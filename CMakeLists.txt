@@ -19,11 +19,15 @@ set(SHADER_PATH_PREFIX ${PROJECT_SOURCE_DIR}/src/shaders/)
 
 include_directories(
     ${PROJECT_BINARY_DIR}
+    dependencies/imgui
     dependencies/generated/glad/include
 )
 
 add_executable(${PROJECT_NAME} 
     src/mill-gui/main.cpp
+    src/mill-gui/ImGuiBinding.cpp
+    dependencies/imgui/imgui.cpp
+    dependencies/imgui/imgui_draw.cpp
     dependencies/generated/glad/src/glad.c
 )
 
