@@ -40,6 +40,11 @@ void OpenGLApplication::create()
 
     glfwSetWindowUserPointer(_window, static_cast<void*>(this));
 
+    glfwSetMouseButtonCallback(_window, OpenGLApplication::mouseButtonCallback);
+    glfwSetScrollCallback(_window, OpenGLApplication::scrollCallback);
+    glfwSetKeyCallback(_window, OpenGLApplication::keyCallback);
+    glfwSetCharCallback(_window, OpenGLApplication::charCallback);
+
     onCreate();
 }
 
@@ -77,4 +82,62 @@ void OpenGLApplication::onUpdate()
 
 void OpenGLApplication::onRender()
 {
+}
+
+void OpenGLApplication::onMouseButton(int button, int action, int mods)
+{
+}
+
+void OpenGLApplication::onScroll(double xoffset, double yoffset)
+{
+}
+
+void OpenGLApplication::onKey(int key, int scancode, int action, int mods)
+{
+}
+
+void OpenGLApplication::onChar(unsigned int c)
+{
+}
+
+void OpenGLApplication::mouseButtonCallback(
+    GLFWwindow *window, int button, int action, int mods
+)
+{
+    auto app = static_cast<OpenGLApplication*>(
+        glfwGetWindowUserPointer(window)
+    );
+
+    app->onMouseButton(button, action, mods);
+}
+
+void OpenGLApplication::scrollCallback(
+    GLFWwindow *window, double xoffset, double yoffset
+)
+{
+    auto app = static_cast<OpenGLApplication*>(
+        glfwGetWindowUserPointer(window)
+    );
+
+    app->onScroll(xoffset, yoffset);
+}
+
+void OpenGLApplication::keyCallback(
+    GLFWwindow *window, int key, int scancode, int action, int mods
+)
+{
+    auto app = static_cast<OpenGLApplication*>(
+        glfwGetWindowUserPointer(window)
+    );
+
+    app->onKey(key, scancode, action, mods);
+}
+
+void OpenGLApplication::charCallback(GLFWwindow *window, unsigned int c)
+{
+    auto app = static_cast<OpenGLApplication*>(
+        glfwGetWindowUserPointer(window)
+    );
+
+    app->onChar(c);
 }

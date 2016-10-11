@@ -18,6 +18,11 @@ protected:
     virtual void onUpdate();
     virtual void onRender();
 
+    virtual void onMouseButton(int button, int action, int mods);
+    virtual void onScroll(double xoffset, double yoffset);
+    virtual void onKey(int key, int scancode, int action, int mods);
+    virtual void onChar(unsigned int c);
+
 private:
     std::shared_ptr<ShaderProgram> _program;
     GLuint _texture;

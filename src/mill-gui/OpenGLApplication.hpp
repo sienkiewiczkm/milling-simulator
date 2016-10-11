@@ -19,5 +19,24 @@ protected:
     virtual void onUpdate();
     virtual void onRender();
 
+    virtual void onMouseButton(int button, int action, int mods);
+    virtual void onScroll(double xoffset, double yoffset);
+    virtual void onKey(int key, int scancode, int action, int mods);
+    virtual void onChar(unsigned int c);
+
+    static void mouseButtonCallback(
+        GLFWwindow *window, int button, int action, int mods
+    );
+
+    static void scrollCallback(
+        GLFWwindow *window, double xoffset, double yoffset
+    );
+
+    static void keyCallback(
+        GLFWwindow *window, int key, int scancode, int action, int mods
+    );
+
+    static void charCallback(GLFWwindow *window, unsigned int c);
+
     GLFWwindow *_window;
 };

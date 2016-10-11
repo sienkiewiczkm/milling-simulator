@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui.h>
+
 #include <cmath>
 
 using namespace std;
@@ -19,7 +20,7 @@ MillerApplication::~MillerApplication()
 
 void MillerApplication::onCreate()
 {
-    ImGuiBinding::initialize(_window, true);
+    ImGuiBinding::initialize(_window, false);
 
     shared_ptr<VertexShader> vs = make_shared<VertexShader>(
         RESOURCE("shaders/MVPTransformTexCoord.vert")
@@ -130,4 +131,24 @@ void MillerApplication::onRender()
     _heightmapGeo.render();
 
     ImGui::Render();
+}
+
+void MillerApplication::onMouseButton(int button, int action, int mods)
+{
+    ImGuiBinding::mouseButtonCallback(_window, button, action, mods);
+}
+
+void MillerApplication::onScroll(double xoffset, double yoffset)
+{
+    ImGuiBinding::scrollCallback(_window, xoffset, yoffset);
+}
+
+void MillerApplication::onKey(int key, int scancode, int action, int mods)
+{
+    ImGuiBinding::keyCallback(_window, key, scancode, action, mods);
+}
+
+void MillerApplication::onChar(unsigned int c)
+{
+    ImGuiBinding::charCallback(_window, c);
 }
