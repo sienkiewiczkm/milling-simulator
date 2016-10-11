@@ -7,3 +7,9 @@
 [submodule "dependencies/glad"]
 	path = dependencies/glad
 	url = https://github.com/Dav1dde/glad
+[submodule "dependencies/glm"]
+	path = dependencies/glm
+	url = https://github.com/g-truc/glm
+[submodule "dependencies/stb"]
+	path = dependencies/stb
+	url = https://github.com/nothings/stb

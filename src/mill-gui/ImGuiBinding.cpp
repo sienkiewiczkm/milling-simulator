@@ -3,7 +3,7 @@ This file is based on opengl3 example from official repository.
 Rewritten to learn how it works & change it to a bit more friendly form.
 */
 
-#include "ImGuiBinding.h"
+#include "ImGuiBinding.hpp"
 
 #include <imgui.h>
 

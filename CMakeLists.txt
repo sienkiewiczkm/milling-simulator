@@ -9,13 +9,15 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(dependencies/glfw)
 
-set(ASSETS_PATH_PREFIX ${PROJECT_SOURCE_DIR}/assets/)
-set(SHADER_PATH_PREFIX ${PROJECT_SOURCE_DIR}/src/shaders/)
+include_directories(dependencies/glm)
+include_directories(dependencies/stb)
 
-# configure_file(
-#  ${PROJECT_SOURCE_DIR}/src/config.hpp.in 
-#  ${PROJECT_BINARY_DIR}/config.hpp
-# )
+set(RESOURCES_PATH ${PROJECT_SOURCE_DIR}/resources/)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/src/Config.hpp.in 
+    ${PROJECT_BINARY_DIR}/Config.hpp
+)
 
 include_directories(
     ${PROJECT_BINARY_DIR}
@@ -24,8 +26,13 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME} 
-    src/mill-gui/main.cpp
+    src/mill-gui/DebugShapes.cpp
     src/mill-gui/ImGuiBinding.cpp
+    src/mill-gui/Main.cpp
+    src/mill-gui/OrbitingCamera.cpp
+    src/mill-gui/Shaders.cpp
+    src/mill-gui/StbImplementation.c
+    src/mill-gui/TextureUtils.cpp
     dependencies/imgui/imgui.cpp
     dependencies/imgui/imgui_draw.cpp
     dependencies/generated/glad/src/glad.c
