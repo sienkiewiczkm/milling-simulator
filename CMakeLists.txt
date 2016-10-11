@@ -27,12 +27,16 @@ include_directories(
 
 add_executable(${PROJECT_NAME} 
     src/mill-gui/DebugShapes.cpp
+    src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/ImGuiBinding.cpp
     src/mill-gui/Main.cpp
+    src/mill-gui/MillerApplication.cpp
+    src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
     src/mill-gui/Shaders.cpp
     src/mill-gui/StbImplementation.c
     src/mill-gui/TextureUtils.cpp
+    src/mill-gui/Vertices.cpp
     dependencies/imgui/imgui.cpp
     dependencies/imgui/imgui_draw.cpp
     dependencies/generated/glad/src/glad.c
