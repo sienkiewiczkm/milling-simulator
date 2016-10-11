@@ -8,7 +8,7 @@
 using namespace std;
 
 OrbitingCamera::OrbitingCamera() :
-  _xMin(-0.5f*M_PI), _xMax(0.5f*M_PI),
+  _xMin(-0.49f*M_PI), _xMax(0.49f*M_PI),
   _dist(1.0f),
   _rotationX(0.0f), _rotationY(0.0f) {
 }

@@ -141,3 +141,11 @@ void OpenGLApplication::charCallback(GLFWwindow *window, unsigned int c)
 
     app->onChar(c);
 }
+
+glm::vec2 OpenGLApplication::getMousePosition()
+{
+    double xPos, yPos;
+    glfwGetCursorPos(_window, &xPos, &yPos);
+    return glm::vec2((float)xPos, (float)yPos);
+}
+

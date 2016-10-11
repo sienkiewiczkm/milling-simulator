@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class OpenGLApplication
 {
@@ -37,6 +38,8 @@ protected:
     );
 
     static void charCallback(GLFWwindow *window, unsigned int c);
+
+    glm::vec2 getMousePosition();
 
     GLFWwindow *_window;
 };

@@ -4,7 +4,6 @@
 #include "Config.hpp"
 #include "TextureUtils.hpp"
 
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -13,6 +12,11 @@
 #include <cmath>
 
 using namespace std;
+
+MillerApplication::MillerApplication() : 
+    _mouseSensitivity(0.05f)
+{
+}
 
 MillerApplication::~MillerApplication()
 {
@@ -54,6 +58,7 @@ void MillerApplication::onCreate()
 
     _heightmapGeo.create(heightmapWidth, heightmapHeight, heightmap);
 
+    _lastMousePosition = getMousePosition();
 }
 
 void MillerApplication::onDestroy()
@@ -64,6 +69,7 @@ void MillerApplication::onDestroy()
 void MillerApplication::onUpdate()
 {
     ImGuiBinding::newFrame();
+    handleInput();
 
     static bool booleanset;
     
@@ -117,7 +123,7 @@ void MillerApplication::onRender()
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    view = _camera.getViewMatrix();
     projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
 
     GLint modelLoc = glGetUniformLocation(_program->getId(), "model");
@@ -151,4 +157,19 @@ void MillerApplication::onKey(int key, int scancode, int action, int mods)
 void MillerApplication::onChar(unsigned int c)
 {
     ImGuiBinding::charCallback(_window, c);
+}
+
+void MillerApplication::handleInput()
+{
+    ImGuiIO &io = ImGui::GetIO();
+
+    auto mousePosition = getMousePosition();
+    auto movement = (mousePosition - _lastMousePosition)*_mouseSensitivity;
+    _lastMousePosition = mousePosition;
+
+    if (!io.WantCaptureMouse && 
+        GLFW_PRESS == glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT))
+    {
+        _camera.rotate(movement.y, movement.x);
+    }
 }
