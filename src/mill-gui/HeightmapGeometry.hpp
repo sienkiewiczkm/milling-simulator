@@ -11,24 +11,22 @@ public:
     HeightmapGeometry();
     ~HeightmapGeometry();
 
-    void create(int width, int height, 
-        const std::vector<float> &heightmap);
+    void create(int width, int height);
     void destroy();
 
-    void setHeightmap(int width, int height, 
-        const std::vector<float> &heightmap);
+    void setHeightmap(const std::vector<float> &heightmap);
     void render();
 
 protected:
-    void generateGeometryFromHeightmap(
-        int width,
-        int height,
-        const std::vector<float> &heightmap,
-        std::vector<VertexNormalTexCoords> &vertices,
-        std::vector<GLuint> &indices
+    std::vector<VertexNormalTexCoords> generateVertsFromHeightmap(
+        const std::vector<float> &heightmap
     );
 
+    std::vector<GLuint> generateIndices();
+
 private:
+    int _width, _height;
+
     float _geometryWidth;
     float _geometryLength;
 

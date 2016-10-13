@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <vector>
 
 class ShaderProgram;
 
@@ -26,6 +27,7 @@ protected:
     virtual void onKey(int key, int scancode, int action, int mods);
     virtual void onChar(unsigned int c);
 
+    std::vector<float> generateHeightmap(int width, int height);
     void handleInput();
 
 private:

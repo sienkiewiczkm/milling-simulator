@@ -43,20 +43,12 @@ void MillerApplication::onCreate()
 
     const int heightmapWidth = 64;
     const int heightmapHeight = 64;
-    vector<float> heightmap;
+    vector<float> heightmap = generateHeightmap(
+        heightmapWidth, heightmapHeight
+    );
 
-    for (int y = 0; y < heightmapHeight; ++y)
-    {
-        float yfactor = sinf(y*0.1f);
-        for (int x = 0; x < heightmapWidth; ++x)
-        {
-            float xfactor = sinf(x*0.1f);
-            float factor = 0.1f *((xfactor+yfactor) / 2.0f + 1.0f);
-            heightmap.push_back(factor);
-        }
-    }
-
-    _heightmapGeo.create(heightmapWidth, heightmapHeight, heightmap);
+    _heightmapGeo.create(heightmapWidth, heightmapHeight);
+    _heightmapGeo.setHeightmap(heightmap);
 
     _lastMousePosition = getMousePosition();
 }
@@ -97,6 +89,14 @@ void MillerApplication::onUpdate()
     static float f = 0.0f;
     ImGui::Text("Hello world!");
     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    
+    const int heightmapWidth = 64;
+    const int heightmapHeight = 64;
+    vector<float> heightmap = generateHeightmap(
+        heightmapWidth, heightmapHeight
+    );
+
+    _heightmapGeo.setHeightmap(heightmap);
 }
 
 void MillerApplication::onRender()
@@ -157,6 +157,26 @@ void MillerApplication::onKey(int key, int scancode, int action, int mods)
 void MillerApplication::onChar(unsigned int c)
 {
     ImGuiBinding::charCallback(_window, c);
+}
+
+vector<float> MillerApplication::generateHeightmap(int width, int height)
+{
+    float phaseShift = glfwGetTime();
+
+    vector<float> heightmap;
+
+    for (int y = 0; y < height; ++y)
+    {
+        float yfactor = sinf(y*0.2f+phaseShift*0.8f);
+        for (int x = 0; x < width; ++x)
+        {
+            float xfactor = sinf(x*0.1f+phaseShift*1.6f);
+            float factor = 0.1f *((xfactor+yfactor) / 2.0f + 1.0f);
+            heightmap.push_back(factor);
+        }
+    }
+
+    return heightmap;
 }
 
 void MillerApplication::handleInput()
