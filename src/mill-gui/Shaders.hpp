@@ -40,6 +40,7 @@ public:
 
   void attach(Shader *shader);
   void link();
+  void use();
   GLuint getId() { return _program; }
 
 private:

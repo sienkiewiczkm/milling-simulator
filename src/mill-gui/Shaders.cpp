@@ -89,3 +89,7 @@ void ShaderProgram::link() {
   }
 }
 
+void ShaderProgram::use()
+{
+    glUseProgram(_program);
+}
