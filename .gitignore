@@ -1,2 +1,3 @@
-build
+*.swo
 *.swp
+build
