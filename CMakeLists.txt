@@ -26,6 +26,7 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME} 
+    src/mill-gui/CuttingToolModel.cpp
     src/mill-gui/DebugShapes.cpp
     src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/ImGuiBinding.cpp
@@ -38,6 +39,7 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/TextureUtils.cpp
     src/mill-gui/Vertices.cpp
     dependencies/imgui/imgui.cpp
+    dependencies/imgui/imgui_demo.cpp
     dependencies/imgui/imgui_draw.cpp
     dependencies/generated/glad/src/glad.c
 )

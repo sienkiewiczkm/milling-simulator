@@ -1,6 +1,8 @@
 #pragma once
-#include "OpenGLApplication.hpp"
+
+#include "CuttingToolModel.hpp"
 #include "HeightmapGeometry.hpp"
+#include "OpenGLApplication.hpp"
 #include "OrbitingCamera.hpp"
 
 #include <glm/glm.hpp>
@@ -37,4 +39,6 @@ private:
     GLuint _texture;
     HeightmapGeometry _heightmapGeo;
     OrbitingCamera _camera;
+
+    CuttingToolModel _cuttingTool;
 };

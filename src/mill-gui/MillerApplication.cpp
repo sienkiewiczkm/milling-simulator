@@ -39,7 +39,7 @@ void MillerApplication::onCreate()
     _program->attach(fs.get());
     _program->link();
 
-    _texture = loadTextureFromFile(RESOURCE("textures/wefi_cat.jpg"));
+    _texture = loadTextureFromFile(RESOURCE("textures/checker-base.png"));
 
     const int heightmapWidth = 64;
     const int heightmapHeight = 64;
@@ -51,6 +51,8 @@ void MillerApplication::onCreate()
     _heightmapGeo.setHeightmap(heightmap);
 
     _lastMousePosition = getMousePosition();
+
+    _cuttingTool.create(0.25f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 void MillerApplication::onDestroy()
@@ -60,35 +62,66 @@ void MillerApplication::onDestroy()
 
 void MillerApplication::onUpdate()
 {
+    static bool showSimulationTools = false;
+    static bool showImguiDemo = false;
+
     ImGuiBinding::newFrame();
     handleInput();
 
-    static bool booleanset;
+    bool booleanset = false;
     
-    ImGui::Begin("Tools", nullptr, ImGuiWindowFlags_MenuBar);
-
-    if (ImGui::BeginMenuBar())
+    if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("Simulation"))
+        if (ImGui::BeginMenu("Tools"))
         {
-            ImGui::MenuItem("Clear simulation", NULL, &booleanset);
+            ImGui::MenuItem("Simulation tools", "CTRL+S", &showSimulationTools);
+            ImGui::MenuItem("ImGui Test Window", nullptr, &showImguiDemo);
             ImGui::EndMenu();
         }
 
-        ImGui::EndMenuBar();
+        if (ImGui::BeginMenu("Help"))
+        {
+            if (ImGui::MenuItem("About"))
+            {
+                booleanset = true;
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
     }
 
-    if (ImGui::CollapsingHeader("Window options"))
+    static float speed = 1.0f;
+
+    if (showImguiDemo) {
+        ImGui::ShowTestWindow();
+    }
+
+    if (showSimulationTools)
     {
-        static bool flag;
-        ImGui::Checkbox("No titlebar", &flag);
+        ImGui::Begin("Simulation tools", &showSimulationTools);
+        ImGui::Button("Play"); ImGui::SameLine();
+        ImGui::Button("Pause"); ImGui::SameLine();
+        ImGui::Button("Stop");
+        ImGui::SliderFloat("Speed", &speed, 0.0f, 10.0f);
+
+        ImGui::ProgressBar(0.50, ImVec2(0.0f,0.0f));
+        ImGui::SameLine(0.0f);
+        ImGui::Text("Progress");
+
+        ImGui::End();
     }
 
-    ImGui::End();
 
     static float f = 0.0f;
     ImGui::Text("Hello world!");
     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+
+    if (ImGui::Button("Show this thing"))
+    {
+        ImGui::BulletText("Okay, I'm showing");
+    }
     
     const int heightmapWidth = 64;
     const int heightmapHeight = 64;
@@ -134,6 +167,7 @@ void MillerApplication::onRender()
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+    _cuttingTool.render();
     _heightmapGeo.render();
 
     ImGui::Render();
