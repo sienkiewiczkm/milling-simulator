@@ -26,13 +26,13 @@ void MillerApplication::onCreate()
 {
     ImGuiBinding::initialize(_window, false);
 
-    shared_ptr<VertexShader> vs = make_shared<VertexShader>(
-        RESOURCE("shaders/MVPTransformTexCoord.vert")
-    );
+    shared_ptr<Shader> vs = make_shared<Shader>();
+    vs->addSourceFromFile(RESOURCE("shaders/MVPTransformTexCoord.vert"));
+    vs->compile(GL_VERTEX_SHADER);
 
-    shared_ptr<FragmentShader> fs = make_shared<FragmentShader>(
-        RESOURCE("shaders/SingleTexture.frag")
-    );
+    shared_ptr<Shader> fs = make_shared<Shader>();
+    fs->addSourceFromFile(RESOURCE("shaders/SingleTexture.frag"));
+    fs->compile(GL_FRAGMENT_SHADER);
 
     _program = make_shared<ShaderProgram>();
     _program->attach(vs.get());
@@ -53,6 +53,9 @@ void MillerApplication::onCreate()
     _lastMousePosition = getMousePosition();
 
     _cuttingTool.create(0.25f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+    _cuttingToolGUI.setVisibility(true);
+    _cuttingToolGUI.setWindowName("Cutting Tool Controller");
 }
 
 void MillerApplication::onDestroy()
@@ -128,6 +131,8 @@ void MillerApplication::onUpdate()
     vector<float> heightmap = generateHeightmap(
         heightmapWidth, heightmapHeight
     );
+
+    _cuttingToolGUI.update();
 
     _heightmapGeo.setHeightmap(heightmap);
 }

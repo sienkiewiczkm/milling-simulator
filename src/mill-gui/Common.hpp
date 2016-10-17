@@ -1,8 +1,12 @@
 #pragma once
 
 #include <cmath>
+#include <string>
 
 namespace common
 {
-    double pi() { return std::acos(-1); }
+    double pi();
+    std::string loadASCIITextFile(const std::string &filepath);
+
+    const char *transformStringToCStr(const std::string &str);
 }

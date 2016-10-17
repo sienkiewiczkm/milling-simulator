@@ -4,6 +4,7 @@
 #include "HeightmapGeometry.hpp"
 #include "OpenGLApplication.hpp"
 #include "OrbitingCamera.hpp"
+#include "CuttingToolGUI.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -41,4 +42,5 @@ private:
     OrbitingCamera _camera;
 
     CuttingToolModel _cuttingTool;
+    CuttingToolGUI _cuttingToolGUI;
 };

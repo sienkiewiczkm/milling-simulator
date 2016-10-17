@@ -2,35 +2,27 @@
 #define __SHADER_HPP__
 
 #include <glad/glad.h>
-#include <string>
 
-class Shader {
+#include <string>
+#include <vector>
+
+class Shader
+{
 public:
   Shader();
   Shader(const Shader &shader) = default;
   virtual ~Shader();
 
-  GLenum getType() { return _shaderType; }
-  GLuint getId() { return _shaderId; }
+  inline GLenum getType() { return _shaderType; }
+  inline GLuint getId() { return _shaderId; }
 
-protected:
-  void loadShaderFromFile(GLenum shaderType, std::string filename);
+  void addSourceFromFile(const std::string &filename);
+  void compile(GLenum shaderType);
 
 private:
+  std::vector<std::string> _sources;
   GLenum _shaderType;
   GLuint _shaderId;
-};
-
-class VertexShader : public Shader {
-public:
-  VertexShader(const char *filename);
-  virtual ~VertexShader();
-};
-
-class FragmentShader : public Shader {
-public:
-  FragmentShader(const char *filename);
-  virtual ~FragmentShader();
 };
 
 class ShaderProgram {
@@ -41,6 +33,7 @@ public:
   void attach(Shader *shader);
   void link();
   void use();
+
   GLuint getId() { return _program; }
 
 private:

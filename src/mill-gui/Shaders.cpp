@@ -1,4 +1,6 @@
 #include "Shaders.hpp"
+#include "Common.hpp"
+
 #include <cstdio>
 #include <iostream>
 
@@ -14,52 +16,46 @@ Shader::~Shader() {
   }
 }
 
-void Shader::loadShaderFromFile(GLenum shaderType, string filename) {
-  FILE *f = fopen(filename.c_str(), "rb");
-  if (!f) {
-    cerr << "Error: Cannot load shader: \"" << filename << "\"." << endl;
-    return;
-  }
-
-  fseek(f, 0, SEEK_END);
-  auto size = ftell(f);
-  fseek(f, 0, SEEK_SET);
-  char *shaderCode = new char[size+1];
-  fread(shaderCode, size, 1, f);
-  shaderCode[size] = 0;
-  fclose(f);
-
-  GLuint shader = glCreateShader(shaderType);
-  glShaderSource(shader, 1, &shaderCode, nullptr); 
-  glCompileShader(shader);
-  delete[] shaderCode;
-
-  GLint success;
-  GLchar infoLog[512];
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-    std::cout << "Error: Shader compilation failed" << std::endl 
-      << infoLog << std::endl;
-    return; // todo: throw exception
-  }
-
-  _shaderType = shaderType;
-  _shaderId = shader;
+void Shader::addSourceFromFile(const string &filename)
+{
+  string shaderCode = common::loadASCIITextFile(filename);
+  _sources.push_back(shaderCode);
 }
 
-VertexShader::VertexShader(const char *filename) {
-  loadShaderFromFile(GL_VERTEX_SHADER, filename);
-}
+void Shader::compile(GLenum shaderType)
+{
+    vector<const char *> transformedSources;
+    
+    transform(
+        _sources.begin(),
+        _sources.end(),
+        back_inserter(transformedSources),
+        common::transformStringToCStr
+    );
 
-VertexShader::~VertexShader() {
-}
+    GLuint shader = glCreateShader(shaderType);
 
-FragmentShader::FragmentShader(const char *filename) {
-  loadShaderFromFile(GL_FRAGMENT_SHADER, filename);
-}
+    glShaderSource(
+        shader,
+        transformedSources.size(),
+        transformedSources.data(),
+        nullptr
+    ); 
 
-FragmentShader::~FragmentShader() {
+    glCompileShader(shader);
+
+    GLint success;
+    GLchar infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        std::cout << "Error: Shader compilation failed" << std::endl 
+            << infoLog << std::endl;
+        return; // todo: throw exception
+    }
+
+    _shaderType = shaderType;
+    _shaderId = shader;
 }
 
 ShaderProgram::ShaderProgram() {
