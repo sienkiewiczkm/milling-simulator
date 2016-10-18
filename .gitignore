@@ -1,3 +1,7 @@
-*.swo
-*.swp
+# Default CMake directories
 build
+
+# vim temporary files
+*.swo
+*.swn
+*.swp

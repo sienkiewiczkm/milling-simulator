@@ -15,5 +15,5 @@ void main(void)
 {
     gl_Position = projection * view * model * vec4(position, 1.0f);
     TexCoord = vec2(texCoord.x, texCoord.y);
-    Normal = normal;
+    Normal = (transpose(inverse(model)) * vec4(normal, 0)).xyz;
 }

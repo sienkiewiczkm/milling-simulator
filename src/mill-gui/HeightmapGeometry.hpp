@@ -25,6 +25,9 @@ protected:
     std::vector<GLuint> generateIndices();
 
 private:
+    bool _skirtEnabled;
+    float _skirtLevel;
+
     int _width, _height;
 
     float _geometryWidth;

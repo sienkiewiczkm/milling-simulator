@@ -27,7 +27,7 @@ void MillerApplication::onCreate()
 {
     ImGuiBinding::initialize(_window, false);
 
-    _texture = loadTextureFromFile(RESOURCE("textures/wefi_cat.jpg"));
+    _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
 
     const int heightmapWidth = 64;
     const int heightmapHeight = 64;
