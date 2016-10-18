@@ -27,10 +27,11 @@ include_directories(
 
 add_executable(${PROJECT_NAME} 
     src/mill-gui/Common.cpp
-    src/mill-gui/Effect.cpp
+    src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
     src/mill-gui/CuttingToolModel.cpp
     src/mill-gui/DebugShapes.cpp
+    src/mill-gui/Effect.cpp
     src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/ImGuiBinding.cpp
     src/mill-gui/Main.cpp

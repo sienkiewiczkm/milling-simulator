@@ -1,4 +1,5 @@
 #include "CuttingToolGUI.hpp"
+#include "CuttingToolController.hpp"
 
 #include <imgui.h>
 #include <glm/glm.hpp>
@@ -9,6 +10,7 @@
 
 using namespace std;
 using namespace glm;
+using namespace ms;
 
 CuttingToolGUI::CuttingToolGUI()
 {
@@ -24,13 +26,27 @@ void CuttingToolGUI::setWindowName(const std::string &windowName)
     _windowName = windowName;
 }
 
+void CuttingToolGUI::setController(
+    std::shared_ptr<CuttingToolController> controller
+)
+{
+    _controller = controller;
+}
+
 void CuttingToolGUI::update()
 {
     if (!ImGui::Begin(_windowName.c_str(), &_isVisible))
         return;
 
-    ImGui::InputFloat3("Tip position", glm::value_ptr(_tipPosition), 
-        -1, ImGuiInputTextFlags_ReadOnly);
+    vec3 currentPosition = _controller->getCurrentPosition();
+
+    ImGui::InputFloat3(
+        "Tip position", 
+        glm::value_ptr(currentPosition), 
+        -1, 
+        ImGuiInputTextFlags_ReadOnly
+    );
+
     ImGui::InputFloat3("Desired position", glm::value_ptr(_desiredPosition));
     ImGui::Button("Goto");
 

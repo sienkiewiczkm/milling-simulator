@@ -11,6 +11,7 @@
 
 #include <cmath>
 
+using namespace ms;
 using namespace std;
 
 MillerApplication::MillerApplication() : 
@@ -45,6 +46,14 @@ void MillerApplication::onCreate()
     _cuttingToolGUI.setWindowName("Cutting Tool Controller");
 
     _effect.create();
+
+    _toolController = make_shared<CuttingToolController>();
+    _toolController->setMovementSpeed(0.1f);
+    _toolController->setStartingPosition(glm::vec3(-0.5f, 0.0f, +0.5f));
+    _toolController->setTargetPosition(glm::vec3(+0.5f, 0.0f, -0.5f));
+    _toolController->startMovement();
+
+    _cuttingToolGUI.setController(_toolController);
 }
 
 void MillerApplication::onDestroy()
@@ -59,6 +68,11 @@ void MillerApplication::onUpdate()
 
     ImGuiBinding::newFrame();
     handleInput();
+
+    /* todo: move to framework */
+    _lastTime = _currentTime;
+    _currentTime = glfwGetTime();
+    _deltaTime = _currentTime - _lastTime;
 
     bool booleanset = false;
     
@@ -105,7 +119,6 @@ void MillerApplication::onUpdate()
         ImGui::End();
     }
 
-
     static float f = 0.0f;
     ImGui::Text("Hello world!");
     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
@@ -121,15 +134,21 @@ void MillerApplication::onUpdate()
         heightmapWidth, heightmapHeight
     );
 
-    float centralHeight = heightmap[
-        (heightmapHeight/2) * heightmapWidth + (heightmapWidth/2)
-    ];
+    if (!_toolController->isMovementActive())
+    {
+        _toolController->finishMovement();
+        _toolController->setTargetPosition(
+            -_toolController->getCurrentPosition()
+        );
+        _toolController->startMovement();
+    }
+
+    _toolController->update(_deltaTime);
 
     glm::mat4 toolHeightMatrix = glm::translate(glm::mat4(),
-        glm::vec3(0.0f, centralHeight, 0.0f));
+        _toolController->getCurrentPosition());
 
     _cuttingTool.setModelMatrix(toolHeightMatrix);
-
     _cuttingToolGUI.update();
 
     _heightmapGeo.setHeightmap(heightmap);
@@ -148,11 +167,6 @@ void MillerApplication::onRender()
     glm::mat4 model, view, projection;
 
     float aspectRatio = (float)display_w/display_h;
-    model = glm::rotate(
-        model,
-        (float)glfwGetTime(), 
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
 
     view = _camera.getViewMatrix();
     projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);

@@ -6,6 +6,7 @@
 #include "OpenGLApplication.hpp"
 #include "OrbitingCamera.hpp"
 #include "TexturedPhongEffect.hpp"
+#include "CuttingToolController.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -41,7 +42,12 @@ private:
     GLuint _texture;
     HeightmapGeometry _heightmapGeo;
     OrbitingCamera _camera;
+    std::shared_ptr<ms::CuttingToolController> _toolController;
 
     CuttingToolModel _cuttingTool;
     CuttingToolGUI _cuttingToolGUI;
+
+    double _lastTime;
+    double _currentTime;
+    double _deltaTime;
 };
