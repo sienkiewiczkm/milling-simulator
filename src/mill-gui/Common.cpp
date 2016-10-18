@@ -1,5 +1,6 @@
 #include "Common.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <streambuf>
 
@@ -7,7 +8,12 @@ using namespace std;
 
 double common::pi()
 {
-    return std::acos(-1);
+    return std::acos(-1.0);
+}
+
+float common::pif()
+{
+    return std::acosf(-1.0f);
 }
 
 std::string common::loadASCIITextFile(const std::string &filepath)

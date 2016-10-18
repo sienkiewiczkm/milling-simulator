@@ -26,20 +26,7 @@ void MillerApplication::onCreate()
 {
     ImGuiBinding::initialize(_window, false);
 
-    shared_ptr<Shader> vs = make_shared<Shader>();
-    vs->addSourceFromFile(RESOURCE("shaders/MVPTransformTexCoord.vert"));
-    vs->compile(GL_VERTEX_SHADER);
-
-    shared_ptr<Shader> fs = make_shared<Shader>();
-    fs->addSourceFromFile(RESOURCE("shaders/SingleTexture.frag"));
-    fs->compile(GL_FRAGMENT_SHADER);
-
-    _program = make_shared<ShaderProgram>();
-    _program->attach(vs.get());
-    _program->attach(fs.get());
-    _program->link();
-
-    _texture = loadTextureFromFile(RESOURCE("textures/checker-base.png"));
+    _texture = loadTextureFromFile(RESOURCE("textures/wefi_cat.jpg"));
 
     const int heightmapWidth = 64;
     const int heightmapHeight = 64;
@@ -52,10 +39,12 @@ void MillerApplication::onCreate()
 
     _lastMousePosition = getMousePosition();
 
-    _cuttingTool.create(0.25f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f);
+    _cuttingTool.create(0.15f, 0.05f, 0.0f, 0.4f, 0.025f, 0.025f);
 
     _cuttingToolGUI.setVisibility(true);
     _cuttingToolGUI.setWindowName("Cutting Tool Controller");
+
+    _effect.create();
 }
 
 void MillerApplication::onDestroy()
@@ -132,6 +121,15 @@ void MillerApplication::onUpdate()
         heightmapWidth, heightmapHeight
     );
 
+    float centralHeight = heightmap[
+        (heightmapHeight/2) * heightmapWidth + (heightmapWidth/2)
+    ];
+
+    glm::mat4 toolHeightMatrix = glm::translate(glm::mat4(),
+        glm::vec3(0.0f, centralHeight, 0.0f));
+
+    _cuttingTool.setModelMatrix(toolHeightMatrix);
+
     _cuttingToolGUI.update();
 
     _heightmapGeo.setHeightmap(heightmap);
@@ -146,12 +144,7 @@ void MillerApplication::onRender()
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _texture);
-    glUniform1i(glGetUniformLocation(_program->getId(), "TextureSlot1"), 0);
-
-    glUseProgram(_program->getId());
-
+    _effect.begin();
     glm::mat4 model, view, projection;
 
     float aspectRatio = (float)display_w/display_h;
@@ -164,16 +157,16 @@ void MillerApplication::onRender()
     view = _camera.getViewMatrix();
     projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
 
-    GLint modelLoc = glGetUniformLocation(_program->getId(), "model");
-    GLint viewLoc = glGetUniformLocation(_program->getId(), "view");
-    GLint projLoc = glGetUniformLocation(_program->getId(), "projection");
+    _effect.setModelMatrix(model);
+    _effect.setViewMatrix(view);
+    _effect.setProjectionMatrix(projection);
+    _effect.setTexture(_texture);
 
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    _cuttingTool.render();
     _heightmapGeo.render();
+
+    _cuttingTool.render(&_effect);
+
+    _effect.end();
 
     ImGui::Render();
 }

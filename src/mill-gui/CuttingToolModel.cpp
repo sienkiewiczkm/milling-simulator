@@ -1,6 +1,8 @@
 #include "CuttingToolModel.hpp"
 #include "DebugShapes.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace std;
 
 CuttingToolModel::CuttingToolModel() :
@@ -37,6 +39,14 @@ void CuttingToolModel::create(
         createCylinder(_holderLength, _holderRadius, 32)
     );
 
+    _cuttingToolMesh = make_shared<Mesh<VertexNormalTexCoords>>(
+        createCylinder(_cuttingToolLength, _cuttingToolRadius, 32)
+    );
+
+    _cuttingToolBallMesh = make_shared<Mesh<VertexNormalTexCoords>>(
+        createSphere(_cuttingToolBallRadius, 32, 32)
+    );
+
     createBuffers();
 }
 
@@ -44,9 +54,48 @@ void CuttingToolModel::destroy()
 {
 }
 
-void CuttingToolModel::render()
+void CuttingToolModel::render(IEffect *effect)
 {
+    glm::mat4 ballMatrix = _modelMatrix * glm::translate(
+        glm::mat4(),
+        glm::vec3(
+            0.0f,
+            _cuttingToolBallRadius,
+            0.0f
+        )
+    );
+ 
+    glm::mat4 cuttingToolMatrix = ballMatrix * glm::translate(
+        glm::mat4(),
+        glm::vec3(
+            0.0f,
+            0.5f * _cuttingToolLength,
+            0.0f
+        )
+    );
+
+    glm::mat4 holderMatrix = cuttingToolMatrix * glm::translate(
+        glm::mat4(),
+        glm::vec3(
+            0.0f,
+            0.5f * _cuttingToolLength + 0.5f * _holderLength,
+            0.0f
+        )
+    );
+
+    effect->setModelMatrix(holderMatrix);
     _holderMesh->render();
+
+    effect->setModelMatrix(cuttingToolMatrix);
+    _cuttingToolMesh->render();
+
+    effect->setModelMatrix(ballMatrix);
+    _cuttingToolBallMesh->render();
+}
+
+void CuttingToolModel::setModelMatrix(glm::mat4 modelMatrix)
+{
+    _modelMatrix = modelMatrix;
 }
 
 void CuttingToolModel::createBuffers()

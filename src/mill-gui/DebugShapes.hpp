@@ -15,6 +15,6 @@ Mesh<VertexNormalTexCoords> createCylinder(
 
 Mesh<VertexNormalTexCoords> createSphere(
     float radius,
-    float latitudeSubdivisions,
-    float longtitudeSubdivisions
+    int latitudeSubdivisions,
+    int longtitudeSubdivisions
 );

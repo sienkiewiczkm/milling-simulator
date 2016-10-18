@@ -10,7 +10,7 @@ void main(void)
 {
     vec3 lightDirection = normalize(vec3(1.0f, 1.0f, 0.0f));
     vec3 diffuseLightColor = vec3(1.0f, 1.0f, 1.0f);
-    float diffuse = dot(lightDirection, Normal);
+    float diffuse = 1.0; //dot(lightDirection, Normal);
     vec3 albedo = texture(TextureSlot1, TexCoord).rgb;
     color = vec4(albedo * diffuseLightColor * diffuse, 1);
 }

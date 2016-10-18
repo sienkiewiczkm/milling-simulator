@@ -2,6 +2,7 @@
 
 #include "Mesh.hpp"
 #include "Vertices.hpp"
+#include "Effect.hpp"
 
 #include <glm/glm.hpp>
 
@@ -21,13 +22,17 @@ public:
     );
 
     void destroy();
-    void render();
+    void render(IEffect *effect);
+
+    void setModelMatrix(glm::mat4 model);
 
 protected:
     void createBuffers();
     void destroyBuffers();
 
 private:
+    glm::mat4 _modelMatrix;
+
     float _holderLength;
     float _holderRadius;
     float _shankLength;

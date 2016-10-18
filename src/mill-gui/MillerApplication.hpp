@@ -1,10 +1,11 @@
 #pragma once
 
+#include "CuttingToolGUI.hpp"
 #include "CuttingToolModel.hpp"
 #include "HeightmapGeometry.hpp"
 #include "OpenGLApplication.hpp"
 #include "OrbitingCamera.hpp"
-#include "CuttingToolGUI.hpp"
+#include "TexturedPhongEffect.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -36,7 +37,7 @@ protected:
 private:
     float _mouseSensitivity;
     glm::vec2 _lastMousePosition;
-    std::shared_ptr<ShaderProgram> _program;
+    TexturedPhongEffect _effect;
     GLuint _texture;
     HeightmapGeometry _heightmapGeo;
     OrbitingCamera _camera;

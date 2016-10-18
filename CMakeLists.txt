@@ -27,6 +27,7 @@ include_directories(
 
 add_executable(${PROJECT_NAME} 
     src/mill-gui/Common.cpp
+    src/mill-gui/Effect.cpp
     src/mill-gui/CuttingToolGUI.cpp
     src/mill-gui/CuttingToolModel.cpp
     src/mill-gui/DebugShapes.cpp
@@ -39,6 +40,7 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/Shaders.cpp
     src/mill-gui/StbImplementation.c
     src/mill-gui/TextureUtils.cpp
+    src/mill-gui/TexturedPhongEffect.cpp
     src/mill-gui/Vertices.cpp
     dependencies/imgui/imgui.cpp
     dependencies/imgui/imgui_demo.cpp

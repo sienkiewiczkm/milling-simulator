@@ -14,8 +14,7 @@ vector<GLfloat> createCube(float width, float height, float length)
 		-halfWidth, -halfHeight, -halfLength,  0.0f, 0.0f,
 		 halfWidth, -halfHeight, -halfLength,  1.0f, 0.0f,
 		 halfWidth,  halfHeight, -halfLength,  1.0f, 1.0f,
-		 halfWidth,  halfHeight, -halfLength,  1.0f, 1.0f,
-		-halfWidth,  halfHeight, -halfLength,  0.0f, 1.0f,
+		 halfWidth,  halfHeight, -halfLength,  1.0f, 1.0f, -halfWidth,  halfHeight, -halfLength,  0.0f, 1.0f,
 		-halfWidth, -halfHeight, -halfLength,  0.0f, 0.0f,
 
 		-halfWidth, -halfHeight,  halfLength,  0.0f, 0.0f,
@@ -100,16 +99,108 @@ Mesh<VertexNormalTexCoords> createCylinder(
         offset += 2;
     }
 
+    for (int y = -1; y <= 1; y += 2)
+    {
+        int centralVertexIndex = vertices.size();
+
+        float fy = 0.5f * height * y;
+        vec3 normal = vec3(0.0f, fy, 0.0f);
+
+        vertices.push_back(VertexNormalTexCoords(
+            vec3(0.0f, fy, 0.0f),
+            normal,
+            vec2(0.5f, 0.5f)
+        ));
+
+        for (int angleStep = 0; angleStep <= circleSubdivisions; ++angleStep)
+        {
+            float theta = 2.0f * common::pif()
+                * angleStep/static_cast<float>(circleSubdivisions);
+            
+            float fx = sinf(theta);
+            float fz = cosf(theta);
+
+            vertices.push_back(VertexNormalTexCoords(
+                vec3(radius * fx, fy, radius * fz),
+                normal,
+                0.5f * vec2(1.0f + fx, 1.0f + fz)
+            ));
+        }
+
+        for (int vertexId = 0; vertexId < circleSubdivisions; ++vertexId)
+        {
+            indices.push_back(centralVertexIndex);
+            indices.push_back(centralVertexIndex+1+vertexId);
+            indices.push_back(centralVertexIndex+1+vertexId+1);
+        }
+    }
+
     return Mesh<VertexNormalTexCoords>(vertices, indices);
 }
 
 Mesh<VertexNormalTexCoords> createSphere(
     float radius,
-    float latitudeSubdivisions,
-    float longtitudeSubdivisions
+    int latitudeSubdivisions,
+    int longtitudeSubdivisions
 )
 {
     vector<VertexNormalTexCoords> vertices;
     vector<GLuint> indices;
+
+    for (int latitude = 0;
+         latitude < latitudeSubdivisions;
+         ++latitude)
+    {
+        for (int longtitude = 0;
+             longtitude < longtitudeSubdivisions;
+             ++longtitude)
+        {
+            float theta = 2.0f * common::pif() * 
+                latitude / static_cast<float>(latitudeSubdivisions);
+            float phi = common::pif() *
+                longtitude / (static_cast<float>(longtitudeSubdivisions) - 1);
+
+            float costheta = cosf(theta);
+            float sintheta = sinf(theta);
+            float cosphi = cosf(phi);
+            float sinphi = sinf(phi);
+
+            glm::vec3 position = glm::vec3(
+                radius * costheta * sinphi,
+                radius * sintheta * sinphi,
+                radius * cosphi
+            );
+
+            vertices.push_back(VertexNormalTexCoords(
+                position,
+                glm::normalize(position),
+                glm::vec2(0.0f, 0.0f)
+            ));
+        }
+    }
+
+
+    for (int latitude = 0;
+         latitude < latitudeSubdivisions;
+         ++latitude)
+    {
+        for (int longtitude = 0;
+             longtitude < longtitudeSubdivisions - 1;
+             ++longtitude)
+        {
+            int baseIndex = latitude * longtitudeSubdivisions + longtitude;
+            int neighbourIndex = ((latitude + 1) % latitudeSubdivisions) 
+                * longtitudeSubdivisions + longtitude;
+
+            indices.push_back(baseIndex);
+            indices.push_back(baseIndex+1);
+            indices.push_back(neighbourIndex);
+
+            indices.push_back(neighbourIndex);
+            indices.push_back(baseIndex+1);
+            indices.push_back(neighbourIndex+1);
+        }
+    }
+
     return Mesh<VertexNormalTexCoords>(vertices, indices);
 }
