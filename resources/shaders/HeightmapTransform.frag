@@ -19,6 +19,6 @@ void main(void)
     float diffuse = dot(lightDirection, normalize(fs_in.normal));
     vec3 albedo = texture(AlbedoTexture, fs_in.texCoord).rgb;
 
-    color = vec4(albedo * diffuseLightColor * diffuse, 1);
+    color = vec4(albedo * diffuse * diffuseLightColor, 1);
 }
 
