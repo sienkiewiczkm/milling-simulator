@@ -216,6 +216,10 @@ void MillerApplication::onMouseButton(int button, int action, int mods)
 
 void MillerApplication::onScroll(double xoffset, double yoffset)
 {
+    float zoomDifference = yoffset * 0.5f;
+    _camera.setDist(
+        max(_camera.getDist() + zoomDifference, 10.0f)
+    );
     ImGuiBinding::scrollCallback(_window, xoffset, yoffset);
 }
 
