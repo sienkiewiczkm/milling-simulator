@@ -38,7 +38,9 @@ void CuttingToolGUI::update()
     if (!ImGui::Begin(_windowName.c_str(), &_isVisible))
         return;
 
+    vec3 startingPosition = _controller->getStartingPosition();
     vec3 currentPosition = _controller->getCurrentPosition();
+    vec3 targetPosition = _controller->getTargetPosition();
 
     ImGui::InputFloat3(
         "Tip position", 
@@ -46,6 +48,25 @@ void CuttingToolGUI::update()
         -1, 
         ImGuiInputTextFlags_ReadOnly
     );
+
+    ImGui::InputFloat3(
+        "Starting position", 
+        glm::value_ptr(startingPosition), 
+        -1, 
+        ImGuiInputTextFlags_ReadOnly
+    );
+
+    ImGui::InputFloat3(
+        "Target position", 
+        glm::value_ptr(targetPosition), 
+        -1, 
+        ImGuiInputTextFlags_ReadOnly
+    );
+    
+    if (_controller->isMovementActive())
+    {
+        ImGui::Text("Tool is moving.");
+    }
 
     ImGui::InputFloat3("Desired position", glm::value_ptr(_desiredPosition));
     ImGui::Button("Goto");

@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/ImGuiBinding.cpp
     src/mill-gui/Main.cpp
+    src/mill-gui/MillPathFormatReader.cpp
     src/mill-gui/MillerApplication.cpp
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp

@@ -7,6 +7,7 @@
 #include "OrbitingCamera.hpp"
 #include "TexturedPhongEffect.hpp"
 #include "CuttingToolController.hpp"
+#include "MillPathFormatReader.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -36,6 +37,8 @@ protected:
     void handleInput();
 
 private:
+    unsigned int _frame;
+
     float _mouseSensitivity;
     glm::vec2 _lastMousePosition;
     TexturedPhongEffect _effect;
@@ -46,6 +49,9 @@ private:
 
     CuttingToolModel _cuttingTool;
     CuttingToolGUI _cuttingToolGUI;
+
+    std::vector<ms::PathMovement> _movements;
+    int _currentMoveIndex;
 
     double _lastTime;
     double _currentTime;

@@ -3,6 +3,7 @@
 #include "ImGuiBinding.hpp"
 #include "Config.hpp"
 #include "TextureUtils.hpp"
+#include "MillPathFormatReader.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,6 +16,7 @@ using namespace ms;
 using namespace std;
 
 MillerApplication::MillerApplication() : 
+    _frame(0),
     _mouseSensitivity(0.05f)
 {
 }
@@ -25,6 +27,8 @@ MillerApplication::~MillerApplication()
 
 void MillerApplication::onCreate()
 {
+    _camera.setDist(100.0f);
+
     ImGuiBinding::initialize(_window, false);
 
     _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
@@ -40,20 +44,34 @@ void MillerApplication::onCreate()
 
     _lastMousePosition = getMousePosition();
 
-    _cuttingTool.create(0.15f, 0.05f, 0.0f, 0.4f, 0.025f, 0.025f);
-
-    _cuttingToolGUI.setVisibility(true);
-    _cuttingToolGUI.setWindowName("Cutting Tool Controller");
-
+    _cuttingTool.create(50.0f, 20.0f, 0.0f, 20.0f, 7.0f, 7.0f);
     _effect.create();
 
+    MillPathFormatReader reader;
+    reader.readFromFile(RESOURCE("paths/t1.k16"));
+    _movements = reader.getMovements();
+    for (auto &mov : _movements)
+    {
+        cout << (mov.type == PathMovementType::FastMovement ? "FAST " : "")
+            << "(" << mov.position.x << ") "
+            << "(" << mov.position.y << ") "
+            << "(" << mov.position.z << ")" << endl;
+    }
+
     _toolController = make_shared<CuttingToolController>();
-    _toolController->setMovementSpeed(0.1f);
-    _toolController->setStartingPosition(glm::vec3(-0.5f, 0.0f, +0.5f));
-    _toolController->setTargetPosition(glm::vec3(+0.5f, 0.0f, -0.5f));
-    _toolController->startMovement();
+    _toolController->setMovementSpeed(8.0f);
+
+    if (_movements.size() > 1)
+    {
+        _toolController->setStartingPosition(_movements[0].position);
+        _toolController->setTargetPosition(_movements[1].position);
+        _toolController->startMovement();
+        _currentMoveIndex = 1;
+    }
 
     _cuttingToolGUI.setController(_toolController);
+    _cuttingToolGUI.setVisibility(true);
+    _cuttingToolGUI.setWindowName("Cutting Tool Controller");
 }
 
 void MillerApplication::onDestroy()
@@ -63,6 +81,8 @@ void MillerApplication::onDestroy()
 
 void MillerApplication::onUpdate()
 {
+    ++_frame;
+
     static bool showSimulationTools = false;
     static bool showImguiDemo = false;
 
@@ -128,28 +148,30 @@ void MillerApplication::onUpdate()
         ImGui::BulletText("Okay, I'm showing");
     }
     
-    const int heightmapWidth = 64;
-    const int heightmapHeight = 64;
-    vector<float> heightmap = generateHeightmap(
-        heightmapWidth, heightmapHeight
-    );
-
-    if (!_toolController->isMovementActive())
+    if (!_toolController->isMovementActive() &&
+        _currentMoveIndex < _movements.size())
     {
+        _currentMoveIndex++;
         _toolController->finishMovement();
         _toolController->setTargetPosition(
-            -_toolController->getCurrentPosition()
+            _movements[_currentMoveIndex].position
         );
         _toolController->startMovement();
     }
 
     _toolController->update(_deltaTime);
 
-    glm::mat4 toolHeightMatrix = glm::translate(glm::mat4(),
+    glm::mat4 toolHeightMatrix = glm::translate(glm::dmat4(),
         _toolController->getCurrentPosition());
 
     _cuttingTool.setModelMatrix(toolHeightMatrix);
     _cuttingToolGUI.update();
+
+    const int heightmapWidth = 64;
+    const int heightmapHeight = 64;
+    vector<float> heightmap = generateHeightmap(
+        heightmapWidth, heightmapHeight
+    );
 
     _heightmapGeo.setHeightmap(heightmap);
 }
@@ -168,13 +190,15 @@ void MillerApplication::onRender()
 
     float aspectRatio = (float)display_w/display_h;
 
+    model = glm::scale(glm::mat4(), glm::vec3(100.0f, 100.0f, 100.0f));
     view = _camera.getViewMatrix();
-    projection = glm::perspective(45.0f, aspectRatio, 0.1f, 100.0f);
+    projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
 
     _effect.setModelMatrix(model);
     _effect.setViewMatrix(view);
     _effect.setProjectionMatrix(projection);
     _effect.setTexture(_texture);
+
 
     _heightmapGeo.render();
 

@@ -5,3 +5,5 @@ build
 *.swo
 *.swn
 *.swp
+
+.DS_Store

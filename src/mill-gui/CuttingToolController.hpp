@@ -10,31 +10,31 @@ public:
     CuttingToolController();
     ~CuttingToolController();
 
-    glm::vec3 getStartingPosition();
-    void setStartingPosition(const glm::vec3 &position);
-    glm::vec3 getLastPosition();
-    glm::vec3 getCurrentPosition();
-    glm::vec3 getTargetPosition();
-    void setTargetPosition(const glm::vec3 &position);
-    void setMovementSpeed(float speed);
+    glm::dvec3 getStartingPosition();
+    void setStartingPosition(const glm::dvec3 &position);
+    glm::dvec3 getLastPosition();
+    glm::dvec3 getCurrentPosition();
+    glm::dvec3 getTargetPosition();
+    void setTargetPosition(const glm::dvec3 &position);
+    void setMovementSpeed(double speed);
 
     void startMovement();
     void finishMovement();
 
     bool isMovementActive();
     
-    void update(float dt);
+    void update(double dt);
 
 private:
     bool _moving;
 
-    float _speed;
-    float _distanceMoved;
-    float _totalDistance;
+    double _speed;
+    double _distanceMoved;
+    double _totalDistance;
 
-    glm::vec3 _startingPosition;
-    glm::vec3 _lastPosition;
-    glm::vec3 _currentPosition;
-    glm::vec3 _targetPosition;
+    glm::dvec3 _startingPosition;
+    glm::dvec3 _lastPosition;
+    glm::dvec3 _currentPosition;
+    glm::dvec3 _targetPosition;
 };
 }
