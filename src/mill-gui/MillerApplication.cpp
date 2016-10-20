@@ -12,6 +12,7 @@
 
 #include <cmath>
 
+using namespace fw;
 using namespace ms;
 using namespace std;
 
@@ -29,21 +30,11 @@ MillerApplication::~MillerApplication()
 
 void MillerApplication::onCreate()
 {
+    ImGuiBinding::initialize(_window, false);
+    _lastMousePosition = getMousePosition();
     _camera.setDist(100.0f);
 
-    ImGuiBinding::initialize(_window, false);
-
     _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
-
-    vector<float> heightmap = generateHeightmap(
-        _heightmapResolutionX, _heightmapResolutionY
-    );
-
-    _heightmapGeo.create(_heightmapResolutionX, _heightmapResolutionY, 
-            glm::vec3(1.0f, 1.0f, 1.0f));
-    _heightmapGeo.setHeightmap(heightmap);
-
-    _lastMousePosition = getMousePosition();
 
     _cuttingTool.create(50.0f, 20.0f, 0.0f, 20.0f, 7.0f, 7.0f);
     _effect.create();
@@ -69,6 +60,20 @@ void MillerApplication::onCreate()
     _cuttingToolGUI.setController(_toolController);
     _cuttingToolGUI.setVisibility(true);
     _cuttingToolGUI.setWindowName("Cutting Tool Controller");
+
+    vector<float> heightmap = generateHeightmap(
+        _heightmapResolutionX, _heightmapResolutionY
+    );
+
+    _heightmapTextureConverter = make_shared<HeightmapTextureConverter>();
+    _heightmapTexture = _heightmapTextureConverter->createTextureFromHeightmap(
+        heightmap,
+        _heightmapResolutionX,
+        _heightmapResolutionY
+    );
+
+    _heightmapGeo.create(_heightmapResolutionX, _heightmapResolutionY, 
+            glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void MillerApplication::onDestroy()
@@ -168,7 +173,12 @@ void MillerApplication::onUpdate()
         _heightmapResolutionX, _heightmapResolutionY
     );
 
-    _heightmapGeo.setHeightmap(heightmap);
+    _heightmapTextureConverter->updateTextureFromHeightmap(
+        _heightmapTexture,
+        heightmap,
+        _heightmapResolutionX,
+        _heightmapResolutionY
+    );
 }
 
 void MillerApplication::onRender()
@@ -202,6 +212,7 @@ void MillerApplication::onRender()
     _heightmapEffect->setViewMatrix(view);
     _heightmapEffect->setProjectionMatrix(projection);
     _heightmapEffect->setAlbedoTexture(_texture);
+    _heightmapEffect->setHeightmapTexture(_heightmapTexture);
     _heightmapGeo.render();
     _heightmapEffect->end(); 
 

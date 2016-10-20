@@ -33,6 +33,7 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/DebugShapes.cpp
     src/mill-gui/Effect.cpp
     src/mill-gui/HeightmapGeometry.cpp
+    src/mill-gui/HeightmapTextureConverter.cpp
     src/mill-gui/HeightmapVisualizationEffect.cpp
     src/mill-gui/ImGuiBinding.cpp
     src/mill-gui/Main.cpp

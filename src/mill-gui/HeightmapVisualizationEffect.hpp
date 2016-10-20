@@ -21,6 +21,7 @@ public:
     void end();
 
     void setAlbedoTexture(GLuint textureId);
+
     void setHeightmapTexture(GLuint textureId);
 
 protected:

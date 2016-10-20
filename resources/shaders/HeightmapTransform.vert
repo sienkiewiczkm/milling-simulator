@@ -20,7 +20,10 @@ uniform mat4 projection;
 void main(void)
 {
     float weirdsin = 0.0f;
-    vec3 displacement = vec3(0, weirdsin, 0);
+
+    float height = texture(HeightmapTexture, texCoord1).r * texCoord2.x;
+    vec3 displacement = vec3(0, height, 0);
+
     gl_Position = projection * view * model 
         * vec4(position + displacement, 1.0f);
     vs_out.texCoord = texCoord1;

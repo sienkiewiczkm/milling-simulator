@@ -9,6 +9,7 @@
 #include "CuttingToolController.hpp"
 #include "MillPathFormatReader.hpp"
 #include "HeightmapVisualizationEffect.hpp"
+#include "HeightmapTextureConverter.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -48,8 +49,11 @@ private:
 
     TexturedPhongEffect _effect;
     std::shared_ptr<ms::HeightmapVisualizationEffect> _heightmapEffect;
+    std::shared_ptr<fw::HeightmapTextureConverter> _heightmapTextureConverter;
 
     GLuint _texture;
+    GLuint _heightmapTexture;
+
     HeightmapGeometry _heightmapGeo;
     OrbitingCamera _camera;
     std::shared_ptr<ms::CuttingToolController> _toolController;
