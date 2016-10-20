@@ -17,7 +17,9 @@ using namespace std;
 
 MillerApplication::MillerApplication() : 
     _frame(0),
-    _mouseSensitivity(0.05f)
+    _mouseSensitivity(0.05f),
+    _heightmapResolutionX(512),
+    _heightmapResolutionY(512)
 {
 }
 
@@ -33,13 +35,12 @@ void MillerApplication::onCreate()
 
     _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
 
-    const int heightmapWidth = 64;
-    const int heightmapHeight = 64;
     vector<float> heightmap = generateHeightmap(
-        heightmapWidth, heightmapHeight
+        _heightmapResolutionX, _heightmapResolutionY
     );
 
-    _heightmapGeo.create(heightmapWidth, heightmapHeight);
+    _heightmapGeo.create(_heightmapResolutionX, _heightmapResolutionY, 
+            glm::vec3(1.0f, 1.0f, 1.0f));
     _heightmapGeo.setHeightmap(heightmap);
 
     _lastMousePosition = getMousePosition();
@@ -47,16 +48,12 @@ void MillerApplication::onCreate()
     _cuttingTool.create(50.0f, 20.0f, 0.0f, 20.0f, 7.0f, 7.0f);
     _effect.create();
 
+    _heightmapEffect = make_shared<ms::HeightmapVisualizationEffect>();
+    _heightmapEffect->create();
+
     MillPathFormatReader reader;
     reader.readFromFile(RESOURCE("paths/t1.k16"));
     _movements = reader.getMovements();
-    for (auto &mov : _movements)
-    {
-        cout << (mov.type == PathMovementType::FastMovement ? "FAST " : "")
-            << "(" << mov.position.x << ") "
-            << "(" << mov.position.y << ") "
-            << "(" << mov.position.z << ")" << endl;
-    }
 
     _toolController = make_shared<CuttingToolController>();
     _toolController->setMovementSpeed(8.0f);
@@ -167,10 +164,8 @@ void MillerApplication::onUpdate()
     _cuttingTool.setModelMatrix(toolHeightMatrix);
     _cuttingToolGUI.update();
 
-    const int heightmapWidth = 64;
-    const int heightmapHeight = 64;
     vector<float> heightmap = generateHeightmap(
-        heightmapWidth, heightmapHeight
+        _heightmapResolutionX, _heightmapResolutionY
     );
 
     _heightmapGeo.setHeightmap(heightmap);
@@ -178,33 +173,37 @@ void MillerApplication::onUpdate()
 
 void MillerApplication::onRender()
 {
+    /* todo: move to framework */
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
+
     glViewport(0, 0, display_w, display_h);
     glClearColor(1.0, 0.0, 1.0, 1.0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    _effect.begin();
     glm::mat4 model, view, projection;
-
     float aspectRatio = (float)display_w/display_h;
 
     model = glm::scale(glm::mat4(), glm::vec3(100.0f, 100.0f, 100.0f));
     view = _camera.getViewMatrix();
     projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
 
+    _effect.begin();
     _effect.setModelMatrix(model);
     _effect.setViewMatrix(view);
     _effect.setProjectionMatrix(projection);
     _effect.setTexture(_texture);
-
-
-    _heightmapGeo.render();
-
     _cuttingTool.render(&_effect);
-
     _effect.end();
+
+    _heightmapEffect->begin();
+    _heightmapEffect->setModelMatrix(model);
+    _heightmapEffect->setViewMatrix(view);
+    _heightmapEffect->setProjectionMatrix(projection);
+    _heightmapEffect->setAlbedoTexture(_texture);
+    _heightmapGeo.render();
+    _heightmapEffect->end(); 
 
     ImGui::Render();
 }

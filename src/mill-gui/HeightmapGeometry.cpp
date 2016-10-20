@@ -6,8 +6,7 @@ using namespace std;
 using namespace glm;
 
 HeightmapGeometry::HeightmapGeometry() :
-    _skirtEnabled(true),
-    _skirtLevel(0.0f)
+    _skirtEnabled(true)
 {
 }
 
@@ -15,32 +14,13 @@ HeightmapGeometry::~HeightmapGeometry()
 {
 }
 
-void HeightmapGeometry::create(int width, int height)
+void HeightmapGeometry::create(int width, int length, vec3 size)
 {
     _width = width;
-    _height = height;
+    _length = length;
+    _size = size;
 
-    glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_VBO);
-    glGenBuffers(1, &_EBO);
-
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-
-    vector<GLuint> indices = generateIndices();
-    _numElements = indices.size();
-
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        indices.size() * sizeof(GLuint),
-        &indices[0],
-        GL_STATIC_DRAW
-    );
-
-    VertexNormalTexCoords::setupAttribPointers();
-
-    glBindVertexArray(0);
+    generateHeightmapGeometry();
 }
 
 void HeightmapGeometry::destroy()
@@ -49,126 +29,67 @@ void HeightmapGeometry::destroy()
 
 void HeightmapGeometry::setHeightmap(const std::vector<float> &heightmap)
 {
-    assert(heightmap.size() == _width * _height);
-    
-    auto vertices = generateVertsFromHeightmap(heightmap);
-
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertices.size() * sizeof(VertexNormalTexCoords),
-        &vertices[0],
-        GL_DYNAMIC_DRAW
-    );
-
-    glBindVertexArray(0);
+    assert(heightmap.size() == _width * _length);
 }
 
 void HeightmapGeometry::render()
 {
-    glBindVertexArray(_VAO);
-    glDrawElements(GL_TRIANGLES, _numElements, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    _mesh->render();
 }
 
-vector<VertexNormalTexCoords> HeightmapGeometry::generateVertsFromHeightmap(
-    const std::vector<float> &heightmap
-)
+void HeightmapGeometry::generateHeightmapGeometry()
 {
-    vector<VertexNormalTexCoords> vertices;
-    vertices.reserve(_width * _height);
+    vector<Vertex3D2TexCoord> vertices;
+    vertices.reserve(_width * _length);
 
-    for (int y = 0; y < _height; ++y)
+    for (int y = 0; y < _length; ++y)
     {
         for (int x = 0; x < _width; ++x)
         {
-            vertices.push_back(VertexNormalTexCoords(
+            vertices.push_back(Vertex3D2TexCoord(
                 glm::vec3(
                     x/((float)_width-1)-0.5f,
-                    heightmap[_width*y+x],
-                    y/((float)_height-1)-0.5f
+                    0.0f,
+                    y/((float)_length-1)-0.5f
                 ),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec2(x/(float)_width, y/(float)_height)
+                glm::vec2(x/(float)_width, y/(float)_length),
+                glm::vec2(1.0f, 0.0f)
             ));
         }
     }
 
-    for (int y = 0; y < _height - 1; ++y)
-    {
-        for (int x = 0; x < _width - 1; ++x)
-        {
-            auto i1 = _width*y+x;
-            auto i2 = _width*y+x+1;
-            auto i3 = _width*(y+1)+x;
-            auto i4 = _width*(y+1)+x+1;
-
-            auto v1 = vertices[i3].position - vertices[i1].position;
-            auto v2 = vertices[i2].position - vertices[i1].position;
-            auto v3 = vertices[i2].position - vertices[i4].position;
-            auto v4 = vertices[i3].position - vertices[i4].position;
-
-            auto normal1 = glm::cross(v1, v2);
-            auto normal2 = glm::cross(v3, v4);
-
-            vertices[i1].normal += normal1;
-            vertices[i2].normal += normal1;
-            vertices[i3].normal += normal1;
-
-            vertices[i2].normal += normal2;
-            vertices[i3].normal += normal2;
-            vertices[i4].normal += normal2;
-        }
-    }
-
-    for (int y = 0; y < _height; ++y)
-    {
-        for (int x = 0; x < _width; ++x)
-        {
-            if (glm::length(vertices[_width*y+x].normal) == 0.0f)
-                continue;
-
-            vertices[_width*y+x].normal =
-                glm::normalize(vertices[_width*y+x].normal);
-        }
-    }
-
-    if (!_skirtEnabled) { return vertices; }
-
-    /* todo: cleanup this code */
+    /*
     for (int x = 0; x < _width; ++x)
     {
         float progress = x / static_cast<float>(_width-1);
         float worldX = -0.5f + progress;
 
-        vec3 position1 = vec3(worldX, _skirtLevel, -0.5f);
-        vec3 value1 = vec3(worldX, heightmap[x], -0.5f);
+        vec3 position1 = vec3(worldX, 0.0f, -0.5f);
+        vec3 value1 = vec3(worldX, 0.0f, -0.5f);
         vec3 normal1 = vec3(0.0f, 0.0f, -1.0f);
         vec2 texcoord11 = vec2(progress, 0.0f);
         vec2 texcoord12 = vec2(progress, 1.0f);
 
-        vertices.push_back(VertexNormalTexCoords(
+        vertices.push_back(Vertex3D2TexCoord(
             position1, normal1, texcoord11
         ));
 
-        vertices.push_back(VertexNormalTexCoords(
+        vertices.push_back(Vertex3D2TexCoord(
             value1, normal1, texcoord12
         ));
 
-        vec3 position2 = vec3(worldX, _skirtLevel, +0.5f);
+        vec3 position2 = vec3(worldX, 0.0f, +0.5f);
         vec3 value2 = vec3(worldX, heightmap[(_height-1)*_width+x], +0.5f);
         vec3 normal2 = vec3(0.0f, 0.0f, 1.0f);
         vec2 texcoord21 = vec2(progress, 0.0f);
         vec2 texcoord22 = vec2(progress, 1.0f);
 
         vertices.push_back(VertexNormalTexCoords(
-            position2, normal2, texcoord21
+            position2, texcoord21
         ));
 
         vertices.push_back(VertexNormalTexCoords(
-            value2, normal2, texcoord22
+            value2, texcoord22
         ));
     }
 
@@ -205,15 +126,11 @@ vector<VertexNormalTexCoords> HeightmapGeometry::generateVertsFromHeightmap(
             value2, normal2, texcoord22
         ));
     }
+    */
 
-    return vertices;
-}
-
-std::vector<GLuint> HeightmapGeometry::generateIndices()
-{
     std::vector<GLuint> indices;
 
-    for (int y = 0; y < _height - 1; ++y)
+    for (int y = 0; y < _length - 1; ++y)
     {
         for (int x = 0; x < _width - 1; ++x)
         {
@@ -230,8 +147,7 @@ std::vector<GLuint> HeightmapGeometry::generateIndices()
         }
     }
 
-    if (!_skirtEnabled) { return indices; }
-
+    /*
     int skirtBase = _width * _height;
     for (int x = 0; x < _width - 1; ++x)
     {
@@ -271,6 +187,7 @@ std::vector<GLuint> HeightmapGeometry::generateIndices()
         indices.push_back(skirtBase + 4*y + 1 + 2);
         indices.push_back(skirtBase + 4*(y + 1) + 1 + 2);
     }
+    */
 
-    return indices;
+    _mesh = make_shared<Mesh<Vertex3D2TexCoord>>(vertices, indices);
 }

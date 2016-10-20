@@ -18,3 +18,19 @@ struct VertexNormalTexCoords
 
     static void setupAttribPointers();
 };
+
+struct Vertex3D2TexCoord
+{
+    Vertex3D2TexCoord();
+    Vertex3D2TexCoord(
+        glm::vec3 position,
+        glm::vec2 texCoord1,
+        glm::vec2 texCoord2
+    );
+
+    glm::vec3 position;
+    glm::vec2 texCoord1;
+    glm::vec2 texCoord2;
+
+    static void setupAttribPointers();
+};

@@ -8,6 +8,7 @@
 #include "TexturedPhongEffect.hpp"
 #include "CuttingToolController.hpp"
 #include "MillPathFormatReader.hpp"
+#include "HeightmapVisualizationEffect.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -37,11 +38,17 @@ protected:
     void handleInput();
 
 private:
+    unsigned int _heightmapResolutionX;
+    unsigned int _heightmapResolutionY;
+
     unsigned int _frame;
 
     float _mouseSensitivity;
     glm::vec2 _lastMousePosition;
+
     TexturedPhongEffect _effect;
+    std::shared_ptr<ms::HeightmapVisualizationEffect> _heightmapEffect;
+
     GLuint _texture;
     HeightmapGeometry _heightmapGeo;
     OrbitingCamera _camera;

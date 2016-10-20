@@ -1,6 +1,11 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "OpenGLHeaders.hpp"
+#include "Mesh.hpp"
+#include "Vertices.hpp"
+
+#include <glm/glm.hpp>
+
 #include <vector>
 
 struct VertexNormalTexCoords;
@@ -11,28 +16,19 @@ public:
     HeightmapGeometry();
     ~HeightmapGeometry();
 
-    void create(int width, int height);
+    void create(int width, int length, glm::vec3 size);
     void destroy();
 
     void setHeightmap(const std::vector<float> &heightmap);
     void render();
 
 protected:
-    std::vector<VertexNormalTexCoords> generateVertsFromHeightmap(
-        const std::vector<float> &heightmap
-    );
-
-    std::vector<GLuint> generateIndices();
+    void generateHeightmapGeometry();
 
 private:
     bool _skirtEnabled;
-    float _skirtLevel;
+    int _width, _length;
+    glm::vec3 _size;
 
-    int _width, _height;
-
-    float _geometryWidth;
-    float _geometryLength;
-
-    GLuint _VAO, _VBO, _EBO;
-    GLuint _numElements;
+    std::shared_ptr<Mesh<Vertex3D2TexCoord>> _mesh;
 };
