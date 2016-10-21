@@ -1,4 +1,5 @@
 #include "OrbitingCamera.hpp"
+#include "Common.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -8,7 +9,7 @@
 using namespace std;
 
 OrbitingCamera::OrbitingCamera() :
-  _xMin(-0.49f*M_PI), _xMax(0.49f*M_PI),
+  _xMin(-0.49f*common::pif()), _xMax(0.49f*common::pif()),
   _dist(1.0f),
   _rotationX(0.0f), _rotationY(0.0f) {
 }
@@ -25,10 +26,10 @@ void OrbitingCamera::rotate(float dx, float dy) {
     _rotationX = _xMax;
   }
 
-  while (_rotationY > 2.0f*M_PI)
-    _rotationY -= 2.0f*M_PI;
-  while (_rotationY < -2.0f*M_PI)
-    _rotationY += 2.0f*M_PI;
+  while (_rotationY > 2.0f*common::pif())
+    _rotationY -= 2.0f*common::pif();
+  while (_rotationY < -2.0f*common::pif())
+    _rotationY += 2.0f*common::pif();
  
 }
 

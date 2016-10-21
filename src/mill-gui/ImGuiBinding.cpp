@@ -7,8 +7,7 @@ Rewritten to learn how it works & change it to a bit more friendly form.
 
 #include <imgui.h>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "OpenGLHeaders.hpp"
 
 namespace ImGuiBinding
 {

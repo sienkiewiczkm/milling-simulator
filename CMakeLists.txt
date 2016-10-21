@@ -3,11 +3,22 @@ project(milling-simulator)
 
 find_library(OpenGL REQUIRED)
 
+if (WIN32)
+    set(GLFW_ADDITIONAL_DEFINITIONS
+        "${GLFW_ADDITIONAL_DEFINITIONS} GLFW_EXPOSE_NATIVE_WIN32"
+    )
+
+    set(ADDITIONAL_DEFINITIONS
+        "${ADDITIONAL_DEFINITIONS} GLFW_EXPOSE_NATIVE_WIN32"
+    )
+endif()
+
 # glfw: do not build docs, tests and examples
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(dependencies/glfw)
+target_compile_definitions(glfw PRIVATE ${GLFW_ADDITIONAL_DEFINITIONS})
 
 include_directories(dependencies/glfw/include)
 include_directories(dependencies/glm)
@@ -16,7 +27,7 @@ include_directories(dependencies/stb)
 set(RESOURCES_PATH ${PROJECT_SOURCE_DIR}/resources/)
 
 configure_file(
-    ${PROJECT_SOURCE_DIR}/src/Config.hpp.in 
+    ${PROJECT_SOURCE_DIR}/src/Config.hpp.in
     ${PROJECT_BINARY_DIR}/Config.hpp
 )
 
@@ -26,7 +37,7 @@ include_directories(
     dependencies/generated/glad/include
 )
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
@@ -57,15 +68,17 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${OPENGL_INCLUDE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
     glfw
     ${OPENGL_gl_LIBRARY}
 )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    ${ADDITIONAL_DEFINITIONS}
+)
 
 target_compile_features(${PROJECT_NAME} PRIVATE
     cxx_auto_type
     cxx_nullptr
     cxx_range_for
 )
-
