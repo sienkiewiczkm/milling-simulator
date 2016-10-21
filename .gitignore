@@ -6,4 +6,7 @@ build
 *.swn
 *.swp
 
+# temporary files
+*~
+
 .DS_Store

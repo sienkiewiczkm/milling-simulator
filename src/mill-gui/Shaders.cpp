@@ -1,6 +1,7 @@
 #include "Shaders.hpp"
 #include "Common.hpp"
 
+#include <algorithm>
 #include <cstdio>
 #include <iostream>
 

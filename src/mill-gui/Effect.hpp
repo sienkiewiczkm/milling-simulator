@@ -3,7 +3,9 @@
 #include "Shaders.hpp"
 
 #include <glm/glm.hpp>
+
 #include <string>
+#include <memory>
 
 namespace uniforms
 {

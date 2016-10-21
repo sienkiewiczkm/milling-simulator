@@ -13,7 +13,7 @@ double common::pi()
 
 float common::pif()
 {
-    return std::acosf(-1.0f);
+    return std::acos(-1.0f);
 }
 
 std::string common::loadASCIITextFile(const std::string &filepath)

@@ -9,6 +9,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(dependencies/glfw)
 
+include_directories(dependencies/glfw/include)
 include_directories(dependencies/glm)
 include_directories(dependencies/stb)
 
