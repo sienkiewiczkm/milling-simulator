@@ -251,10 +251,10 @@ vector<float> MillerApplication::generateHeightmap(int width, int height)
 
     for (int y = 0; y < height; ++y)
     {
-        float yfactor = sinf(y*0.2f+phaseShift*0.8f);
+        float yfactor = 0.0f;//sinf(0.02*y+phaseShift*0.8f);
         for (int x = 0; x < width; ++x)
         {
-            float xfactor = sinf(x*0.1f+phaseShift*1.6f);
+            float xfactor = sinf(x*0.01f+phaseShift*1.6f);
             float factor = 0.1f *((xfactor+yfactor) / 2.0f + 1.0f);
             heightmap.push_back(factor);
         }

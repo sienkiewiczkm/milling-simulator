@@ -30,5 +30,5 @@ private:
     int _width, _length;
     glm::vec3 _size;
 
-    std::shared_ptr<Mesh<Vertex3D2TexCoord>> _mesh;
+    std::shared_ptr<Mesh<Vertex3DNormal2TexCoord>> _mesh;
 };

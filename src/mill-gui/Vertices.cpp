@@ -64,3 +64,47 @@ void Vertex3D2TexCoord::setupAttribPointers()
         reinterpret_cast<GLvoid*>(offsetof(Vertex3D2TexCoord, texCoord2))
     );
 }
+
+Vertex3DNormal2TexCoord::Vertex3DNormal2TexCoord()
+{
+}
+
+Vertex3DNormal2TexCoord::Vertex3DNormal2TexCoord(
+    glm::vec3 position,
+    glm::vec3 normal,
+    glm::vec2 texCoord1,
+    glm::vec2 texCoord2
+) :
+    position(position),
+    normal(normal),
+    texCoord1(texCoord1),
+    texCoord2(texCoord2)
+{
+}
+
+void Vertex3DNormal2TexCoord::setupAttribPointers()
+{
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+        sizeof(Vertex3DNormal2TexCoord),
+        reinterpret_cast<GLvoid*>(0)
+    );
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
+        sizeof(Vertex3DNormal2TexCoord),
+        reinterpret_cast<GLvoid*>(offsetof(Vertex3DNormal2TexCoord, normal))
+    );
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 
+        sizeof(Vertex3DNormal2TexCoord), 
+        reinterpret_cast<GLvoid*>(offsetof(Vertex3DNormal2TexCoord, texCoord1))
+    );
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex3DNormal2TexCoord),
+        reinterpret_cast<GLvoid*>(offsetof(Vertex3DNormal2TexCoord, texCoord2))
+    );
+}
