@@ -36,7 +36,10 @@ void CuttingToolGUI::setController(
 void CuttingToolGUI::update()
 {
     if (!ImGui::Begin(_windowName.c_str(), &_isVisible))
+    {
+        ImGui::End();
         return;
+    }
 
     vec3 startingPosition = _controller->getStartingPosition();
     vec3 currentPosition = _controller->getCurrentPosition();

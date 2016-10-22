@@ -20,7 +20,10 @@ MillerApplication::MillerApplication() :
     _frame(0),
     _mouseSensitivity(0.05f),
     _heightmapResolutionX(512),
-    _heightmapResolutionY(512)
+    _heightmapResolutionY(512),
+    _showImguiDemo(false),
+    _showSimulationTools(false),
+    _showProgramManager(false)
 {
 }
 
@@ -43,20 +46,26 @@ void MillerApplication::onCreate()
     reader.readFromFile(RESOURCE("paths/t1.k16"));
     _movements = reader.getMovements();
 
+    _programManagerGUI = make_shared<ProgramManagerGUI>();
     _toolController = make_shared<CuttingToolController>();
-    _toolController->setMovementSpeed(8.0f);
+    _toolController->setMovementSpeed(25.0f);
 
-    if (_movements.size() > 1)
-    {
-        _toolController->setStartingPosition(_movements[0].position);
-        _toolController->setTargetPosition(_movements[1].position);
-        _toolController->startMovement();
-        _currentMoveIndex = 1;
-    }
+    _programExecutor = make_shared<MillingProgramExecutor>(
+        _toolController
+    );
+
+    _programExecutorGUI = make_shared<MillingProgramExecutorGUI>(
+        _programExecutor
+    );
+
+    _programExecutor->setProgram(_movements);
+    _programExecutor->start();
 
     _cuttingToolGUI.setController(_toolController);
-    _cuttingToolGUI.setVisibility(true);
-    _cuttingToolGUI.setWindowName("Cutting Tool Controller");
+    _cuttingToolGUI.setVisibility(_showProgramManager);
+    _cuttingToolGUI.setWindowName("Cutting tool controller");
+
+    _programManagerGUI->setVisibility(_showProgramManager);
 
     _block = make_shared<MillingBlock>();
     _block->setTexture(_texture);
@@ -71,9 +80,6 @@ void MillerApplication::onUpdate()
 {
     ++_frame;
 
-    static bool showSimulationTools = false;
-    static bool showImguiDemo = false;
-
     ImGuiBinding::newFrame();
     handleInput();
 
@@ -82,39 +88,17 @@ void MillerApplication::onUpdate()
     _currentTime = glfwGetTime();
     _deltaTime = _currentTime - _lastTime;
 
-    bool booleanset = false;
-    
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("Tools"))
-        {
-            ImGui::MenuItem("Simulation tools", "CTRL+S", &showSimulationTools);
-            ImGui::MenuItem("ImGui Test Window", nullptr, &showImguiDemo);
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Help"))
-        {
-            if (ImGui::MenuItem("About"))
-            {
-                booleanset = true;
-            }
-
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
-    }
+    updateMainMenuBar();
 
     static float speed = 1.0f;
 
-    if (showImguiDemo) {
+    if (_showImguiDemo) {
         ImGui::ShowTestWindow();
     }
 
-    if (showSimulationTools)
+    if (_showSimulationTools)
     {
-        ImGui::Begin("Simulation tools", &showSimulationTools);
+        ImGui::Begin("Simulation tools", &_showSimulationTools);
         ImGui::Button("Play"); ImGui::SameLine();
         ImGui::Button("Pause"); ImGui::SameLine();
         ImGui::Button("Stop");
@@ -127,27 +111,10 @@ void MillerApplication::onUpdate()
         ImGui::End();
     }
 
-    static float f = 0.0f;
-    ImGui::Text("Hello world!");
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    _programManagerGUI->update();
+    _programExecutorGUI->update();
 
-    if (ImGui::Button("Show this thing"))
-    {
-        ImGui::BulletText("Okay, I'm showing");
-    }
-    
-    if (!_toolController->isMovementActive() &&
-        _currentMoveIndex < _movements.size())
-    {
-        _currentMoveIndex++;
-        _toolController->finishMovement();
-        _toolController->setTargetPosition(
-            _movements[_currentMoveIndex].position
-        );
-        _toolController->startMovement();
-    }
-
-    _toolController->update(_deltaTime);
+    _programExecutor->update(_deltaTime);
 
     glm::mat4 toolHeightMatrix = glm::translate(glm::dmat4(),
         _toolController->getCurrentPosition());
@@ -175,7 +142,7 @@ void MillerApplication::onRender()
     glfwGetFramebufferSize(_window, &display_w, &display_h);
 
     glViewport(0, 0, display_w, display_h);
-    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+    glClearColor(0.25f, 0.25f, 0.25f, 1.0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -225,26 +192,6 @@ void MillerApplication::onChar(unsigned int c)
     ImGuiBinding::charCallback(_window, c);
 }
 
-vector<float> MillerApplication::generateHeightmap(int width, int height)
-{
-    float phaseShift = glfwGetTime();
-
-    vector<float> heightmap;
-
-    for (int y = 0; y < height; ++y)
-    {
-        float yfactor = 0.0f;//sinf(0.02*y+phaseShift*0.8f);
-        for (int x = 0; x < width; ++x)
-        {
-            float xfactor = sinf(x*0.01f+phaseShift*1.6f);
-            float factor = 50.f * (xfactor+yfactor+2.0f)*0.25f;
-            heightmap.push_back(factor);
-        }
-    }
-
-    return heightmap;
-}
-
 void MillerApplication::handleInput()
 {
     ImGuiIO &io = ImGui::GetIO();
@@ -257,5 +204,36 @@ void MillerApplication::handleInput()
         GLFW_PRESS == glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT))
     {
         _camera.rotate(movement.y, movement.x);
+    }
+}
+
+void MillerApplication::updateMainMenuBar()
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Tools"))
+        {
+            ImGui::MenuItem(
+                "Simulation tools",
+                nullptr,
+                &_showSimulationTools
+            );
+
+            ImGui::MenuItem(
+                "Program manager",
+                nullptr,
+                _programManagerGUI->getVisibilityFlagPointer()
+            );
+
+            ImGui::MenuItem(
+                "ImGui Test Window",
+                nullptr,
+                &_showImguiDemo
+            );
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
     }
 }

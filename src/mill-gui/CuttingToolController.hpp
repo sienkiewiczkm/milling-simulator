@@ -4,6 +4,10 @@
 
 namespace ms
 {
+
+/** \brief This controller is in charge of moving the tool as smooth as possible
+ *         on linear paths.
+ */
 class CuttingToolController
 {
 public:
@@ -16,7 +20,10 @@ public:
     glm::dvec3 getCurrentPosition();
     glm::dvec3 getTargetPosition();
     void setTargetPosition(const glm::dvec3 &position);
+    double getMovementSpeed();
     void setMovementSpeed(double speed);
+
+    double getMoveProgress() const;
 
     void startMovement();
     void finishMovement();
@@ -37,4 +44,5 @@ private:
     glm::dvec3 _currentPosition;
     glm::dvec3 _targetPosition;
 };
+
 }

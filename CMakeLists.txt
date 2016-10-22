@@ -20,6 +20,13 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(dependencies/glfw)
 target_compile_definitions(glfw PRIVATE ${GLFW_ADDITIONAL_DEFINITIONS})
 
+# configure boost
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.60.0 COMPONENTS filesystem)
+include_directories(${Boost_INCLUDE_DIRS})
+
 include_directories(dependencies/glfw/include)
 include_directories(dependencies/glm)
 include_directories(dependencies/stb)
@@ -53,8 +60,11 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/MillPathFormatReader.cpp
     src/mill-gui/MillerApplication.cpp
     src/mill-gui/MillingBlock.cpp
+    src/mill-gui/MillingProgramExecutor.cpp
+    src/mill-gui/MillingProgramExecutorGUI.cpp
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
+    src/mill-gui/ProgramManagerGUI.cpp
     src/mill-gui/Shaders.cpp
     src/mill-gui/StbImplementation.c
     src/mill-gui/TextureUtils.cpp
@@ -73,6 +83,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME}
     glfw
     ${OPENGL_gl_LIBRARY}
+    ${Boost_LIBRARIES}
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

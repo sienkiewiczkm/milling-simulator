@@ -1,5 +1,7 @@
 #include "CuttingToolController.hpp"
 
+#include <algorithm>
+
 namespace ms {
 
 CuttingToolController::CuttingToolController() :
@@ -21,7 +23,7 @@ glm::dvec3 CuttingToolController::getStartingPosition()
 
 void CuttingToolController::setStartingPosition(const glm::dvec3 &position)
 {
-    _startingPosition = position;
+    _lastPosition = _currentPosition = _startingPosition = position;
 }
 
 glm::dvec3 CuttingToolController::getLastPosition()
@@ -44,9 +46,19 @@ void CuttingToolController::setTargetPosition(const glm::dvec3 &position)
     _targetPosition = position;
 }
 
+double CuttingToolController::getMovementSpeed()
+{
+    return _speed;
+}
+
 void CuttingToolController::setMovementSpeed(double speed)
 {
     _speed = speed;
+}
+
+double CuttingToolController::getMoveProgress() const
+{
+    return std::min(_distanceMoved / _totalDistance, 1.0);
 }
 
 void CuttingToolController::startMovement()
