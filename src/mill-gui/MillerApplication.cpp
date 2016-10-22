@@ -36,11 +36,8 @@ void MillerApplication::onCreate()
 
     _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
 
-    _cuttingTool.create(50.0f, 20.0f, 0.0f, 20.0f, 7.0f, 7.0f);
+    _cuttingTool.create(10.0f, 10.0f, 0.0f, 10.0f, 3.5f, 3.5f);
     _effect.create();
-
-    _heightmapEffect = make_shared<ms::HeightmapVisualizationEffect>();
-    _heightmapEffect->create();
 
     MillPathFormatReader reader;
     reader.readFromFile(RESOURCE("paths/t1.k16"));
@@ -61,19 +58,8 @@ void MillerApplication::onCreate()
     _cuttingToolGUI.setVisibility(true);
     _cuttingToolGUI.setWindowName("Cutting Tool Controller");
 
-    vector<float> heightmap = generateHeightmap(
-        _heightmapResolutionX, _heightmapResolutionY
-    );
-
-    _heightmapTextureConverter = make_shared<HeightmapTextureConverter>();
-    _heightmapTexture = _heightmapTextureConverter->createTextureFromHeightmap(
-        heightmap,
-        _heightmapResolutionX,
-        _heightmapResolutionY
-    );
-
-    _heightmapGeo.create(_heightmapResolutionX, _heightmapResolutionY, 
-            glm::vec3(1.0f, 1.0f, 1.0f));
+    _block = make_shared<MillingBlock>();
+    _block->setTexture(_texture);
 }
 
 void MillerApplication::onDestroy()
@@ -169,16 +155,17 @@ void MillerApplication::onUpdate()
     _cuttingTool.setModelMatrix(toolHeightMatrix);
     _cuttingToolGUI.update();
 
-    vector<float> heightmap = generateHeightmap(
-        _heightmapResolutionX, _heightmapResolutionY
+    CuttingToolParams params;
+    params.radius = 3.5f;
+    params.kind = CuttingToolKind::Flat;
+
+    _block->moveTool(
+        _toolController->getLastPosition(),
+        _toolController->getCurrentPosition(),
+        params
     );
 
-    _heightmapTextureConverter->updateTextureFromHeightmap(
-        _heightmapTexture,
-        heightmap,
-        _heightmapResolutionX,
-        _heightmapResolutionY
-    );
+    _block->update();
 }
 
 void MillerApplication::onRender()
@@ -195,7 +182,7 @@ void MillerApplication::onRender()
     glm::mat4 model, view, projection;
     float aspectRatio = (float)display_w/display_h;
 
-    model = glm::scale(glm::mat4(), glm::vec3(100.0f, 100.0f, 100.0f));
+    model = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f));
     view = _camera.getViewMatrix();
     projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
 
@@ -207,14 +194,9 @@ void MillerApplication::onRender()
     _cuttingTool.render(&_effect);
     _effect.end();
 
-    _heightmapEffect->begin();
-    _heightmapEffect->setModelMatrix(model);
-    _heightmapEffect->setViewMatrix(view);
-    _heightmapEffect->setProjectionMatrix(projection);
-    _heightmapEffect->setAlbedoTexture(_texture);
-    _heightmapEffect->setHeightmapTexture(_heightmapTexture);
-    _heightmapGeo.render();
-    _heightmapEffect->end(); 
+    _block->setViewMatrix(view);
+    _block->setProjectionMatrix(projection);
+    _block->render();
 
     ImGui::Render();
 }
@@ -255,7 +237,7 @@ vector<float> MillerApplication::generateHeightmap(int width, int height)
         for (int x = 0; x < width; ++x)
         {
             float xfactor = sinf(x*0.01f+phaseShift*1.6f);
-            float factor = 0.1f *((xfactor+yfactor) / 2.0f + 1.0f);
+            float factor = 50.f * (xfactor+yfactor+2.0f)*0.25f;
             heightmap.push_back(factor);
         }
     }

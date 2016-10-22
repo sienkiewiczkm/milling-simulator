@@ -2,6 +2,8 @@
 
 #include "Effect.hpp"
 
+#include <glm/glm.hpp>
+
 #include <memory>
 
 namespace ms
@@ -20,12 +22,17 @@ public:
     void begin();
     void end();
 
-    void setAlbedoTexture(GLuint textureId);
+    void setTextureMatrix(const glm::mat4 &textureMatrix);
 
+    void setAlbedoTexture(GLuint textureId);
     void setHeightmapTexture(GLuint textureId);
+    void setSize(const glm::vec2 &size);
 
 protected:
     void createShaders();
+
+private:
+    glm::mat4 _textureMatrix;
 };
 
 }

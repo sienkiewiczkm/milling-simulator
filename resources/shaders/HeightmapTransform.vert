@@ -17,6 +17,9 @@ uniform sampler2D HeightmapTexture;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 TextureMatrix;
+
+uniform vec2 HeightmapSize;
 
 uniform int NormalEstBaseX[4] = int[] (0, -1, 0, 1);
 uniform int NormalEstBaseY[4] = int[] (-1, 0, 1, 0);
@@ -25,6 +28,10 @@ void main(void)
 {
     float height = texture(HeightmapTexture, texCoord1).r * texCoord2.x;
     vec3 displacement = vec3(0, height, 0);
+
+    vec2 autoTexCoord = (TextureMatrix * vec4(position, 1)).xz;
+    vec2 finalTexCoord = (texCoord2.y) * autoTexCoord
+        + (1.0 - texCoord2.y) * texCoord1;
 
     vec3 heightNormal = vec3(0, 0, 0);
     vec2 texOffset = 1.0 / textureSize(HeightmapTexture, 0);
@@ -35,11 +42,11 @@ void main(void)
         vec2 vShift = vec2(NormalEstBaseX[2*i+1], NormalEstBaseY[2*i+1]);
 
         float uHeight = texture(
-            HeightmapTexture, texCoord1 + uShift * texOffset
+            HeightmapTexture, finalTexCoord + uShift * texOffset
         ).r;
 
         float vHeight = texture(
-            HeightmapTexture, texCoord1 + vShift * texOffset
+            HeightmapTexture, finalTexCoord + vShift * texOffset
         ).r;
 
         heightNormal += cross(
@@ -52,8 +59,10 @@ void main(void)
         + (1.0-texCoord2.y) * normal;
 
     gl_Position = projection * view * model 
-        * vec4(position + displacement, 1.0f);
-    vs_out.texCoord = texCoord1;
+        * vec4(vec3(150.0, 50.0, 150.0) * position 
+               + displacement, 1.0f);
+
+    vs_out.texCoord = finalTexCoord;
 
     vs_out.normal =
         normalize((transpose(inverse(model)) * vec4(finalNormal, 0)).xyz);

@@ -38,6 +38,7 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME}
+    src/mill-gui/BoundariesMillingTechnique.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
@@ -51,6 +52,7 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/Main.cpp
     src/mill-gui/MillPathFormatReader.cpp
     src/mill-gui/MillerApplication.cpp
+    src/mill-gui/MillingBlock.cpp
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
     src/mill-gui/Shaders.cpp

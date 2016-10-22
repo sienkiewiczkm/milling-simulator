@@ -2,6 +2,8 @@
 #include "OpenGLHeaders.hpp"
 #include "Config.hpp"
 
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace std;
 
 namespace ms
@@ -33,6 +35,20 @@ void HeightmapVisualizationEffect::end()
 {
 }
 
+void HeightmapVisualizationEffect::setTextureMatrix(
+    const glm::mat4 &textureMatrix
+)
+{
+    _textureMatrix = textureMatrix;
+
+    GLint uniformLoc = glGetUniformLocation(
+        _shaderProgram->getId(),
+        "TextureMatrix"
+    );
+
+    glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, glm::value_ptr(_textureMatrix));
+}
+
 void HeightmapVisualizationEffect::setAlbedoTexture(GLuint textureId)
 {
     glActiveTexture(GL_TEXTURE0); 
@@ -50,6 +66,15 @@ void HeightmapVisualizationEffect::setHeightmapTexture(GLuint textureId)
     glUniform1i(
         glGetUniformLocation(_shaderProgram->getId(), "HeightmapTexture"),
         1
+    );
+}
+
+void HeightmapVisualizationEffect::setSize(const glm::vec2 &size)
+{
+    glUniform2fv(
+        glGetUniformLocation(_shaderProgram->getId(), "HeightmapSize"),
+        1,
+        value_ptr(size)
     );
 }
 

@@ -10,6 +10,7 @@
 #include "MillPathFormatReader.hpp"
 #include "HeightmapVisualizationEffect.hpp"
 #include "HeightmapTextureConverter.hpp"
+#include "MillingBlock.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -48,13 +49,11 @@ private:
     glm::vec2 _lastMousePosition;
 
     TexturedPhongEffect _effect;
-    std::shared_ptr<ms::HeightmapVisualizationEffect> _heightmapEffect;
-    std::shared_ptr<fw::HeightmapTextureConverter> _heightmapTextureConverter;
+
+    std::shared_ptr<ms::MillingBlock> _block;
 
     GLuint _texture;
-    GLuint _heightmapTexture;
 
-    HeightmapGeometry _heightmapGeo;
     OrbitingCamera _camera;
     std::shared_ptr<ms::CuttingToolController> _toolController;
 
