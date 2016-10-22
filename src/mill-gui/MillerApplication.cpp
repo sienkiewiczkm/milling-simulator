@@ -22,7 +22,6 @@ MillerApplication::MillerApplication() :
     _heightmapResolutionX(512),
     _heightmapResolutionY(512),
     _showImguiDemo(false),
-    _showSimulationTools(false),
     _showProgramManager(false)
 {
 }
@@ -94,21 +93,6 @@ void MillerApplication::onUpdate()
 
     if (_showImguiDemo) {
         ImGui::ShowTestWindow();
-    }
-
-    if (_showSimulationTools)
-    {
-        ImGui::Begin("Simulation tools", &_showSimulationTools);
-        ImGui::Button("Play"); ImGui::SameLine();
-        ImGui::Button("Pause"); ImGui::SameLine();
-        ImGui::Button("Stop");
-        ImGui::SliderFloat("Speed", &speed, 0.0f, 10.0f);
-
-        ImGui::ProgressBar(0.50, ImVec2(0.0f,0.0f));
-        ImGui::SameLine(0.0f);
-        ImGui::Text("Progress");
-
-        ImGui::End();
     }
 
     _programManagerGUI->update();
@@ -213,12 +197,6 @@ void MillerApplication::updateMainMenuBar()
     {
         if (ImGui::BeginMenu("Tools"))
         {
-            ImGui::MenuItem(
-                "Simulation tools",
-                nullptr,
-                &_showSimulationTools
-            );
-
             ImGui::MenuItem(
                 "Program manager",
                 nullptr,

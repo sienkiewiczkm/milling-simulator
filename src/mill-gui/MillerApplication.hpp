@@ -59,7 +59,6 @@ private:
 
     GLuint _texture;
 
-    bool _showSimulationTools;
     bool _showImguiDemo;
     bool _showProgramManager;
 
