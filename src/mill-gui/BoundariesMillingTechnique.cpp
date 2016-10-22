@@ -79,21 +79,16 @@ void BoundariesMillingTechnique::moveTool(
             if (dist > texCoordRadius)
                 continue;
 
+
             auto &cell = heightmap[y*heightmapResolution.x + x];
-            cell = std::min(cell, static_cast<float>(tipEndPosition.y));
+
+            auto tcHeight = texCoordRadius
+                - sqrt(texCoordRadius*texCoordRadius - dist*dist);
+            tcHeight *= (toolParams.radius / texCoordRadius);
+            auto toolHeight = tipStartPosition.y + tcHeight;
+            cell = std::min(cell, static_cast<float>(toolHeight));
         }
     }
-
-    /*
-    if (texCoord.x >= 0.0f && texCoord.x <= 1.0f
-        && texCoord.z >= 0.0f && texCoord.z <= 1.0f)
-    {
-        int x = static_cast<int>(texCoord.x * heightmapResolution.x);
-        int y = static_cast<int>(texCoord.z * heightmapResolution.y);
-        auto &cell = heightmap[y*heightmapResolution.x + x];
-        cell = std::min(cell, static_cast<float>(tipEndPosition.y));
-    }
-    */
 }
 
 }

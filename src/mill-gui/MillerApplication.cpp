@@ -175,7 +175,7 @@ void MillerApplication::onRender()
     glfwGetFramebufferSize(_window, &display_w, &display_h);
 
     glViewport(0, 0, display_w, display_h);
-    glClearColor(1.0, 0.0, 1.0, 1.0);
+    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
