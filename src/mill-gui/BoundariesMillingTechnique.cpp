@@ -79,13 +79,18 @@ void BoundariesMillingTechnique::moveTool(
             if (dist > texCoordRadius)
                 continue;
 
-
             auto &cell = heightmap[y*heightmapResolution.x + x];
 
             auto tcHeight = texCoordRadius
                 - sqrt(texCoordRadius*texCoordRadius - dist*dist);
             tcHeight *= (toolParams.radius / texCoordRadius);
-            auto toolHeight = tipStartPosition.y + tcHeight;
+
+            auto toolHeight = tipStartPosition.y;
+            if (toolParams.kind == CuttingToolKind::Ball)
+            {
+                toolHeight += tcHeight;
+            }
+            
             cell = std::min(cell, static_cast<float>(toolHeight));
         }
     }

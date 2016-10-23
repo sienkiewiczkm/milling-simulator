@@ -19,8 +19,8 @@ using namespace std;
 MillerApplication::MillerApplication() : 
     _frame(0),
     _mouseSensitivity(0.05f),
-    _heightmapResolutionX(512),
-    _heightmapResolutionY(512),
+    _heightmapResolutionX(32),
+    _heightmapResolutionY(32),
     _showImguiDemo(false),
     _showProgramManager(false)
 {

@@ -16,7 +16,7 @@ namespace ms
 
 MillingBlock::MillingBlock():
     _blockSize(150.0f, 50.0f, 150.0f),
-    _blockResolution(512, 512)
+    _blockResolution(1024, 1024)
 {
     _heightmapEffect = make_shared<HeightmapVisualizationEffect>();
     _heightmapEffect->create();
