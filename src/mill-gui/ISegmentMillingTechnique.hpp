@@ -39,6 +39,14 @@ public:
         glm::dvec3 tipStartPosition, 
         glm::dvec3 tipEndPosition
     );
+
+protected:
+    CuttingToolParams _cuttingToolParams;
+    double _tcRadius;
+
+    glm::dmat4 _heightmapTransformation;
+
+    glm::dvec4 getToolBoundaries(glm::dvec3 position);
 };
 
 }
