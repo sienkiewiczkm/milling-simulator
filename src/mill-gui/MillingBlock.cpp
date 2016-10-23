@@ -18,18 +18,17 @@ MillingBlock::MillingBlock():
     _blockSize(150.0f, 50.0f, 150.0f),
     _blockResolution(1024, 1024)
 {
-    _heightmapEffect = make_shared<HeightmapVisualizationEffect>();
-    _heightmapEffect->create();
+    create();
+}
 
-    _heightmapTextureConverter = make_shared<HeightmapTextureConverter>();
-
-    _geometry = make_shared<HeightmapGeometry>();
-    _geometry->create(_blockResolution.x, _blockResolution.y, _blockSize);
-
-    createHeightmap();
-
-    _textureMatrix = translate(mat4(), vec3(0.5f, 0.0f, 0.5f));
-    _technique = make_shared<BoundariesMillingTechnique>();
+MillingBlock::MillingBlock(
+    glm::vec3 blockSize,
+    glm::ivec2 blockResolution
+):
+    _blockSize(blockSize),
+    _blockResolution(blockResolution)
+{
+    create();
 }
 
 MillingBlock::~MillingBlock()
@@ -113,6 +112,22 @@ void MillingBlock::render()
     _geometry->render();
 
     _heightmapEffect->end(); 
+}
+
+void MillingBlock::create()
+{
+    _heightmapEffect = make_shared<HeightmapVisualizationEffect>();
+    _heightmapEffect->create();
+
+    _heightmapTextureConverter = make_shared<HeightmapTextureConverter>();
+
+    _geometry = make_shared<HeightmapGeometry>();
+    _geometry->create(_blockResolution.x, _blockResolution.y, _blockSize);
+
+    createHeightmap();
+
+    _textureMatrix = translate(mat4(), vec3(0.5f, 0.0f, 0.5f));
+    _technique = make_shared<BoundariesMillingTechnique>();
 }
 
 void MillingBlock::createHeightmap()

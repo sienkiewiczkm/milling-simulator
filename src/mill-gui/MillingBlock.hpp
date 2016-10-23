@@ -19,6 +19,11 @@ class MillingBlock
 {
 public:
     MillingBlock();
+    MillingBlock(
+        glm::vec3 blockSize,
+        glm::ivec2 blockResolution
+    );
+
     ~MillingBlock();
 
     void setModelMatrix(const glm::mat4 &modelMatrix);
@@ -42,6 +47,7 @@ public:
     void render();
 
 protected:
+    void create();
     void createHeightmap();
     void updateHeightmap();
 

@@ -96,6 +96,14 @@ void MillerApplication::onUpdate()
 
     _createBlockGUI->update();
 
+    auto newBlock = _createBlockGUI->getNewBlock();
+    if (newBlock != nullptr)
+    {
+        _block = newBlock;
+        _block->setTexture(_texture);
+        _toolController->setStartingPosition(_block->getSafePosition());
+    }
+
     static float speed = 1.0f;
 
     if (_showImguiDemo) {

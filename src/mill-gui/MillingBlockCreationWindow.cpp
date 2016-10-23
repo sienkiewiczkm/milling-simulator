@@ -1,4 +1,5 @@
 #include "MillingBlockCreationWindow.hpp"
+#include "MillingBlock.hpp"
 
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -11,7 +12,8 @@ namespace ms
 MillingBlockCreationWindow::MillingBlockCreationWindow():
     _size(150.0f, 50.0f, 150.0f),
     _resolution(1024, 1024),
-    _safeHeight(20.0f)
+    _safeHeight(20.0f),
+    _blockReady(false)
 {
 }
 
@@ -58,9 +60,16 @@ void MillingBlockCreationWindow::update()
     }
 }
 
+std::shared_ptr<ms::MillingBlock> MillingBlockCreationWindow::getNewBlock()
+{
+    if (!_blockReady) { return nullptr; }
+    _blockReady = false;
+    return make_shared<MillingBlock>(_size, _resolution);
+}
+
 void MillingBlockCreationWindow::createMillingBlock()
 {
-    /* todo */
+    _blockReady = true;
 }
 
 }
