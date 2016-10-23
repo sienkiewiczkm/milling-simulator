@@ -2,6 +2,7 @@
 
 #include "MillPathFormatReader.hpp"
 #include "CuttingToolController.hpp"
+#include "MillingBlock.hpp"
 
 #include <memory>
 #include <string>
@@ -28,6 +29,9 @@ public:
 
     std::shared_ptr<CuttingToolController> getController();
 
+    std::shared_ptr<MillingBlock> getMillingBlock() const;
+    void setMillingBlock(std::shared_ptr<MillingBlock> block);
+
     void start();
     void stop();
 
@@ -43,6 +47,7 @@ private:
     int _currentProgramStep;
     std::vector<ms::PathMovement> _millingProgram;
     std::shared_ptr<CuttingToolController> _toolController;
+    std::shared_ptr<MillingBlock> _block;
 };
 
 }

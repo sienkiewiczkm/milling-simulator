@@ -1,6 +1,9 @@
 #include "CuttingToolController.hpp"
 
 #include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 namespace ms {
 
@@ -94,14 +97,26 @@ bool CuttingToolController::isMovementActive()
     return _moving;
 }
 
-void CuttingToolController::update(double dt)
+double CuttingToolController::update(double dt)
 {
+    auto prevDistanceMoved = _distanceMoved;
     _distanceMoved += dt * _speed;
+
     _lastPosition = _currentPosition;
+
+    double timeLeft = 0.0;
 
     if (_distanceMoved >= _totalDistance)
     {
+        auto timeNeeded = std::max(
+            0.05,
+            (_totalDistance - prevDistanceMoved)/_speed
+        );
+
+        timeLeft = std::max(0.0, dt - timeNeeded);
+        
         _distanceMoved = _totalDistance;
+
         _moving = false;
         _currentPosition = _targetPosition;
     }
@@ -111,6 +126,8 @@ void CuttingToolController::update(double dt)
         _currentPosition = (1.0 - alpha) * _startingPosition 
             + alpha * _targetPosition;
     }
+    
+    return timeLeft;
 }
 
 }

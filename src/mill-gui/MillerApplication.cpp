@@ -52,6 +52,8 @@ void MillerApplication::onCreate()
         _toolController
     );
 
+    _programExecutor->setMillingBlock(_block);
+
     _programExecutorGUI = make_shared<MillingProgramExecutorGUI>(
         _programExecutor
     );
@@ -101,6 +103,7 @@ void MillerApplication::onUpdate()
     {
         _block = newBlock;
         _block->setTexture(_texture);
+        _programExecutor->setMillingBlock(_block);
         _toolController->setStartingPosition(_block->getSafePosition());
     }
 
@@ -120,12 +123,6 @@ void MillerApplication::onUpdate()
 
     _cuttingTool.setModelMatrix(toolHeightMatrix);
     _cuttingToolGUI.update();
-
-    _block->moveTool(
-        _toolController->getLastPosition(),
-        _toolController->getCurrentPosition(),
-        _toolController->getCuttingToolParams()
-    );
 
     _block->update();
 

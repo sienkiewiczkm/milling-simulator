@@ -57,6 +57,18 @@ std::shared_ptr<CuttingToolController> MillingProgramExecutor::getController()
     return _toolController;
 }
 
+std::shared_ptr<MillingBlock> MillingProgramExecutor::getMillingBlock() const
+{
+    return _block;
+}
+
+void MillingProgramExecutor::setMillingBlock(
+    std::shared_ptr<MillingBlock> block
+)
+{
+    _block = block;
+}
+
 void MillingProgramExecutor::start()
 {
     _isRunning = _currentProgramStep < _millingProgram.size();
@@ -86,20 +98,30 @@ void MillingProgramExecutor::update(double dt)
 {
     if (!_isRunning) { return; }
 
-    _toolController->update(dt);
-
-    if (!_toolController->isMovementActive() &&
-        _currentProgramStep < _millingProgram.size())
+    auto timeLeft = dt;
+    
+    while (timeLeft > 0.001f && _currentProgramStep < _millingProgram.size())
     {
-        _currentProgramStep++;
-        _toolController->finishMovement();
+        timeLeft = _toolController->update(dt);
 
-        if (_currentProgramStep < _millingProgram.size())
+        _block->moveTool(
+            _toolController->getLastPosition(),
+            _toolController->getCurrentPosition(),
+            _toolController->getCuttingToolParams()
+        );
+
+        if (!_toolController->isMovementActive())
         {
-            _toolController->setTargetPosition(
-                _millingProgram[_currentProgramStep].position
-            );
-            _toolController->startMovement();
+            _currentProgramStep++;
+            _toolController->finishMovement();
+
+            if (_currentProgramStep < _millingProgram.size())
+            {
+                _toolController->setTargetPosition(
+                    _millingProgram[_currentProgramStep].position
+                );
+                _toolController->startMovement();
+            }
         }
     }
 }

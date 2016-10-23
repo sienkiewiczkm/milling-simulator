@@ -35,7 +35,7 @@ public:
 
     bool isMovementActive();
     
-    void update(double dt);
+    double update(double dt);
 
 private:
     bool _moving;
