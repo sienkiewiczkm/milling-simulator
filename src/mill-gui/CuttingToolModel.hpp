@@ -3,6 +3,7 @@
 #include "Mesh.hpp"
 #include "Vertices.hpp"
 #include "Effect.hpp"
+#include "CuttingToolParams.hpp"
 
 #include <glm/glm.hpp>
 
@@ -25,10 +26,10 @@ public:
     void render(IEffect *effect);
 
     void setModelMatrix(glm::mat4 model);
+    void ensureCompability(const ms::CuttingToolParams &params);
 
 protected:
-    void createBuffers();
-    void destroyBuffers();
+    void createMesh();
 
 private:
     glm::mat4 _modelMatrix;

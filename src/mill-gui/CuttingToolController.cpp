@@ -61,6 +61,18 @@ double CuttingToolController::getMoveProgress() const
     return std::min(_distanceMoved / _totalDistance, 1.0);
 }
 
+const CuttingToolParams &CuttingToolController::getCuttingToolParams() const
+{
+    return _cuttingToolParams;
+}
+
+void CuttingToolController::setCuttingToolParams(
+    const CuttingToolParams &params
+)
+{
+   _cuttingToolParams = params; 
+}
+
 void CuttingToolController::startMovement()
 {
     if (_moving) { return; /* todo: react with an error */}

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CuttingToolParams.hpp"
+
 #include <glm/glm.hpp>
 
 namespace ms
@@ -25,6 +27,9 @@ public:
 
     double getMoveProgress() const;
 
+    const CuttingToolParams &getCuttingToolParams() const;
+    void setCuttingToolParams(const CuttingToolParams &params);
+
     void startMovement();
     void finishMovement();
 
@@ -34,6 +39,8 @@ public:
 
 private:
     bool _moving;
+
+    CuttingToolParams _cuttingToolParams;
 
     double _speed;
     double _distanceMoved;

@@ -6,10 +6,14 @@
 namespace ms
 {
 
+class MillingProgramExecutor;
+
 class ProgramManagerGUI
 {
 public:
-    ProgramManagerGUI();
+    ProgramManagerGUI(
+        std::shared_ptr<MillingProgramExecutor> programExecutor
+    );
 
     bool *getVisibilityFlagPointer();
     void setVisibility(bool isVisible);
@@ -17,12 +21,15 @@ public:
 
 protected:
     void discoverAvailableFiles();
+    void loadSelectedFile();
 
 private:
     boost::filesystem::path _observedDirectory;
     std::vector<boost::filesystem::path> _discoveredPaths;
     int _selectedIndex;
     bool _isOpened;
+
+    std::shared_ptr<MillingProgramExecutor> _programExecutor;
 };
 
 }

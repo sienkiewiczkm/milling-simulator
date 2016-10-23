@@ -89,6 +89,11 @@ void MillingBlock::moveTool(
     );
 }
 
+glm::vec3 MillingBlock::getSafePosition() const
+{
+    return glm::vec3(0.0f, _blockSize.y + 10.0, 0.0f);
+}
+
 void MillingBlock::update()
 {
     updateHeightmap();

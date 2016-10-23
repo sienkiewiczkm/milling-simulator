@@ -9,7 +9,8 @@ namespace ms
 
 MillingProgramExecutor::MillingProgramExecutor(
     std::shared_ptr<CuttingToolController> cuttingToolController
-)
+):
+    _isRunning(false)
 {
     _toolController = cuttingToolController;
 }
@@ -18,19 +19,37 @@ MillingProgramExecutor::~MillingProgramExecutor()
 {
 }
 
+const std::string &MillingProgramExecutor::getProgramName() const
+{
+    return _programName;
+}
+
 void MillingProgramExecutor::setProgram(
-    const std::vector<ms::PathMovement> millingProgram
+    const std::string &programName,
+    const std::vector<ms::PathMovement> &millingProgram
 )
 {
+    if (millingProgram.size() == 0)
+    {
+        throw new string("Milling program must be non-empty");
+    }
+
+    _programName = programName;
     _millingProgram = millingProgram;
 
     if (millingProgram.size() > 1)
     {
-        _toolController->setStartingPosition(millingProgram[0].position);
-        _toolController->setTargetPosition(millingProgram[1].position);
+        _toolController->setTargetPosition(millingProgram[0].position);
         _toolController->startMovement();
-        _currentProgramStep = 1;
+        _currentProgramStep = 0;
     }
+
+    stop();
+}
+
+bool MillingProgramExecutor::isProgramLoaded()
+{
+    return _millingProgram.size() > 0;
 }
 
 std::shared_ptr<CuttingToolController> MillingProgramExecutor::getController()

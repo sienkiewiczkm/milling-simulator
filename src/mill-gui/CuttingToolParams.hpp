@@ -12,6 +12,9 @@ enum class CuttingToolKind
 
 struct CuttingToolParams
 {
+    CuttingToolParams();
+    CuttingToolParams(CuttingToolKind kind, double radius);
+
     CuttingToolKind kind;
     double radius;
 };

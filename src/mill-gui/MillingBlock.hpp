@@ -36,6 +36,8 @@ public:
         const CuttingToolParams &cuttingToolParams
     );
 
+    glm::vec3 getSafePosition() const;
+
     void update();
     void render();
 

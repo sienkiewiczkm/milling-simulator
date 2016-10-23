@@ -4,6 +4,7 @@
 #include "CuttingToolController.hpp"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace ms
@@ -17,7 +18,14 @@ public:
     );
     ~MillingProgramExecutor();
 
-    void setProgram(const std::vector<ms::PathMovement> millingProgram);
+    const std::string &getProgramName() const;
+    void setProgram(
+        const std::string &programName,
+        const std::vector<ms::PathMovement> &millingProgram
+    );
+
+    bool isProgramLoaded();
+
     std::shared_ptr<CuttingToolController> getController();
 
     void start();
@@ -30,6 +38,7 @@ public:
     void update(double dt);
 
 private:
+    std::string _programName;
     bool _isRunning;
     int _currentProgramStep;
     std::vector<ms::PathMovement> _millingProgram;

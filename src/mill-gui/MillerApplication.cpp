@@ -36,18 +36,16 @@ void MillerApplication::onCreate()
     _lastMousePosition = getMousePosition();
     _camera.setDist(100.0f);
 
+    _effect.create();
     _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
 
+    _block = make_shared<MillingBlock>();
+    _block->setTexture(_texture);
+
     _cuttingTool.create(10.0f, 10.0f, 0.0f, 10.0f, 3.5f, 3.5f);
-    _effect.create();
-
-    MillPathFormatReader reader;
-    reader.readFromFile(RESOURCE("paths/t1.k16"));
-    _movements = reader.getMovements();
-
-    _programManagerGUI = make_shared<ProgramManagerGUI>();
     _toolController = make_shared<CuttingToolController>();
     _toolController->setMovementSpeed(25.0f);
+    _toolController->setStartingPosition(_block->getSafePosition());
 
     _programExecutor = make_shared<MillingProgramExecutor>(
         _toolController
@@ -57,17 +55,15 @@ void MillerApplication::onCreate()
         _programExecutor
     );
 
-    _programExecutor->setProgram(_movements);
-    _programExecutor->start();
+    _programManagerGUI = make_shared<ProgramManagerGUI>(
+        _programExecutor
+    );
 
     _cuttingToolGUI.setController(_toolController);
     _cuttingToolGUI.setVisibility(_showProgramManager);
     _cuttingToolGUI.setWindowName("Cutting tool controller");
 
     _programManagerGUI->setVisibility(_showProgramManager);
-
-    _block = make_shared<MillingBlock>();
-    _block->setTexture(_texture);
 }
 
 void MillerApplication::onDestroy()
@@ -106,17 +102,15 @@ void MillerApplication::onUpdate()
     _cuttingTool.setModelMatrix(toolHeightMatrix);
     _cuttingToolGUI.update();
 
-    CuttingToolParams params;
-    params.radius = 3.5f;
-    params.kind = CuttingToolKind::Flat;
-
     _block->moveTool(
         _toolController->getLastPosition(),
         _toolController->getCurrentPosition(),
-        params
+        _toolController->getCuttingToolParams()
     );
 
     _block->update();
+
+    _cuttingTool.ensureCompability(_toolController->getCuttingToolParams());
 }
 
 void MillerApplication::onRender()

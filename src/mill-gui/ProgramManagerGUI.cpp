@@ -1,5 +1,8 @@
 #include "ProgramManagerGUI.hpp"
 #include "Config.hpp" 
+#include "MillPathFormatReader.hpp"
+#include "MillingProgramExecutor.hpp"
+
 #include <imgui.h>
 #include <iostream>
 
@@ -11,19 +14,15 @@ using namespace std;
 namespace ms
 {
 
-ProgramManagerGUI::ProgramManagerGUI():
-    _isOpened(false)
+ProgramManagerGUI::ProgramManagerGUI(
+    std::shared_ptr<MillingProgramExecutor> programExecutor
+):
+    _programExecutor(programExecutor),
+    _isOpened(false),
+    _selectedIndex(-1)
 {
     _observedDirectory = RESOURCE("paths");
-    //discoverAvailableFiles();
-    directory_entry pathDirectory(_observedDirectory);
-    _discoveredPaths.clear();
-    for (auto &item : directory_iterator(pathDirectory))
-    {
-        if (item.path().filename().string()[0] == '.') { continue; }
-        _discoveredPaths.push_back(item.path());
-        cout << item.path() << endl;
-    }
+    discoverAvailableFiles();
 }
 
 bool *ProgramManagerGUI::getVisibilityFlagPointer()
@@ -58,7 +57,7 @@ void ProgramManagerGUI::update()
         if (ImGui::BeginChild("Right Pane"))
         {
             if (ImGui::Button("Refresh")) { discoverAvailableFiles(); }
-            ImGui::Button("Load");
+            if (ImGui::Button("Load")) { loadSelectedFile(); }
             ImGui::EndChild();
         }
 
@@ -69,14 +68,37 @@ void ProgramManagerGUI::update()
 
 void ProgramManagerGUI::discoverAvailableFiles()
 {
-    directory_entry pathDirectory(_observedDirectory);
+    _selectedIndex = -1;
     _discoveredPaths.clear();
+
+    directory_entry pathDirectory(_observedDirectory);
     for (auto &item : directory_iterator(pathDirectory))
     {
         if (item.path().filename().string()[0] == '.') { continue; }
         _discoveredPaths.push_back(item.path());
         cout << item.path() << endl;
     }
+}
+
+void ProgramManagerGUI::loadSelectedFile()
+{
+    if (_selectedIndex == -1) { return; }
+
+    auto &selected = _discoveredPaths[_selectedIndex];
+
+    MillPathFormatReader reader;
+    reader.readFromFile(selected.string());
+    auto loadedProgram = reader.getMovements();
+    _programExecutor->setProgram(selected.filename().string(), loadedProgram);
+
+    CuttingToolParams defaultParameters;
+    auto ext = selected.extension().string();
+
+    if (ext[1] == 'k') { defaultParameters.kind = CuttingToolKind::Ball; }
+    if (ext[1] == 'f') { defaultParameters.kind = CuttingToolKind::Flat; }
+    auto diameter = stoi(ext.substr(2));
+    defaultParameters.radius = 0.5f * diameter;
+    _programExecutor->getController()->setCuttingToolParams(defaultParameters);
 }
 
 }
