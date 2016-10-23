@@ -20,10 +20,11 @@ BoundariesMillingTechnique::~BoundariesMillingTechnique()
 }
 
 
-void BoundariesMillingTechnique::moveTool(
+MillingError BoundariesMillingTechnique::moveTool(
     std::vector<float> &heightmap,
     glm::ivec2 heightmapResolution,
     glm::mat4 worldHeightmapTransformation,
+    float safeHeight,
     const CuttingToolParams &toolParams,
     glm::dvec3 tipStartPosition, 
     glm::dvec3 tipEndPosition
@@ -99,10 +100,17 @@ void BoundariesMillingTechnique::moveTool(
             {
                 toolHeight += tcHeight;
             }
+
+            if (cell > toolHeight && toolHeight < safeHeight)
+            {
+                return MillingError::SafeZoneReached;
+            }
             
             cell = std::min(cell, static_cast<float>(toolHeight));
         }
     }
+
+    return MillingError::None;
 }
 
 glm::dvec4 BoundariesMillingTechnique::getToolBoundaries(glm::dvec3 position)

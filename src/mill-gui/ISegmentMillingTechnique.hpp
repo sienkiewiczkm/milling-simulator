@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CuttingToolParams.hpp"
+#include "MillingErrors.hpp"
 
 #include <glm/glm.hpp>
 
@@ -14,10 +15,11 @@ class ISegmentMillingTechnique
 public:
     virtual ~ISegmentMillingTechnique() = default;
 
-    virtual void moveTool(
+    virtual MillingError moveTool(
         std::vector<float> &heightmap,
         glm::ivec2 heightmapResolution,
         glm::mat4 worldHeightmapTransformation,
+        float safeHeight,
         const CuttingToolParams &toolParams,
         glm::dvec3 tipStartPosition, 
         glm::dvec3 tipEndPosition
@@ -31,10 +33,11 @@ public:
     BoundariesMillingTechnique();
     virtual ~BoundariesMillingTechnique();
 
-    virtual void moveTool(
+    virtual MillingError moveTool(
         std::vector<float> &heightmap,
         glm::ivec2 heightmapResolution,
         glm::mat4 worldHeightmapTransformation,
+        float safeHeight,
         const CuttingToolParams &toolParams,
         glm::dvec3 tipStartPosition, 
         glm::dvec3 tipEndPosition

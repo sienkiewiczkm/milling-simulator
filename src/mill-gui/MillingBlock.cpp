@@ -1,4 +1,5 @@
 #include "MillingBlock.hpp"
+#include "MillingErrors.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
@@ -16,7 +17,8 @@ namespace ms
 
 MillingBlock::MillingBlock():
     _blockSize(150.0f, 50.0f, 150.0f),
-    _blockResolution(1024, 1024)
+    _blockResolution(1024, 1024),
+    _safeZoneHeight(30.0f)
 {
     create();
 }
@@ -26,7 +28,8 @@ MillingBlock::MillingBlock(
     glm::ivec2 blockResolution
 ):
     _blockSize(blockSize),
-    _blockResolution(blockResolution)
+    _blockResolution(blockResolution),
+    _safeZoneHeight(30.0f)
 {
     create();
 }
@@ -65,7 +68,7 @@ void MillingBlock::setBlockResolution(const glm::ivec2 &blockResolution)
     _blockResolution = blockResolution;
 }
 
-void MillingBlock::moveTool(
+MillingError MillingBlock::moveTool(
     glm::dvec3 tipStartPoint,
     glm::dvec3 tipEndPoint, 
     const CuttingToolParams &cuttingToolParams
@@ -78,14 +81,17 @@ void MillingBlock::moveTool(
 
     auto tipTexMat = _textureMatrix * invScaling;
 
-    _technique->moveTool(
+    auto errorState = _technique->moveTool(
         _rawHeightmap, 
         _blockResolution,
         tipTexMat,
+        _safeZoneHeight,
         cuttingToolParams,
         tipStartPoint,
         tipEndPoint
     );
+
+    return errorState;
 }
 
 glm::vec3 MillingBlock::getSafePosition() const

@@ -35,7 +35,7 @@ public:
     void setBlockSize(const glm::vec3 &blockSize);
     void setBlockResolution(const glm::ivec2 &blockResolution);
 
-    void moveTool(
+    MillingError moveTool(
         glm::dvec3 tipStartPoint,
         glm::dvec3 tipEndPoint, 
         const CuttingToolParams &cuttingToolParams
@@ -59,6 +59,8 @@ private:
 
     glm::vec3 _blockSize;
     glm::ivec2 _blockResolution;
+
+    float _safeZoneHeight;
 
     GLuint _texture;
 

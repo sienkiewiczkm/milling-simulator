@@ -94,9 +94,9 @@ int MillingProgramExecutor::getTotalStepsNum()
     return _millingProgram.size();
 }
 
-void MillingProgramExecutor::update(double dt)
+MillingError MillingProgramExecutor::update(double dt)
 {
-    if (!_isRunning) { return; }
+    if (!_isRunning) { return MillingError::None; }
 
     auto timeLeft = dt;
     
@@ -104,11 +104,20 @@ void MillingProgramExecutor::update(double dt)
     {
         timeLeft = _toolController->update(dt);
 
-        _block->moveTool(
+        auto errorState = _block->moveTool(
             _toolController->getLastPosition(),
             _toolController->getCurrentPosition(),
             _toolController->getCuttingToolParams()
         );
+
+        if (errorState != MillingError::None)
+        {
+            // abort and notify if move is prohibited
+            _toolController->finishMovement();
+            _millingProgram.clear();
+            _isRunning = false;
+            return errorState;
+        }
 
         if (!_toolController->isMovementActive())
         {
@@ -123,6 +132,8 @@ void MillingProgramExecutor::update(double dt)
                 _toolController->startMovement();
             }
         }
+
+        return MillingError::None;
     }
 }
 

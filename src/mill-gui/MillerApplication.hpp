@@ -81,4 +81,5 @@ private:
     double _lastTime;
     double _currentTime;
     double _deltaTime;
+    ms::MillingError _lastErrorState;
 };

@@ -116,7 +116,41 @@ void MillerApplication::onUpdate()
     _programManagerGUI->update();
     _programExecutorGUI->update();
 
-    _programExecutor->update(_deltaTime);
+    auto errorState = _programExecutor->update(_deltaTime);
+    if (errorState != MillingError::None)
+    {
+        _lastErrorState = errorState;
+        ImGui::OpenPopup("Milling error");
+    }
+
+    if (ImGui::BeginPopupModal(
+            "Milling error",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize
+        ))
+    {
+        std::string errorText = "Unknown error.";
+        switch (_lastErrorState)
+        {
+        case MillingError::None:
+            errorText = "No error. Weird.";
+            break;
+        case MillingError::SafeZoneReached:
+            errorText = "Tool has reached the safe zone. Check your program.";
+            break;
+        case MillingError::DrillingHolesWithFlatTool:
+            errorText = "Cannot drill holes using flat tool.";
+            break;
+        }
+
+        ImGui::TextColored(
+            ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+            errorText.c_str()
+        );
+
+        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
 
     glm::mat4 toolHeightMatrix = glm::translate(glm::dmat4(),
         _toolController->getCurrentPosition());

@@ -3,6 +3,7 @@
 #include "MillPathFormatReader.hpp"
 #include "CuttingToolController.hpp"
 #include "MillingBlock.hpp"
+#include "MillingErrors.hpp"
 
 #include <memory>
 #include <string>
@@ -39,7 +40,7 @@ public:
     int getExecutedStepsNum();
     int getTotalStepsNum();
 
-    void update(double dt);
+    MillingError update(double dt);
 
 private:
     std::string _programName;
