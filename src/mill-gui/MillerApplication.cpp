@@ -18,6 +18,7 @@ using namespace std;
 
 MillerApplication::MillerApplication() : 
     _frame(0),
+    _newBlockRequested(false),
     _mouseSensitivity(0.05f),
     _heightmapResolutionX(32),
     _heightmapResolutionY(32),
@@ -59,6 +60,8 @@ void MillerApplication::onCreate()
         _programExecutor
     );
 
+    _createBlockGUI = make_shared<MillingBlockCreationWindow>();
+
     _cuttingToolGUI.setController(_toolController);
     _cuttingToolGUI.setVisibility(_showProgramManager);
     _cuttingToolGUI.setWindowName("Cutting tool controller");
@@ -84,6 +87,14 @@ void MillerApplication::onUpdate()
     _deltaTime = _currentTime - _lastTime;
 
     updateMainMenuBar();
+
+    if (_newBlockRequested)
+    {
+        _newBlockRequested = false;
+        _createBlockGUI->open();
+    }
+
+    _createBlockGUI->update();
 
     static float speed = 1.0f;
 
@@ -189,6 +200,16 @@ void MillerApplication::updateMainMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
+        if (ImGui::BeginMenu("File"))
+        {
+            if(ImGui::MenuItem("New"))
+            {
+                _newBlockRequested = true;
+            }
+
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Tools"))
         {
             ImGui::MenuItem(

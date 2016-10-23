@@ -57,10 +57,12 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/HeightmapTextureConverter.cpp
     src/mill-gui/HeightmapVisualizationEffect.cpp
     src/mill-gui/ImGuiBinding.cpp
+    src/mill-gui/ImGuiToolboxWindow.cpp
     src/mill-gui/Main.cpp
     src/mill-gui/MillPathFormatReader.cpp
     src/mill-gui/MillerApplication.cpp
     src/mill-gui/MillingBlock.cpp
+    src/mill-gui/MillingBlockCreationWindow.cpp
     src/mill-gui/MillingProgramExecutor.cpp
     src/mill-gui/MillingProgramExecutorGUI.cpp
     src/mill-gui/OpenGLApplication.cpp

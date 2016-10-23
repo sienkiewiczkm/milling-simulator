@@ -14,6 +14,7 @@
 #include "ProgramManagerGUI.hpp"
 #include "MillingProgramExecutor.hpp"
 #include "MillingProgramExecutorGUI.hpp"
+#include "MillingBlockCreationWindow.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -50,6 +51,8 @@ private:
 
     unsigned int _frame;
 
+    bool _newBlockRequested;
+
     float _mouseSensitivity;
     glm::vec2 _lastMousePosition;
 
@@ -67,6 +70,7 @@ private:
     std::shared_ptr<ms::CuttingToolController> _toolController;
     std::shared_ptr<ms::MillingProgramExecutor> _programExecutor;
     std::shared_ptr<ms::MillingProgramExecutorGUI> _programExecutorGUI;
+    std::shared_ptr<ms::MillingBlockCreationWindow> _createBlockGUI;
 
     CuttingToolModel _cuttingTool;
     CuttingToolGUI _cuttingToolGUI;
