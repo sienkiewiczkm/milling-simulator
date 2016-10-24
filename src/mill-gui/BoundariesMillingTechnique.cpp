@@ -43,26 +43,30 @@ MillingError BoundariesMillingTechnique::moveTool(
         - tipTexCoord).x;
 
     auto startBoundaries = getToolBoundaries(tipStartPosition); 
-    auto endBoundaries = getToolBoundaries(tipStartPosition); 
+    auto endBoundaries = getToolBoundaries(tipEndPosition); 
 
-    auto minTexCoord = vec4(
-        std::min(startBoundaries.x, endBoundaries.x), 0.0f,
-        std::min(startBoundaries.y, endBoundaries.y), 0.0f
+    auto texCoordRect = vec4(
+        std::min(startBoundaries.x, endBoundaries.x),
+        std::min(startBoundaries.y, endBoundaries.y),
+        std::max(startBoundaries.z, endBoundaries.z),
+        std::max(startBoundaries.w, endBoundaries.w)
     );
 
-    auto maxTexCoord = vec4(
-        std::min(startBoundaries.z, endBoundaries.z), 0.0f,
-        std::min(startBoundaries.w, endBoundaries.w), 0.0f
-    );
+    auto boundaries = getAvailableBoundaries(texCoordRect);
+
+    if (boundaries.x > boundaries.z || boundaries.y > boundaries.w)
+    {
+        return MillingError::None;
+    }
 
     auto minTouched = ivec2(
-        static_cast<int>(std::floor(minTexCoord.x * heightmapResolution.x)),
-        static_cast<int>(std::floor(minTexCoord.z * heightmapResolution.y))
+        static_cast<int>(std::floor(boundaries.x * heightmapResolution.x)),
+        static_cast<int>(std::floor(boundaries.y * heightmapResolution.y))
     );
 
     auto maxTouched = ivec2(
-        static_cast<int>(std::ceil(maxTexCoord.x * heightmapResolution.x)),
-        static_cast<int>(std::ceil(maxTexCoord.z * heightmapResolution.y))
+        static_cast<int>(std::ceil(boundaries.z * heightmapResolution.x)),
+        static_cast<int>(std::ceil(boundaries.w * heightmapResolution.y))
     );
 
     auto tcStart = vec2(tipTexCoord.x, tipTexCoord.z);
@@ -79,7 +83,6 @@ MillingError BoundariesMillingTechnique::moveTool(
                 y / static_cast<float>(heightmapResolution.y)
             );
 
-            // find closest point on 
             auto v = tcPos - tcStart;
             auto projection = dot(v, tcSegmentVec) / tcSegmentLength;
             projection = std::min(tcSegmentLength, std::max(0.0f, projection));
@@ -126,14 +129,24 @@ MillingError BoundariesMillingTechnique::moveTool(
 glm::dvec4 BoundariesMillingTechnique::getToolBoundaries(glm::dvec3 position)
 {
     auto tcPosition = _heightmapTransformation * dvec4(position, 1.0f);
-    auto minTexCoord = tcPosition - dvec4(_tcRadius, 0.0, _tcRadius, 0.0);
-    auto maxTexCoord = tcPosition + dvec4(_tcRadius, 0.0, _tcRadius, 0.0);
-    minTexCoord = glm::max(minTexCoord, dvec4(0.0f, 0.0f, 0.0f, 0.0f));
-    maxTexCoord = glm::min(maxTexCoord, dvec4(1.0f, 0.0f, 1.0f, 0.0f));
+
+    auto radiusVector = dvec4(_tcRadius, 0.0, _tcRadius, 0.0);
+    auto minTexCoord = tcPosition - radiusVector;
+    auto maxTexCoord = tcPosition + radiusVector;
 
     return glm::dvec4(
         minTexCoord.x, minTexCoord.z, 
         maxTexCoord.x, maxTexCoord.z
+    );
+}
+
+glm::dvec4 BoundariesMillingTechnique::getAvailableBoundaries(glm::dvec4 bounds)
+{
+    return glm::dvec4(
+        std::max(bounds.x, 0.0),
+        std::max(bounds.y, 0.0),
+        std::min(bounds.z, 1.0),
+        std::min(bounds.w, 1.0)
     );
 }
 

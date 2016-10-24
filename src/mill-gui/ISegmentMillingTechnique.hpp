@@ -50,6 +50,7 @@ protected:
     glm::dmat4 _heightmapTransformation;
 
     glm::dvec4 getToolBoundaries(glm::dvec3 position);
+    glm::dvec4 getAvailableBoundaries(glm::dvec4 bounds);
 };
 
 }
