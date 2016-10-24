@@ -74,9 +74,15 @@ MillingError BoundariesMillingTechnique::moveTool(
     auto tcSegmentVec = tcEnd - tcStart;
     auto tcSegmentLength = length(tcSegmentVec);
 
-    for (auto y = minTouched.y; y <= maxTouched.y; ++y)
+    for (auto y = minTouched.y;
+         y <= std::min(maxTouched.y, heightmapResolution.y - 1);
+         ++y
+        )
     {
-        for (auto x = minTouched.x; x <= maxTouched.x; ++x)
+        for (auto x = minTouched.x;
+             x <= std::min(maxTouched.x, heightmapResolution.x - 1);
+             ++x
+            )
         {
             auto tcPos = vec2(
                 x / static_cast<float>(heightmapResolution.x),
@@ -86,7 +92,10 @@ MillingError BoundariesMillingTechnique::moveTool(
             auto v = tcPos - tcStart;
             auto projection = dot(v, tcSegmentVec) / tcSegmentLength;
             projection = std::min(tcSegmentLength, std::max(0.0f, projection));
-            auto Q = tcStart + (projection/tcSegmentLength)*tcSegmentVec;
+            auto interpolant = projection / tcSegmentLength;
+            auto Q = tcStart + interpolant*tcSegmentVec;
+            auto interpolatedToolHeight = (1.0-interpolant) * tipStartPosition.y
+                + interpolant * tipEndPosition.y;
 
             auto dist = glm::length(tcPos - Q);
 
@@ -98,7 +107,7 @@ MillingError BoundariesMillingTechnique::moveTool(
             auto tcHeight = _tcRadius - sqrt(_tcRadius*_tcRadius - dist*dist);
             tcHeight *= (toolParams.radius / _tcRadius);
 
-            auto toolHeight = tipStartPosition.y;
+            auto toolHeight = interpolatedToolHeight;
             if (toolParams.kind == CuttingToolKind::Ball)
             {
                 toolHeight += tcHeight;
