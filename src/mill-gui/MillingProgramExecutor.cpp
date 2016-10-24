@@ -103,6 +103,7 @@ void MillingProgramExecutor::enableFastForward()
 
 bool MillingProgramExecutor::isInFastForwardMode()
 {
+    if (!_isRunning) { _fastForwardMode = false; }
     return _fastForwardMode;
 }
 
@@ -111,10 +112,17 @@ MillingError MillingProgramExecutor::update(double dt)
     if (!_isRunning) { return MillingError::None; }
 
     auto timeLeft = dt;
-    
-    while (timeLeft > 0.001f && _currentProgramStep < _millingProgram.size())
+    while (timeLeft > 0.001 && _currentProgramStep < _millingProgram.size())
     {
-        timeLeft = _toolController->update(dt);
+        if (_fastForwardMode)
+        {
+            _toolController->fastForward();
+            timeLeft = 0.0;
+        }
+        else
+        {
+            timeLeft = _toolController->update(dt);
+        }
 
         auto errorState = _block->moveTool(
             _toolController->getLastPosition(),
@@ -127,7 +135,10 @@ MillingError MillingProgramExecutor::update(double dt)
             // abort and notify if move is prohibited
             _toolController->finishMovement();
             _millingProgram.clear();
+
             _isRunning = false;
+            _fastForwardMode = false;
+
             return errorState;
         }
 
@@ -141,9 +152,19 @@ MillingError MillingProgramExecutor::update(double dt)
                 _toolController->setTargetPosition(
                     _millingProgram[_currentProgramStep].position
                 );
+
                 _toolController->startMovement();
             }
+            else
+            {
+            }
         }
+    }
+
+    if (_currentProgramStep >= _millingProgram.size())
+    {
+        _isRunning = false;
+        _fastForwardMode = false;
     }
 
     return MillingError::None;

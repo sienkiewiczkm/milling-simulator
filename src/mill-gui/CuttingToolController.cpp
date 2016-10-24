@@ -130,4 +130,12 @@ double CuttingToolController::update(double dt)
     return timeLeft;
 }
 
+void CuttingToolController::fastForward()
+{
+    _distanceMoved = _totalDistance;
+    _lastPosition = _currentPosition;
+    _currentPosition = _targetPosition;
+    _moving = false;
+}
+
 }

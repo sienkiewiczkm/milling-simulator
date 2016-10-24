@@ -36,6 +36,7 @@ public:
     bool isMovementActive();
     
     double update(double dt);
+    void fastForward();
 
 private:
     bool _moving;
