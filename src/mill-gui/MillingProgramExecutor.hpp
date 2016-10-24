@@ -40,9 +40,13 @@ public:
     int getExecutedStepsNum();
     int getTotalStepsNum();
 
+    void enableFastForward();
+    bool isInFastForwardMode();
+
     MillingError update(double dt);
 
 private:
+    bool _fastForwardMode;
     std::string _programName;
     bool _isRunning;
     int _currentProgramStep;

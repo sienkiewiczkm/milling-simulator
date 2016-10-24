@@ -10,7 +10,9 @@ namespace ms
 MillingProgramExecutor::MillingProgramExecutor(
     std::shared_ptr<CuttingToolController> cuttingToolController
 ):
-    _isRunning(false)
+    _isRunning(false),
+    _fastForwardMode(false),
+    _currentProgramStep(0)
 {
     _toolController = cuttingToolController;
 }
@@ -92,6 +94,16 @@ int MillingProgramExecutor::getExecutedStepsNum()
 int MillingProgramExecutor::getTotalStepsNum()
 {
     return _millingProgram.size();
+}
+
+void MillingProgramExecutor::enableFastForward()
+{
+    _fastForwardMode = true;
+}
+
+bool MillingProgramExecutor::isInFastForwardMode()
+{
+    return _fastForwardMode;
 }
 
 MillingError MillingProgramExecutor::update(double dt)

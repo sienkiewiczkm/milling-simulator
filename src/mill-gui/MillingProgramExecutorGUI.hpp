@@ -19,9 +19,13 @@ public:
 
 protected:
     void showExecutionControls();
+    void showFastForwardPopup();
     void showProgressBars();
+    void showCommandsProgress();
+    void showMoveProgress();
 
 private:
+    bool _startFastForward;
     std::shared_ptr<MillingProgramExecutor> _programExecutor;
 };
 
