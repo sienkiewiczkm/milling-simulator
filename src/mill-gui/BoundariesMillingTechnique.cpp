@@ -101,10 +101,20 @@ MillingError BoundariesMillingTechnique::moveTool(
                 toolHeight += tcHeight;
             }
 
-            if (cell > toolHeight && toolHeight < safeHeight)
+            if (cell > toolHeight)
             {
-                return MillingError::SafeZoneReached;
+                if (toolHeight < safeHeight)
+                {
+                    return MillingError::SafeZoneReached;
+                }
+
+                if (toolParams.kind == CuttingToolKind::Flat &&
+                    abs(tipStartPosition.y - tipEndPosition.y) > 0.001)
+                {
+                    return MillingError::DrillingHolesWithFlatTool;
+                }
             }
+
             
             cell = std::min(cell, static_cast<float>(toolHeight));
         }
