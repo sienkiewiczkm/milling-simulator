@@ -21,7 +21,8 @@ public:
     MillingBlock();
     MillingBlock(
         glm::vec3 blockSize,
-        glm::ivec2 blockResolution
+        glm::ivec2 blockResolution,
+        float safeZoneHeight
     );
 
     ~MillingBlock();
@@ -41,6 +42,9 @@ public:
         const CuttingToolParams &cuttingToolParams
     );
 
+    float getSafeZoneHeight() const;
+    void setSafeZoneHeight(float safeZoneHeight);
+    
     glm::vec3 getSafePosition() const;
 
     void update();

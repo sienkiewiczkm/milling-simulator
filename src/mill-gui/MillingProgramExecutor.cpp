@@ -132,9 +132,9 @@ MillingError MillingProgramExecutor::update(double dt)
                 _toolController->startMovement();
             }
         }
-
-        return MillingError::None;
     }
+
+    return MillingError::None;
 }
 
 }

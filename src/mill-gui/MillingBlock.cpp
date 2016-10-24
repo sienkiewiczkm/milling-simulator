@@ -25,11 +25,12 @@ MillingBlock::MillingBlock():
 
 MillingBlock::MillingBlock(
     glm::vec3 blockSize,
-    glm::ivec2 blockResolution
+    glm::ivec2 blockResolution,
+    float safeZoneHeight
 ):
     _blockSize(blockSize),
     _blockResolution(blockResolution),
-    _safeZoneHeight(30.0f)
+    _safeZoneHeight(safeZoneHeight)
 {
     create();
 }
@@ -93,6 +94,18 @@ MillingError MillingBlock::moveTool(
 
     return errorState;
 }
+
+float MillingBlock::getSafeZoneHeight() const
+{
+    return _safeZoneHeight;
+}
+
+void MillingBlock::setSafeZoneHeight(float safeZoneHeight)
+{
+    _safeZoneHeight = safeZoneHeight;
+}
+
+void setSafeZoneHeight(float height);
 
 glm::vec3 MillingBlock::getSafePosition() const
 {

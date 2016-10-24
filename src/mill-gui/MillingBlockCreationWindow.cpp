@@ -64,7 +64,7 @@ std::shared_ptr<ms::MillingBlock> MillingBlockCreationWindow::getNewBlock()
 {
     if (!_blockReady) { return nullptr; }
     _blockReady = false;
-    return make_shared<MillingBlock>(_size, _resolution);
+    return make_shared<MillingBlock>(_size, _resolution, _safeHeight);
 }
 
 void MillingBlockCreationWindow::createMillingBlock()
