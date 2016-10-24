@@ -96,7 +96,14 @@ void MillerApplication::onUpdate()
         _createBlockGUI->open();
     }
 
-    _createBlockGUI->update();
+    if (!isGUIHidden())
+    {
+        _createBlockGUI->update();
+        _cuttingToolGUI.update();
+        _programManagerGUI->update();
+    }
+
+    _programExecutorGUI->update();
 
     auto newBlock = _createBlockGUI->getNewBlock();
     if (newBlock != nullptr)
@@ -107,15 +114,6 @@ void MillerApplication::onUpdate()
         _toolController->setStartingPosition(_block->getSafePosition());
     }
 
-    static float speed = 1.0f;
-
-    if (_showImguiDemo) {
-        ImGui::ShowTestWindow();
-    }
-
-    _programManagerGUI->update();
-    _programExecutorGUI->update();
-
     auto errorState = _programExecutor->update(_deltaTime);
     if (errorState != MillingError::None)
     {
@@ -123,44 +121,12 @@ void MillerApplication::onUpdate()
         ImGui::OpenPopup("Milling error");
     }
 
-    if (ImGui::BeginPopupModal(
-            "Milling error",
-            nullptr,
-            ImGuiWindowFlags_AlwaysAutoResize
-        ))
-    {
-        std::string errorText = "Unknown error.";
-        switch (_lastErrorState)
-        {
-        case MillingError::None:
-            errorText = "No error. Weird.";
-            break;
-        case MillingError::SafeZoneReached:
-            errorText = "Tool has reached the safe zone. Check your program.";
-            break;
-        case MillingError::DrillingHolesWithFlatTool:
-            errorText = "Cannot drill holes using flat tool.";
-            break;
-        }
+    updateMillingErrorPopup();
+    updateRenderables();
 
-        ImGui::TextColored(
-            ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
-            errorText.c_str()
-        );
-
-        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
-        ImGui::EndPopup();
+    if (_showImguiDemo) {
+        ImGui::ShowTestWindow();
     }
-
-    glm::mat4 toolHeightMatrix = glm::translate(glm::dmat4(),
-        _toolController->getCurrentPosition());
-
-    _cuttingTool.setModelMatrix(toolHeightMatrix);
-    _cuttingToolGUI.update();
-
-    _block->update();
-
-    _cuttingTool.ensureCompability(_toolController->getCuttingToolParams());
 }
 
 void MillerApplication::onRender()
@@ -174,24 +140,10 @@ void MillerApplication::onRender()
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 model, view, projection;
-    float aspectRatio = (float)display_w/display_h;
-
-    model = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f));
-    view = _camera.getViewMatrix();
-    projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
-
-    _effect.begin();
-    _effect.setModelMatrix(model);
-    _effect.setViewMatrix(view);
-    _effect.setProjectionMatrix(projection);
-    _effect.setTexture(_texture);
-    _cuttingTool.render(&_effect);
-    _effect.end();
-
-    _block->setViewMatrix(view);
-    _block->setProjectionMatrix(projection);
-    _block->render();
+    if (isGeometryRenderingEnabled())
+    {
+        renderSceneGeometry();
+    }
 
     ImGui::Render();
 }
@@ -269,3 +221,88 @@ void MillerApplication::updateMainMenuBar()
         ImGui::EndMainMenuBar();
     }
 }
+
+bool MillerApplication::isGUIHidden()
+{
+    return _programExecutor->isInFastForwardMode();
+}
+
+void MillerApplication::updateMillingErrorPopup()
+{
+    if (ImGui::BeginPopupModal(
+            "Milling error",
+            nullptr,
+            ImGuiWindowFlags_AlwaysAutoResize
+        ))
+    {
+        std::string errorText = "Unknown error.";
+        switch (_lastErrorState)
+        {
+        case MillingError::None:
+            errorText = "No error. Weird.";
+            break;
+        case MillingError::SafeZoneReached:
+            errorText = "Tool has reached the safe zone. Check your program.";
+            break;
+        case MillingError::DrillingHolesWithFlatTool:
+            errorText = "Cannot drill holes using flat tool.";
+            break;
+        }
+
+        ImGui::TextColored(
+            ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+            errorText.c_str()
+        );
+
+        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+}
+
+void MillerApplication::updateRenderables()
+{
+    updateCuttingTool();
+    _block->update();
+}
+
+void MillerApplication::updateCuttingTool()
+{
+    glm::mat4 toolHeightMatrix = glm::translate(
+        glm::dmat4(),
+        _toolController->getCurrentPosition()
+    );
+
+    _cuttingTool.ensureCompability(_toolController->getCuttingToolParams());
+    _cuttingTool.setModelMatrix(toolHeightMatrix);
+}
+
+bool MillerApplication::isGeometryRenderingEnabled()
+{
+    return !(_programExecutor->isInFastForwardMode());
+}
+
+void MillerApplication::renderSceneGeometry()
+{
+    int display_w, display_h;
+    glfwGetFramebufferSize(_window, &display_w, &display_h);
+
+    glm::mat4 model, view, projection;
+    float aspectRatio = (float)display_w/display_h;
+
+    model = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f));
+    view = _camera.getViewMatrix();
+    projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
+
+    _effect.begin();
+    _effect.setModelMatrix(model);
+    _effect.setViewMatrix(view);
+    _effect.setProjectionMatrix(projection);
+    _effect.setTexture(_texture);
+    _cuttingTool.render(&_effect);
+    _effect.end();
+
+    _block->setViewMatrix(view);
+    _block->setProjectionMatrix(projection);
+    _block->render();
+}
+

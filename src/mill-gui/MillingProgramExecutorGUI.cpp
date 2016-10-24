@@ -24,14 +24,18 @@ MillingProgramExecutorGUI::~MillingProgramExecutorGUI()
 
 void MillingProgramExecutorGUI::update()
 {
-    if (ImGui::Begin("Milling program executor"))
+    if (!_programExecutor->isInFastForwardMode())
     {
-        showExecutionControls();
-        showProgressBars();
-        showFastForwardPopup();
+        if (ImGui::Begin("Milling program executor"))
+        {
+            showExecutionControls();
+            showProgressBars();
+        }
+
+        ImGui::End();
     }
 
-    ImGui::End();
+    showFastForwardPopup();
 }
 
 void MillingProgramExecutorGUI::showExecutionControls()
@@ -60,6 +64,7 @@ void MillingProgramExecutorGUI::showFastForwardPopup()
     if (_startFastForward)
     {
         _startFastForward = false;
+        _programExecutor->enableFastForward();
         ImGui::OpenPopup("Fast-forwarding");
     }
 
@@ -71,7 +76,7 @@ void MillingProgramExecutorGUI::showFastForwardPopup()
     {
         ImGui::Text("Fast-forwarding the milling process. Please, be patient.");
         showCommandsProgress();
-        if (_programExecutor->isInFastForwardMode())
+        if (!_programExecutor->isInFastForwardMode())
         {
             ImGui::CloseCurrentPopup();
         }

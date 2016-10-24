@@ -44,6 +44,14 @@ protected:
 
 protected:
     void updateMainMenuBar();
+    bool isGUIHidden();
+    void updateMillingErrorPopup();
+
+    void updateRenderables();
+    void updateCuttingTool();
+
+    bool isGeometryRenderingEnabled();
+    void renderSceneGeometry();
 
 private:
     unsigned int _heightmapResolutionX;
