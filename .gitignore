@@ -9,4 +9,10 @@ build
 # temporary files
 *~
 
+# CLion
+.idea/
+
+# YCM files
+.ycm_extra*
+
 .DS_Store

@@ -4,6 +4,34 @@
 using namespace std;
 using namespace glm;
 
+Mesh<VertexNormalTexCoords> createPlane(float width, float length)
+{
+    std::vector<VertexNormalTexCoords> vertices;
+
+    float halfWidth = 0.5f * width;
+    float halfLength = 0.5f * length;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        int x = i % 2;
+        int z = i / 2;
+
+        int signX = x == 0 ? -1 : 1;
+        int signZ = z == 0 ? -1 : 1;
+
+        glm::vec3 position(signX * halfWidth, 0.0f, signZ * halfLength);
+        glm::vec3 normal(0.0f, 1.0f, 0.0f);
+        glm::vec2 texCoord(static_cast<float>(x), static_cast<float>(z));
+
+        auto vertex = VertexNormalTexCoords(position, normal, texCoord);
+        vertices.push_back(vertex);
+    }
+
+    std::vector<GLuint> indices = { 0, 1, 2, 1, 2, 3 };
+
+    return Mesh<VertexNormalTexCoords>(vertices, indices);
+}
+
 vector<GLfloat> createCube(float width, float height, float length)
 {
     float halfWidth = 0.5f * width;

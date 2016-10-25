@@ -1,5 +1,6 @@
 #include "MillingBlock.hpp"
 #include "MillingErrors.hpp"
+#include "DebugShapes.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
@@ -127,16 +128,34 @@ void MillingBlock::render()
     _heightmapEffect->setAlbedoTexture(_texture);
     _heightmapEffect->setHeightmapTexture(_heightmapTexture);
     _heightmapEffect->setSize(vec2(_blockSize.x, _blockSize.z));
-
     _geometry->render();
-
     _heightmapEffect->end(); 
+
+    glm::mat4 safeZoneTranformation = glm::translate(
+        glm::mat4(),
+        glm::vec3(0.0f, _safeZoneHeight, 0.0f)
+    );
+
+    _basicEffect->begin();
+    _basicEffect->setModelMatrix(_modelMatrix * safeZoneTranformation);
+    _basicEffect->setViewMatrix(_viewMatrix);
+    _basicEffect->setProjectionMatrix(_projMatrix);
+    _safeZoneLimitPlane->render();
+    _basicEffect->end();
 }
 
 void MillingBlock::create()
 {
     _heightmapEffect = make_shared<HeightmapVisualizationEffect>();
     _heightmapEffect->create();
+    
+    const float planeScale = 1.3f;
+    _basicEffect = make_shared<fw::BasicEffect>();
+    _basicEffect->create();
+
+    _safeZoneLimitPlane = make_shared<Mesh<VertexNormalTexCoords>>(
+        createPlane(planeScale * _blockSize.x, planeScale * _blockSize.z)
+    );
 
     _heightmapTextureConverter = make_shared<HeightmapTextureConverter>();
 

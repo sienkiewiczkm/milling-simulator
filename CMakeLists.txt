@@ -45,6 +45,7 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME}
+    src/mill-gui/BasicEffect.cpp
     src/mill-gui/BoundariesMillingTechnique.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp
