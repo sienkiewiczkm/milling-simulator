@@ -41,63 +41,49 @@ void CuttingToolGUI::update()
         return;
     }
 
-    vec3 startingPosition = _controller->getStartingPosition();
-    vec3 currentPosition = _controller->getCurrentPosition();
-    vec3 targetPosition = _controller->getTargetPosition();
-
-    ImGui::InputFloat3(
-        "Tip position", 
-        glm::value_ptr(currentPosition), 
-        -1, 
-        ImGuiInputTextFlags_ReadOnly
-    );
-
-    ImGui::InputFloat3(
-        "Starting position", 
-        glm::value_ptr(startingPosition), 
-        -1, 
-        ImGuiInputTextFlags_ReadOnly
-    );
-
-    ImGui::InputFloat3(
-        "Target position", 
-        glm::value_ptr(targetPosition), 
-        -1, 
-        ImGuiInputTextFlags_ReadOnly
-    );
-    
-    if (_controller->isMovementActive())
+    if (ImGui::CollapsingHeader("Cutting tool parameters"))
     {
-        ImGui::Text("Tool is moving.");
+        CuttingToolParams params = _controller->getCuttingToolParams();
+
+        int selectedItem = static_cast<int>(params.kind) - 1;
+        const char *kinds[] = { "Ball", "Flat" };
+        ImGui::Combo("Kind", &selectedItem, kinds, 2);
+        params.kind = selectedItem == 0
+            ? CuttingToolKind::Ball
+            : CuttingToolKind::Flat;
+
+        _controller->setCuttingToolParams(params);
     }
 
-    ImGui::InputFloat3("Desired position", glm::value_ptr(_desiredPosition));
-    ImGui::Button("Goto");
-
-    struct ToolAxis
+    if (ImGui::CollapsingHeader("Additional information"))
     {
-        std::string axisName;
-        glm::vec3 axisPositive;
-    };
+        vec3 startingPosition = _controller->getStartingPosition();
+        vec3 currentPosition = _controller->getCurrentPosition();
+        vec3 targetPosition = _controller->getTargetPosition();
 
-    std::vector<ToolAxis> axes = {
-        { "X", vec3(1.0f, 0.0f, 0.0f) },
-        { "Y", vec3(0.0f, 1.0f, 0.0f) },
-        { "Z", vec3(0.0f, 0.0f, 1.0f) }
-    };
+        ImGui::InputFloat3(
+            "Tip position", 
+            glm::value_ptr(currentPosition), 
+            -1, 
+            ImGuiInputTextFlags_ReadOnly
+        );
 
-    std::vector<float> multiplers = { -1.0f, +1.0f };
+        ImGui::InputFloat3(
+            "Starting position", 
+            glm::value_ptr(startingPosition), 
+            -1, 
+            ImGuiInputTextFlags_ReadOnly
+        );
 
-    for (auto &axis : axes)
-    {
-        for (auto multipler : multiplers)
-        {
-            stringstream ss;
-            ss << (multipler > 0 ? '+' : '-');
-            ss << axis.axisName;
-            ImGui::Button(ss.str().c_str());
-            ImGui::SameLine();
-        }
+        ImGui::InputFloat3(
+            "Target position", 
+            glm::value_ptr(targetPosition), 
+            -1, 
+            ImGuiInputTextFlags_ReadOnly
+        );
+        
+        bool isMovementActive = _controller->isMovementActive();
+        ImGui::Checkbox("Movement active", &isMovementActive);
     }
 
     ImGui::End();
