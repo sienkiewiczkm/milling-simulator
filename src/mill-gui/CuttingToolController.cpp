@@ -115,10 +115,7 @@ double CuttingToolController::update(double dt)
 
     if (_distanceMoved >= _totalDistance)
     {
-        auto timeNeeded = std::max(
-            0.05,
-            (_totalDistance - prevDistanceMoved)/_speed
-        );
+        auto timeNeeded = (_totalDistance - prevDistanceMoved)/_speed;
 
         timeLeft = std::max(0.0, dt - timeNeeded);
         

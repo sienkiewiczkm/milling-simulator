@@ -134,7 +134,7 @@ MillingError MillingProgramExecutor::update(double dt)
         }
         else
         {
-            timeLeft = _toolController->update(dt);
+            timeLeft = _toolController->update(timeLeft);
         }
 
         bool isCollisionProhibited = _millingProgram[_currentProgramStep].type 
