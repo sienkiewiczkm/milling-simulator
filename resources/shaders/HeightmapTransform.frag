@@ -16,9 +16,13 @@ void main(void)
     vec3 lightDirection = normalize(vec3(1.0f, 1.0f, 1.0f));
     vec3 diffuseLightColor = vec3(1.0f, 1.0f, 1.0f);
 
-    float diffuse = dot(lightDirection, normalize(fs_in.normal));
+    vec3 normal = normalize(fs_in.normal);
+    float lightFactor = clamp(dot(lightDirection, normal), 0.0, 1.0);
     vec3 albedo = texture(AlbedoTexture, fs_in.texCoord).rgb;
 
-    color = vec4(albedo * diffuse * diffuseLightColor, 1);
+    float adjustedLightFactor = clamp(lightFactor + 0.15, 0.0, 1.0);
+    vec3 diffusePart = albedo * diffuseLightColor * adjustedLightFactor;
+
+    color = vec4(diffusePart, 1);
 }
 

@@ -38,7 +38,7 @@ void MillerApplication::onCreate()
     _camera.setDist(100.0f);
 
     _effect.create();
-    _texture = loadTextureFromFile(RESOURCE("textures/rustymetal.jpg"));
+    _texture = loadTextureFromFile(RESOURCE("textures/opengameart-metal.jpg"));
 
     _block = make_shared<MillingBlock>();
     _block->setTexture(_texture);
