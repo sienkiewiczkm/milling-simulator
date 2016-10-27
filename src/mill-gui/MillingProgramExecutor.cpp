@@ -1,11 +1,11 @@
 #include "MillingProgramExecutor.hpp"
+#include <chrono>
 
 using namespace glm;
 using namespace std;
 
 namespace ms
 {
-
 
 MillingProgramExecutor::MillingProgramExecutor(
     std::shared_ptr<CuttingToolController> cuttingToolController
@@ -111,9 +111,18 @@ MillingError MillingProgramExecutor::update(double dt)
 {
     if (!_isRunning) { return MillingError::None; }
 
+    auto startTime = std::chrono::high_resolution_clock::now();
+    auto maxDuration = std::chrono::milliseconds(50);
+
     auto timeLeft = dt;
     while (timeLeft > 0.001 && _currentProgramStep < _millingProgram.size())
     {
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        if (currentTime - startTime > maxDuration)
+        {
+            break;
+        }
+
         if (_fastForwardMode)
         {
             _toolController->fastForward();
