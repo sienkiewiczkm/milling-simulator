@@ -75,7 +75,6 @@ void ProgramManagerGUI::discoverAvailableFiles()
     {
         if (item.path().filename().string()[0] == '.') { continue; }
         _discoveredPaths.push_back(item.path());
-        cout << item.path() << endl;
     }
 }
 
