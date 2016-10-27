@@ -23,7 +23,8 @@ MillerApplication::MillerApplication() :
     _heightmapResolutionX(32),
     _heightmapResolutionY(32),
     _showImguiDemo(false),
-    _showProgramManager(false)
+    _showProgramManager(false),
+    _lastErrorState(MillingError::None)
 {
 }
 
@@ -118,6 +119,10 @@ void MillerApplication::onUpdate()
     if (errorState != MillingError::None)
     {
         _lastErrorState = errorState;
+    }
+
+    if ( _lastErrorState != MillingError::None)
+    {
         ImGui::OpenPopup("Milling error");
     }
 
@@ -254,7 +259,12 @@ void MillerApplication::updateMillingErrorPopup()
             errorText.c_str()
         );
 
-        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        if (ImGui::Button("OK"))
+        {
+            ImGui::CloseCurrentPopup();
+            _lastErrorState = MillingError::None;
+        }
+
         ImGui::EndPopup();
     }
 }
