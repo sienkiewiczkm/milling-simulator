@@ -22,7 +22,7 @@ namespace ms
 MillingBlock::MillingBlock():
     _blockSize(150.0f, 50.0f, 150.0f),
     _blockResolution(1024, 1024),
-    _safeZoneHeight(30.0f)
+    _safeZoneHeight(20.0f)
 {
     create();
 }
