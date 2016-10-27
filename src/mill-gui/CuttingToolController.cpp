@@ -92,6 +92,13 @@ void CuttingToolController::finishMovement()
     _moving = false;
 }
 
+void CuttingToolController::abortMovement()
+{
+    _startingPosition = _currentPosition;
+    _distanceMoved = 0.0;
+    _moving = false;
+}
+
 bool CuttingToolController::isMovementActive()
 {
     return _moving;

@@ -32,6 +32,7 @@ public:
 
     void startMovement();
     void finishMovement();
+    void abortMovement();
 
     bool isMovementActive();
     

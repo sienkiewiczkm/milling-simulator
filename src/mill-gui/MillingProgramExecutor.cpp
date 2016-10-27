@@ -133,7 +133,7 @@ MillingError MillingProgramExecutor::update(double dt)
         if (errorState != MillingError::None)
         {
             // abort and notify if move is prohibited
-            _toolController->finishMovement();
+            _toolController->abortMovement();
             _millingProgram.clear();
 
             _isRunning = false;
