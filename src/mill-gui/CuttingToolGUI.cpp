@@ -52,6 +52,10 @@ void CuttingToolGUI::update()
             ? CuttingToolKind::Ball
             : CuttingToolKind::Flat;
 
+        float radius = static_cast<float>(params.radius);
+        ImGui::SliderFloat("Radius", &radius, 0.1f, 25.0f);
+
+        params.radius = radius;
         _controller->setCuttingToolParams(params);
     }
 

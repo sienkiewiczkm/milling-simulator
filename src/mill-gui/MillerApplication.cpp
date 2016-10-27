@@ -43,7 +43,7 @@ void MillerApplication::onCreate()
     _block = make_shared<MillingBlock>();
     _block->setTexture(_texture);
 
-    _cuttingTool.create(10.0f, 10.0f, 0.0f, 10.0f, 3.5f, 3.5f);
+    _cuttingTool.create(10.0f, 10.0f, 0.0f, 30.0f, 3.5f, 3.5f);
     _toolController = make_shared<CuttingToolController>();
     _toolController->setMovementSpeed(25.0f);
     _toolController->setStartingPosition(_block->getSafePosition());

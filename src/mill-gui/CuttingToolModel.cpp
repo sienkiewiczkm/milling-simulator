@@ -35,6 +35,7 @@ void CuttingToolModel::create(
     _cuttingToolRadius = cuttingToolRadius;
     _cuttingToolBallRadius = cuttingToolBallRadius;
 
+    createMesh();
 }
 
 void CuttingToolModel::destroy()
@@ -43,40 +44,52 @@ void CuttingToolModel::destroy()
 
 void CuttingToolModel::render(IEffect *effect)
 {
+
     glm::mat4 ballMatrix = _modelMatrix * glm::translate(
         glm::mat4(),
+        glm::vec3(0.0f, _cuttingToolBallRadius, 0.0f)
+    );
+
+    glm::mat4 ballScale = glm::scale(
+        glm::mat4(),
         glm::vec3(
-            0.0f,
             _cuttingToolBallRadius,
-            0.0f
+            _cuttingToolBallRadius,
+            _cuttingToolBallRadius
         )
     );
  
     glm::mat4 cuttingToolMatrix = ballMatrix * glm::translate(
         glm::mat4(),
+        glm::vec3(0.0f, 0.5f * _cuttingToolLength, 0.0f)
+    );
+
+    glm::mat4 cuttingToolScale = glm::scale(
+        glm::mat4(),
         glm::vec3(
-            0.0f,
-            0.5f * _cuttingToolLength,
-            0.0f
+            _cuttingToolRadius,
+            _cuttingToolLength,
+            _cuttingToolRadius
         )
     );
 
     glm::mat4 holderMatrix = cuttingToolMatrix * glm::translate(
         glm::mat4(),
-        glm::vec3(
-            0.0f,
-            0.5f * _cuttingToolLength + 0.5f * _holderLength,
-            0.0f
-        )
+        glm::vec3(0.0f, 0.5f * _cuttingToolLength + 0.5f * _holderLength, 0.0f)
     );
 
-    effect->setModelMatrix(holderMatrix);
+    glm::mat4 holderScale = glm::scale(
+        glm::mat4(),
+        glm::vec3(_holderRadius, _holderLength, _holderRadius)
+    );
+
+    effect->setModelMatrix(holderMatrix * holderScale);
     _holderMesh->render();
 
-    effect->setModelMatrix(cuttingToolMatrix);
+    effect->setModelMatrix(cuttingToolMatrix * cuttingToolScale);
     _cuttingToolMesh->render();
 
-    effect->setModelMatrix(ballMatrix);
+    effect->setModelMatrix(ballMatrix * ballScale);
     _cuttingToolBallMesh->render();
 }
 
@@ -94,7 +107,6 @@ void CuttingToolModel::ensureCompability(const ms::CuttingToolParams &params)
             abs(params.radius - _cuttingToolBallRadius) > 0.0001f)
         {
             _cuttingToolRadius = _cuttingToolBallRadius = params.radius;
-            createMesh();
             return;
         }
     }
@@ -106,7 +118,6 @@ void CuttingToolModel::ensureCompability(const ms::CuttingToolParams &params)
         {
             _cuttingToolBallRadius = 0.0f;
             _cuttingToolRadius = params.radius;
-            createMesh();
             return;
         }
     }
@@ -115,14 +126,14 @@ void CuttingToolModel::ensureCompability(const ms::CuttingToolParams &params)
 void CuttingToolModel::createMesh()
 {
     _holderMesh = make_shared<Mesh<VertexNormalTexCoords>>(
-        createCylinder(_holderLength, _holderRadius, 32)
+        createCylinder(1.0f, 1.0f, 32)
     );
 
     _cuttingToolMesh = make_shared<Mesh<VertexNormalTexCoords>>(
-        createCylinder(_cuttingToolLength, _cuttingToolRadius, 32)
+        createCylinder(1.0f, 1.0f, 32)
     );
 
     _cuttingToolBallMesh = make_shared<Mesh<VertexNormalTexCoords>>(
-        createSphere(_cuttingToolBallRadius, 32, 32)
+        createSphere(1.0f, 32, 32)
     );
 }
