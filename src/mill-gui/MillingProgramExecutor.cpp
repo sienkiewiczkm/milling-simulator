@@ -114,6 +114,11 @@ MillingError MillingProgramExecutor::update(double dt)
     auto startTime = std::chrono::high_resolution_clock::now();
     auto maxDuration = std::chrono::milliseconds(50);
 
+    if (_fastForwardMode)
+    {
+        dt *= 100.0f;
+    }
+
     auto timeLeft = dt;
     while (timeLeft > 0.001 && _currentProgramStep < _millingProgram.size())
     {
@@ -126,7 +131,6 @@ MillingError MillingProgramExecutor::update(double dt)
         if (_fastForwardMode)
         {
             _toolController->fastForward();
-            timeLeft = 0.0;
         }
         else
         {
