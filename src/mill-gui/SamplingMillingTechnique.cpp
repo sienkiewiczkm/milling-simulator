@@ -56,14 +56,6 @@ MillingError SamplingMillingTechnique::moveTool(
 
     samples += 20;
 
-    ImGui::SliderInt("Samples", &samples, 0, 100000);
-
-    std::cout << "start: " << tipStartPosition.x << " " << tipStartPosition.y
-        << " " << tipStartPosition.z << std::endl;
-    std::cout << "end: " << tipEndPosition.x << " " << tipEndPosition.y
-        << " " << tipEndPosition.z << std::endl;
-    std::cout << "samples: " << samples << std::endl;
-
     for (auto i = 0; i < samples; ++i)
     {
         auto progress = i/static_cast<double>(samples-1);
