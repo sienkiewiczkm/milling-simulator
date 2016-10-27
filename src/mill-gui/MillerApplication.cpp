@@ -252,6 +252,9 @@ void MillerApplication::updateMillingErrorPopup()
         case MillingError::DrillingHolesWithFlatTool:
             errorText = "Cannot drill holes using flat tool.";
             break;
+        case MillingError::FastMovementCollision:
+            errorText = "Tool cannot touch the material during fast move.";
+            break;
         }
 
         ImGui::TextColored(

@@ -76,7 +76,8 @@ void MillingBlock::setBlockResolution(const glm::ivec2 &blockResolution)
 MillingError MillingBlock::moveTool(
     glm::dvec3 tipStartPoint,
     glm::dvec3 tipEndPoint, 
-    const CuttingToolParams &cuttingToolParams
+    const CuttingToolParams &cuttingToolParams,
+    bool cuttingProhibited
 )
 {
     auto invScaling = scale(
@@ -103,7 +104,8 @@ MillingError MillingBlock::moveTool(
         _safeZoneHeight,
         cuttingToolParams,
         tipStartPoint,
-        tipEndPoint
+        tipEndPoint,
+        cuttingProhibited
     );
 
     return errorState;

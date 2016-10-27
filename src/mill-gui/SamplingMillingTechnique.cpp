@@ -31,7 +31,8 @@ MillingError SamplingMillingTechnique::moveTool(
     float safeHeight,
     const CuttingToolParams &toolParams,
     glm::dvec3 tipStartPosition, 
-    glm::dvec3 tipEndPosition
+    glm::dvec3 tipEndPosition,
+    bool cuttingProhibited
 )
 {
     _heightmapTransformation = worldHeightmapTransformation;
@@ -118,6 +119,11 @@ MillingError SamplingMillingTechnique::moveTool(
 
                 if (cell > toolHeight)
                 {
+                    if (cuttingProhibited)
+                    {
+                        return MillingError::FastMovementCollision;
+                    }
+
                     if (toolHeight < safeHeight)
                     {
                         return MillingError::SafeZoneReached;

@@ -40,7 +40,8 @@ public:
     MillingError moveTool(
         glm::dvec3 tipStartPoint,
         glm::dvec3 tipEndPoint, 
-        const CuttingToolParams &cuttingToolParams
+        const CuttingToolParams &cuttingToolParams,
+        bool cuttingProhibited = false
     );
 
     float getSafeZoneHeight() const;

@@ -21,7 +21,8 @@ public:
         float safeHeight,
         const CuttingToolParams &toolParams,
         glm::dvec3 tipStartPosition, 
-        glm::dvec3 tipEndPosition
+        glm::dvec3 tipEndPosition,
+        bool cuttingProhibited = false
     );
 
 protected:

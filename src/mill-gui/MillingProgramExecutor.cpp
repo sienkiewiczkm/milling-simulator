@@ -133,10 +133,14 @@ MillingError MillingProgramExecutor::update(double dt)
             timeLeft = _toolController->update(dt);
         }
 
+        bool isCollisionProhibited = _millingProgram[_currentProgramStep].type 
+            == PathMovementType::FastMovement;
+
         auto errorState = _block->moveTool(
             _toolController->getLastPosition(),
             _toolController->getCurrentPosition(),
-            _toolController->getCuttingToolParams()
+            _toolController->getCuttingToolParams(),
+            isCollisionProhibited
         );
 
         if (errorState != MillingError::None)

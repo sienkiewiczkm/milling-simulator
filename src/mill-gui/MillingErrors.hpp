@@ -7,7 +7,8 @@ enum class MillingError
 {
     None,
     SafeZoneReached,
-    DrillingHolesWithFlatTool
+    DrillingHolesWithFlatTool,
+    FastMovementCollision
 };
 
 }
