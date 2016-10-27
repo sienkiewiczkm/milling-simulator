@@ -26,7 +26,7 @@ public:
 
     void setAlbedoTexture(GLuint textureId);
     void setHeightmapTexture(GLuint textureId);
-    void setSize(const glm::vec2 &size);
+    void setSize(const glm::vec3 &size);
 
 protected:
     void createShaders();

@@ -19,7 +19,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 TextureMatrix;
 
-uniform vec2 HeightmapSize;
+uniform vec3 HeightmapSize;
 
 uniform int NormalEstBaseX[4] = int[] (0, -1, 0, 1);
 uniform int NormalEstBaseY[4] = int[] (-1, 0, 1, 0);
@@ -59,7 +59,7 @@ void main(void)
         + (1.0-texCoord2.y) * normal;
 
     gl_Position = projection * view * model 
-        * vec4(vec3(150.0, 50.0, 150.0) * position 
+        * vec4(HeightmapSize * position 
                + displacement, 1.0f);
 
     vs_out.texCoord = finalTexCoord;

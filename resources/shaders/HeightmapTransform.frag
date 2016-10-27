@@ -11,6 +11,8 @@ out vec4 color;
 uniform sampler2D AlbedoTexture;
 uniform sampler2D HeightmapTexture;
 
+vec2 HeightmapSize;
+
 void main(void)
 {
     vec3 lightDirection = normalize(vec3(1.0f, 1.0f, 1.0f));

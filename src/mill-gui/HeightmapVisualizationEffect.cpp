@@ -69,9 +69,9 @@ void HeightmapVisualizationEffect::setHeightmapTexture(GLuint textureId)
     );
 }
 
-void HeightmapVisualizationEffect::setSize(const glm::vec2 &size)
+void HeightmapVisualizationEffect::setSize(const glm::vec3 &size)
 {
-    glUniform2fv(
+    glUniform3fv(
         glGetUniformLocation(_shaderProgram->getId(), "HeightmapSize"),
         1,
         value_ptr(size)

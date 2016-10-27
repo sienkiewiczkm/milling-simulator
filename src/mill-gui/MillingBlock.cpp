@@ -142,7 +142,7 @@ void MillingBlock::render()
     _heightmapEffect->setTextureMatrix(_textureMatrix);
     _heightmapEffect->setAlbedoTexture(_texture);
     _heightmapEffect->setHeightmapTexture(_heightmapTexture);
-    _heightmapEffect->setSize(vec2(_blockSize.x, _blockSize.z));
+    _heightmapEffect->setSize(_blockSize);
     _geometry->render();
     _heightmapEffect->end(); 
 
