@@ -1,4 +1,4 @@
-#include "ISegmentMillingTechnique.hpp"
+#include "BoundariesMillingTechnique.hpp"
 
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,6 +10,8 @@ using namespace glm;
 
 namespace ms
 {
+
+const double BoundariesMillingTechnique::cFlatnessEpsilon = 0.01;
 
 BoundariesMillingTechnique::BoundariesMillingTechnique()
 {
@@ -121,7 +123,7 @@ MillingError BoundariesMillingTechnique::moveTool(
                 }
 
                 if (toolParams.kind == CuttingToolKind::Flat &&
-                    abs(tipStartPosition.y - tipEndPosition.y) > 0.001)
+                    abs(tipEndPosition.y - tipStartPosition.y) > cFlatnessEpsilon)
                 {
                     return MillingError::DrillingHolesWithFlatTool;
                 }
@@ -133,6 +135,14 @@ MillingError BoundariesMillingTechnique::moveTool(
     }
 
     return MillingError::None;
+}
+
+bool BoundariesMillingTechnique::isAvailable(
+    glm::dvec3 startPosition,
+    glm::dvec3 endPosition
+)
+{
+    return abs(startPosition.y - endPosition.y) < cFlatnessEpsilon;
 }
 
 glm::dvec4 BoundariesMillingTechnique::getToolBoundaries(glm::dvec3 position)

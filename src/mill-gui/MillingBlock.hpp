@@ -76,7 +76,8 @@ private:
     std::shared_ptr<HeightmapGeometry> _geometry;
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _safeZoneLimitPlane;
     std::shared_ptr<fw::HeightmapTextureConverter> _heightmapTextureConverter;
-    std::shared_ptr<ISegmentMillingTechnique> _technique;
+
+    std::vector<std::shared_ptr<ISegmentMillingTechnique>> _techniques;
 
     GLuint _heightmapTexture;
 };

@@ -9,6 +9,9 @@
 #include <iterator>
 #include <sstream>
 
+#include "BoundariesMillingTechnique.hpp"
+#include "SamplingMillingTechnique.hpp"
+
 using namespace fw;
 using namespace glm;
 using namespace std;
@@ -83,7 +86,17 @@ MillingError MillingBlock::moveTool(
 
     auto tipTexMat = _textureMatrix * invScaling;
 
-    auto errorState = _technique->moveTool(
+    auto selectedTechnique = _techniques.back();
+    for (auto &tech : _techniques)
+    {
+        if (tech->isAvailable(tipStartPoint, tipEndPoint))
+        {
+            selectedTechnique = tech;
+            break;
+        }
+    }
+
+    auto errorState = selectedTechnique->moveTool(
         _rawHeightmap, 
         _blockResolution,
         tipTexMat,
@@ -165,7 +178,9 @@ void MillingBlock::create()
     createHeightmap();
 
     _textureMatrix = translate(mat4(), vec3(0.5f, 0.0f, 0.5f));
-    _technique = make_shared<BoundariesMillingTechnique>();
+
+    _techniques.push_back(make_shared<BoundariesMillingTechnique>());
+    _techniques.push_back(make_shared<SamplingMillingTechnique>());
 }
 
 void MillingBlock::createHeightmap()

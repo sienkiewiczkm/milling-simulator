@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME}
     src/mill-gui/CuttingToolGUI.cpp
     src/mill-gui/CuttingToolModel.cpp
     src/mill-gui/CuttingToolParams.cpp
+    src/mill-gui/SamplingMillingTechnique.cpp
     src/mill-gui/DebugShapes.cpp
     src/mill-gui/Effect.cpp
     src/mill-gui/HeightmapGeometry.cpp
