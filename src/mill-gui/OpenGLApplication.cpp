@@ -27,7 +27,8 @@ void OpenGLApplication::create()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    _window = glfwCreateWindow(640, 480, "Hello world", nullptr, nullptr);
+    _window = glfwCreateWindow(640, 480, "Milling Simulator", nullptr, 
+        nullptr);
 
     if (!_window)
     {
