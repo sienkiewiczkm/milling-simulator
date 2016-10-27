@@ -50,17 +50,16 @@ void ProgramManagerGUI::update()
                     _selectedIndex = i;
             }
 
-            ImGui::EndChild();
         }
+        ImGui::EndChild();
         ImGui::SameLine();
 
         if (ImGui::BeginChild("Right Pane"))
         {
             if (ImGui::Button("Refresh")) { discoverAvailableFiles(); }
             if (ImGui::Button("Load")) { loadSelectedFile(); }
-            ImGui::EndChild();
         }
-
+        ImGui::EndChild();
     }
 
     ImGui::End();
