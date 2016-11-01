@@ -34,6 +34,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_subdirectory(${DEPENDENCIES_DIR}googletest)
 enable_testing()
 include_directories(${gtest_SOURCE_DIR}/include)
+include_directories(${gmock_SOURCE_DIR}/include)
 
 include_directories(dependencies/glfw/include)
 include_directories(dependencies/glm)
@@ -56,6 +57,8 @@ include_directories(
 add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BasicEffect.cpp
     src/mill-gui/BoundariesMillingTechnique.cpp
+    src/mill-gui/BsplineBasisEvaluator.cpp
+    src/mill-gui/BsplineEquidistantKnotGenerator.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
@@ -90,7 +93,10 @@ add_library(${PROJECT_NAME_LIB}
 )
 
 add_executable(${PROJECT_NAME_TEST}
+    test/BsplineBasisEvaluatorTests.cpp
+    test/BsplineEquidistantKnotGeneratorTests.cpp
     test/CommonTest.cpp
+    test/LinearCombinationEvaluatorTests.cpp
 )
 
 add_executable(${PROJECT_NAME}
@@ -104,7 +110,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME_TEST} 
     ${PROJECT_NAME_LIB}
     gtest
-    gtest_main
+    gmock
+    gmock_main
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -126,5 +133,8 @@ set(PROJECT_COMPILE_FEATURES
 
 target_compile_features(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_FEATURES})
 target_compile_features(${PROJECT_NAME_LIB} PRIVATE ${PROJECT_COMPILE_FEATURES})
+target_compile_features(${PROJECT_NAME_TEST} PRIVATE
+    ${PROJECT_COMPILE_FEATURES}
+)
 
 add_test(NAME ${PROJECT_NAME_TEST} COMMAND ${PROJECT_NAME_TEST})
