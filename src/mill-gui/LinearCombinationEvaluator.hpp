@@ -9,13 +9,13 @@
 namespace fw
 {
 
-template <typename T>
+template <typename TPoint, typename TFloating = double>
 class LinearCombinationEvaluator
 {
 public:
     LinearCombinationEvaluator(
         std::shared_ptr<IBasisEvaluator> basisEvaluator,
-        std::vector<T> controlPoints
+        std::vector<TPoint> controlPoints
     ):
         _basisEvaluator{basisEvaluator},
         _controlPoints{controlPoints}
@@ -26,14 +26,14 @@ public:
     {
     }
 
-    T evaluate(double parameter) const
+    TPoint evaluate(TFloating parameter) const
     {
         auto basis = _basisEvaluator->evaluate(parameter);
 
         assert(basis.size() > 0);
         assert(basis.size() == _controlPoints.size());
 
-        T output = basis[0] * _controlPoints[0];
+        TPoint output = basis[0] * _controlPoints[0];
         for (auto i = 1; i < basis.size(); ++i)
         {
             output += basis[i] * _controlPoints[i];
@@ -44,7 +44,7 @@ public:
 
 private:
     std::shared_ptr<IBasisEvaluator> _basisEvaluator;
-    std::vector<T> _controlPoints;
+    std::vector<TPoint> _controlPoints;
 };
 
 }

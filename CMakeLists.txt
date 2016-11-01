@@ -59,6 +59,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BoundariesMillingTechnique.cpp
     src/mill-gui/BsplineBasisEvaluator.cpp
     src/mill-gui/BsplineEquidistantKnotGenerator.cpp
+    src/mill-gui/BsplineSurface.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
@@ -95,6 +96,7 @@ add_library(${PROJECT_NAME_LIB}
 add_executable(${PROJECT_NAME_TEST}
     test/BsplineBasisEvaluatorTests.cpp
     test/BsplineEquidistantKnotGeneratorTests.cpp
+    test/BsplineSurfaceTests.cpp
     test/CommonTest.cpp
     test/LinearCombinationEvaluatorTests.cpp
 )
