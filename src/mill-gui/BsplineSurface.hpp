@@ -12,6 +12,13 @@ namespace fw
 {
 class IBsplineKnotGenerator;
 
+enum class SurfaceFoldingMode
+{
+    None,
+    ContinuousU,
+    ContinuousV,
+};
+
 /** \brief BsplinePatch with maximum possible degree on edge.
  *
  */
@@ -23,7 +30,8 @@ public:
         int surfaceDegree,
         glm::ivec2 controlPointsGridSize,
         std::vector<glm::dvec3> controlPoints,
-        std::shared_ptr<IBsplineKnotGenerator> knotGenerator
+        std::shared_ptr<IBsplineKnotGenerator> knotGenerator,
+        SurfaceFoldingMode foldingMode = SurfaceFoldingMode::None
     );
 
     virtual ~BsplineSurface();
@@ -60,6 +68,7 @@ private:
     std::shared_ptr<IBsplineKnotGenerator> _knotGenerator;
     std::vector<double> _knotsX;
     std::vector<double> _knotsY;
+    SurfaceFoldingMode _foldingMode;
 };
 
 }

@@ -9,15 +9,32 @@ BsplineSurface::BsplineSurface(
     int surfaceDegree,
     glm::ivec2 controlPointsGridSize,
     std::vector<glm::dvec3> controlPoints,
-    std::shared_ptr<IBsplineKnotGenerator> knotGenerator
+    std::shared_ptr<IBsplineKnotGenerator> knotGenerator,
+    SurfaceFoldingMode foldingMode
 ):
     _degree{surfaceDegree},
     _controlPointsGridSize{controlPointsGridSize},
     _controlPoints{controlPoints},
-    _knotGenerator{knotGenerator}
+    _knotGenerator{knotGenerator},
+    _foldingMode{foldingMode}
 {
-    _knotsX = _knotGenerator->generate(_controlPointsGridSize.x, _degree);
-    _knotsY = _knotGenerator->generate(_controlPointsGridSize.y, _degree);
+    auto xFoldAdditional = _foldingMode == SurfaceFoldingMode::ContinuousU
+        ? _degree
+        : 0;
+
+    auto yFoldAdditional = _foldingMode == SurfaceFoldingMode::ContinuousV
+        ? _degree
+        : 0;
+
+    _knotsX = _knotGenerator->generate(
+        _controlPointsGridSize.x + xFoldAdditional,
+        _degree
+    );
+
+    _knotsY = _knotGenerator->generate(
+        _controlPointsGridSize.y + yFoldAdditional,
+        _degree
+    );
 }
 
 BsplineSurface::~BsplineSurface()
@@ -26,15 +43,9 @@ BsplineSurface::~BsplineSurface()
 
 glm::dvec3 BsplineSurface::getPosition(glm::dvec2 parametrisation)
 {
+    // todo: remove evaluation mode - no differences
     auto evaluationMode = EvaluationDirection::AlongXAxis;
-    auto numSubcurves = evaluationMode == EvaluationDirection::AlongXAxis
-        ? _controlPointsGridSize.x
-        : _controlPointsGridSize.y;
-
-    if (evaluationMode == EvaluationDirection::AlongYAxis)
-    {
-        parametrisation = glm::dvec2(parametrisation.y, parametrisation.x);
-    }
+    auto numSubcurves = _controlPointsGridSize.x;
 
     std::vector<glm::dvec3> subcurveControlPoints;
     for (auto i = 0; i < numSubcurves; ++i)
@@ -42,6 +53,14 @@ glm::dvec3 BsplineSurface::getPosition(glm::dvec2 parametrisation)
         auto subcontrol = evaluateSubcontrolPoints(i, evaluationMode);
         auto point = evaluateCurve(subcontrol, parametrisation.x);
         subcurveControlPoints.push_back(point);
+    }
+
+    if (_foldingMode == SurfaceFoldingMode::ContinuousV)
+    {
+        for (auto i = 0; i < _degree; ++i)
+        {
+            subcurveControlPoints.push_back(subcurveControlPoints[i]);
+        }
     }
 
     return evaluateCurve(subcurveControlPoints, parametrisation.y);
@@ -85,16 +104,32 @@ std::vector<glm::dvec3> BsplineSurface::evaluateSubcontrolPoints(
         ? glm::ivec2(1, 0)
         : glm::ivec2(0, 1);
 
+    auto xFoldAdditional = _foldingMode == SurfaceFoldingMode::ContinuousU
+        ? _degree
+        : 0;
+
+    auto yFoldAdditional = _foldingMode == SurfaceFoldingMode::ContinuousV
+        ? _degree
+        : 0;
+
+    auto stepLimit = direction == EvaluationDirection::AlongXAxis
+        ? _controlPointsGridSize.x + xFoldAdditional
+        : _controlPointsGridSize.y + yFoldAdditional;
+
     std::vector<glm::dvec3> subcontrolPoints;
 
-    for (auto pt = startPosition;
-         pt.x < _controlPointsGridSize.x && pt.y < _controlPointsGridSize.y;
-         pt += increase
-    )
+    auto pt = startPosition;
+
+    for (auto i = 0; i < stepLimit; ++i)
     {
+        auto x = pt.x % _controlPointsGridSize.x;
+        auto y = pt.y % _controlPointsGridSize.y;
+
         subcontrolPoints.push_back(
-            _controlPoints[_controlPointsGridSize.y * pt.y + pt.x]
+            _controlPoints[_controlPointsGridSize.y * y + x]
         );
+        
+        pt += increase;
     }
 
     return subcontrolPoints;

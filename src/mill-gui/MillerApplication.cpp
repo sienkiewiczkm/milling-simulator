@@ -81,13 +81,12 @@ void MillerApplication::onCreate()
         {-200.0, 0.0, 200.0}, {-100.0, 10.0, 200.0}, {100.0, 10.0, 200.0}, {200.0, 0.0, 200.0},
     };
 
-
-    std::cout << "OnCreate Bspline start" << std::endl;
     _bsplineSurface = std::make_shared<fw::BsplineSurface>(
         3,
         glm::ivec2(4, 4),
         controlPoints,
-        std::make_shared<fw::BsplineEquidistantKnotGenerator>()
+        std::make_shared<fw::BsplineEquidistantKnotGenerator>(),
+        SurfaceFoldingMode::ContinuousV
     );
 
     auto reparam = std::make_shared<fw::BsplineNonVanishingReparametrization>(
@@ -95,10 +94,8 @@ void MillerApplication::onCreate()
     );
 
     ParametricSurfaceMeshBuilder parametricBuilder;
-    parametricBuilder.setSamplingResolution(glm::ivec2(8, 8));
+    parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
     _parametricSurfaceMesh = parametricBuilder.build(reparam);
-
-    std::cout << "OnCreate Bspline end" << std::endl;
 }
 
 void MillerApplication::onDestroy()
