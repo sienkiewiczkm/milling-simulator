@@ -6,6 +6,7 @@
 #include "MillPathFormatReader.hpp"
 #include "BsplineEquidistantKnotGenerator.hpp"
 #include "ParametricSurfaceMeshBuilder.hpp"
+#include "BsplineNonVanishingReparametrization.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -74,10 +75,10 @@ void MillerApplication::onCreate()
     _programManagerGUI->setVisibility(_showProgramManager);
 
     std::vector<glm::dvec3> controlPoints {
-        {-200.0, 100.0, -200.0}, {-100.0, 0.0, -200.0}, {100.0, 0.0, -200.0}, {200.0, 0.0, -200.0},
-        {-200.0, 0.0, -100.0}, {-100.0, 100.0, -100.0}, {100.0, 0.0, -100.0}, {200.0, 0.0, -100.0},
-        {-200.0, 0.0, 100.0}, {-100.0, 0.0, 100.0}, {100.0, 100.0, 100.0}, {200.0, 0.0, 100.0},
-        {-200.0, 0.0, 200.0}, {-100.0, 0.0, 200.0}, {100.0, 0.0, 200.0}, {200.0, 100.0, 200.0},
+        {-200.0, 0.0, -200.0}, {-100.0, 10.0, -200.0}, {100.0, 10.0, -200.0}, {200.0, 0.0, -200.0},
+        {-200.0, 0.0, -100.0}, {-100.0, 100.0, -100.0}, {100.0, 100.0, -100.0}, {200.0, 0.0, -100.0},
+        {-200.0, 0.0, 100.0}, {-100.0, 100.0, 100.0}, {100.0, 100.0, 100.0}, {200.0, 0.0, 100.0},
+        {-200.0, 0.0, 200.0}, {-100.0, 10.0, 200.0}, {100.0, 10.0, 200.0}, {200.0, 0.0, 200.0},
     };
 
 
@@ -89,13 +90,13 @@ void MillerApplication::onCreate()
         std::make_shared<fw::BsplineEquidistantKnotGenerator>()
     );
 
-    ParametricSurfaceMeshBuilder parametricBuilder;
-    parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
-    _parametricSurfaceMesh = parametricBuilder.build(
-        _bsplineSurface,
-        glm::dvec2(0.33, 0.33),
-        glm::dvec2(0.66, 0.66)
+    auto reparam = std::make_shared<fw::BsplineNonVanishingReparametrization>(
+        _bsplineSurface
     );
+
+    ParametricSurfaceMeshBuilder parametricBuilder;
+    parametricBuilder.setSamplingResolution(glm::ivec2(8, 8));
+    _parametricSurfaceMesh = parametricBuilder.build(reparam);
 
     std::cout << "OnCreate Bspline end" << std::endl;
 }
@@ -343,11 +344,12 @@ void MillerApplication::renderSceneGeometry()
     _effect.setModelMatrix(glm::scale(
         glm::mat4(), glm::vec3(0.5f, 0.5f, 0.5f))
     );
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     _parametricSurfaceMesh->render();
     _effect.end();
 
-    _block->setViewMatrix(view);
-    _block->setProjectionMatrix(projection);
-    _block->render();
+    //_block->setViewMatrix(view);
+    //_block->setProjectionMatrix(projection);
+    //_block->render();
 }
 

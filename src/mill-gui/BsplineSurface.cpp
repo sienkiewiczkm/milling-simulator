@@ -52,6 +52,26 @@ glm::dvec3 BsplineSurface::getNormal(glm::dvec2 parmetrisation)
     return glm::dvec3();
 }
 
+int BsplineSurface::getDegree() const
+{
+    return _degree;
+}
+
+const std::vector<glm::dvec3> &BsplineSurface::getControlPoints() const
+{
+    return _controlPoints;
+}
+
+const std::vector<double> &BsplineSurface::getKnotsOnU() const
+{
+    return _knotsX;
+}
+
+const std::vector<double> &BsplineSurface::getKnotsOnV() const
+{
+    return _knotsY;
+}
+
 std::vector<glm::dvec3> BsplineSurface::evaluateSubcontrolPoints(
     int rowOrColumn,
     EvaluationDirection direction

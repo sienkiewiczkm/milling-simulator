@@ -51,7 +51,7 @@ std::shared_ptr<Mesh<VertexNormalTexCoords>>
             auto dx = static_cast<double>(x)/(_samplingResolution.x - 1);
             glm::dvec2 dp { dx, dy };
             glm::dvec2 parametrisation =
-                minimumParameter + (maximumParameter - minimumParameter) * dp;
+                glm::mix(minimumParameter, maximumParameter, dp);
 
             auto position = surface->getPosition(parametrisation);
             auto normal = surface->getNormal(parametrisation);

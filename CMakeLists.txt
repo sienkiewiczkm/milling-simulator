@@ -59,6 +59,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BoundariesMillingTechnique.cpp
     src/mill-gui/BsplineBasisEvaluator.cpp
     src/mill-gui/BsplineEquidistantKnotGenerator.cpp
+    src/mill-gui/BsplineNonVanishingReparametrization.cpp
     src/mill-gui/BsplineSurface.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp

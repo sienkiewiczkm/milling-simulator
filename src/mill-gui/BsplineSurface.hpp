@@ -31,6 +31,11 @@ public:
     virtual glm::dvec3 getPosition(glm::dvec2 parametrisation);
     virtual glm::dvec3 getNormal(glm::dvec2 parmetrisation);
 
+    int getDegree() const;
+    const std::vector<glm::dvec3> &getControlPoints() const;
+    const std::vector<double> &getKnotsOnU() const;
+    const std::vector<double> &getKnotsOnV() const;
+
 protected:
     enum class EvaluationDirection
     {
