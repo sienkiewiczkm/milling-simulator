@@ -51,6 +51,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/mill-gui/
     ${PROJECT_BINARY_DIR}
     dependencies/imgui
+    dependencies/ImGuizmo
     dependencies/generated/glad/include
 )
 
@@ -90,10 +91,11 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/TextureUtils.cpp
     src/mill-gui/TexturedPhongEffect.cpp
     src/mill-gui/Vertices.cpp
+    dependencies/generated/glad/src/glad.c
+    dependencies/ImGuizmo/ImGuizmo.cpp
     dependencies/imgui/imgui.cpp
     dependencies/imgui/imgui_demo.cpp
     dependencies/imgui/imgui_draw.cpp
-    dependencies/generated/glad/src/glad.c
 )
 
 add_executable(${PROJECT_NAME_TEST}
@@ -112,7 +114,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${OPENGL_INCLUDE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME_TEST} 
+target_link_libraries(${PROJECT_NAME_TEST}
     ${PROJECT_NAME_LIB}
     gtest
     gmock

@@ -16,3 +16,6 @@
 [submodule "dependencies/googletest"]
 	path = dependencies/googletest
 	url = https://github.com/google/googletest
+[submodule "dependencies/ImGuizmo"]
+	path = dependencies/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo
