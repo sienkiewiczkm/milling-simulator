@@ -13,6 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 #include <cmath>
 
@@ -28,8 +29,13 @@ MillerApplication::MillerApplication() :
     _heightmapResolutionY(32),
     _showImguiDemo(false),
     _showProgramManager(false),
-    _lastErrorState(MillingError::None)
+    _lastErrorState(MillingError::None),
+    _activeOperation{ImGuizmo::TRANSLATE}
 {
+    _loadedModelMatrix = glm::scale(
+        glm::mat4(),
+        glm::vec3(10.0f, 10.0f, 10.0f)
+    );
 }
 
 MillerApplication::~MillerApplication()
@@ -99,6 +105,7 @@ void MillerApplication::onUpdate()
     ++_frame;
 
     ImGuiBinding::newFrame();
+    ImGuizmo::BeginFrame();
     handleInput();
 
     /* todo: move to framework */
@@ -187,6 +194,25 @@ void MillerApplication::onScroll(double xoffset, double yoffset)
 void MillerApplication::onKey(int key, int scancode, int action, int mods)
 {
     ImGuiBinding::keyCallback(_window, key, scancode, action, mods);
+
+    ImGuiIO &io = ImGui::GetIO();
+    if (io.WantCaptureKeyboard)
+        return;
+
+    switch (key)
+    {
+    case GLFW_KEY_Q:
+        break;
+    case GLFW_KEY_W:
+        _activeOperation = ImGuizmo::TRANSLATE;
+        break;
+    case GLFW_KEY_E:
+        _activeOperation = ImGuizmo::ROTATE;
+        break;
+    case GLFW_KEY_R:
+        _activeOperation = ImGuizmo::SCALE;
+        break;
+    }
 }
 
 void MillerApplication::onChar(unsigned int c)
@@ -202,11 +228,12 @@ void MillerApplication::handleInput()
     auto movement = (mousePosition - _lastMousePosition)*_mouseSensitivity;
     _lastMousePosition = mousePosition;
 
-    if (!io.WantCaptureMouse &&
+    if (!io.WantCaptureMouse && !ImGuizmo::IsUsing() &&
         GLFW_PRESS == glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT))
     {
         _camera.rotate(movement.y, movement.x);
     }
+
 }
 
 void MillerApplication::updateMainMenuBar()
@@ -323,15 +350,20 @@ void MillerApplication::renderSceneGeometry()
     view = _camera.getViewMatrix();
     projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
 
+    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
+        _activeOperation, ImGuizmo::LOCAL,
+        glm::value_ptr(_loadedModelMatrix),
+        nullptr,
+        nullptr
+    );
+
     _effect.begin();
     _effect.setModelMatrix(model);
     _effect.setViewMatrix(view);
     _effect.setProjectionMatrix(projection);
     _effect.setTexture(_texture);
     //_cuttingTool.render(&_effect);
-    _effect.setModelMatrix(glm::scale(
-        glm::mat4(), glm::vec3(10.0f, 10.0f, 10.0f))
-    );
+    _effect.setModelMatrix(_loadedModelMatrix);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     for (const auto &mesh: _loadedObjectMeshes)

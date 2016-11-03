@@ -21,6 +21,8 @@
 #include <memory>
 #include <vector>
 
+#include <ImGuizmo.h>
+
 class ShaderProgram;
 
 class MillerApplication :
@@ -90,6 +92,9 @@ private:
     std::vector<std::shared_ptr<fw::IParametricSurfaceUV>> _loadedObjects;
     std::vector<std::shared_ptr<Mesh<VertexNormalTexCoords>>>
         _loadedObjectMeshes;
+
+    ImGuizmo::OPERATION _activeOperation;
+    glm::mat4 _loadedModelMatrix;
 
     double _lastTime;
     double _currentTime;
