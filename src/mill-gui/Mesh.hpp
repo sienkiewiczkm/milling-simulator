@@ -10,6 +10,7 @@ template<typename VertexType>
 class Mesh
 {
 public:
+    Mesh();
     Mesh(
         const std::vector<VertexType> &vertices,
         const std::vector<GLuint> &indices
@@ -35,13 +36,26 @@ protected:
 };
 
 template <typename VertexType>
+Mesh<VertexType>::Mesh():
+    _numElements{0},
+    _vao{0},
+    _vbo{0},
+    _ebo{0}
+{
+}
+
+template <typename VertexType>
 Mesh<VertexType>::Mesh(
     const std::vector<VertexType> &vertices,
     const std::vector<GLuint> &indices
-) : 
-    _numElements(0)
+): 
+    _numElements{0},
+    _vao{0},
+    _vbo{0},
+    _ebo{0}
 {
     createBuffers(vertices, indices);
+    std::cout << "created mesh" << _numElements << std::endl;
 }
 
 template <typename VertexType>

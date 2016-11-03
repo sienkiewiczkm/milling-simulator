@@ -15,6 +15,7 @@
 #include "MillingProgramExecutor.hpp"
 #include "MillingProgramExecutorGUI.hpp"
 #include "MillingBlockCreationWindow.hpp"
+#include "BsplineSurface.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -82,6 +83,9 @@ private:
 
     CuttingToolModel _cuttingTool;
     CuttingToolGUI _cuttingToolGUI;
+
+    std::shared_ptr<fw::BsplineSurface> _bsplineSurface;
+    std::shared_ptr<Mesh<VertexNormalTexCoords>> _parametricSurfaceMesh;
 
     std::vector<ms::PathMovement> _movements;
     int _currentMoveIndex;

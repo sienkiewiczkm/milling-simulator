@@ -4,6 +4,8 @@
 #include "Config.hpp"
 #include "TextureUtils.hpp"
 #include "MillPathFormatReader.hpp"
+#include "BsplineEquidistantKnotGenerator.hpp"
+#include "ParametricSurfaceMeshBuilder.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -70,6 +72,32 @@ void MillerApplication::onCreate()
     _cuttingToolGUI.setWindowName("Cutting tool controller");
 
     _programManagerGUI->setVisibility(_showProgramManager);
+
+    std::vector<glm::dvec3> controlPoints {
+        {-200.0, 100.0, -200.0}, {-100.0, 0.0, -200.0}, {100.0, 0.0, -200.0}, {200.0, 0.0, -200.0},
+        {-200.0, 0.0, -100.0}, {-100.0, 100.0, -100.0}, {100.0, 0.0, -100.0}, {200.0, 0.0, -100.0},
+        {-200.0, 0.0, 100.0}, {-100.0, 0.0, 100.0}, {100.0, 100.0, 100.0}, {200.0, 0.0, 100.0},
+        {-200.0, 0.0, 200.0}, {-100.0, 0.0, 200.0}, {100.0, 0.0, 200.0}, {200.0, 100.0, 200.0},
+    };
+
+
+    std::cout << "OnCreate Bspline start" << std::endl;
+    _bsplineSurface = std::make_shared<fw::BsplineSurface>(
+        3,
+        glm::ivec2(4, 4),
+        controlPoints,
+        std::make_shared<fw::BsplineEquidistantKnotGenerator>()
+    );
+
+    ParametricSurfaceMeshBuilder parametricBuilder;
+    parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
+    _parametricSurfaceMesh = parametricBuilder.build(
+        _bsplineSurface,
+        glm::dvec2(0.33, 0.33),
+        glm::dvec2(0.66, 0.66)
+    );
+
+    std::cout << "OnCreate Bspline end" << std::endl;
 }
 
 void MillerApplication::onDestroy()
@@ -311,7 +339,11 @@ void MillerApplication::renderSceneGeometry()
     _effect.setViewMatrix(view);
     _effect.setProjectionMatrix(projection);
     _effect.setTexture(_texture);
-    _cuttingTool.render(&_effect);
+    //_cuttingTool.render(&_effect);
+    _effect.setModelMatrix(glm::scale(
+        glm::mat4(), glm::vec3(0.5f, 0.5f, 0.5f))
+    );
+    _parametricSurfaceMesh->render();
     _effect.end();
 
     _block->setViewMatrix(view);
