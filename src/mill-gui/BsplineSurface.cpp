@@ -45,22 +45,22 @@ glm::dvec3 BsplineSurface::getPosition(glm::dvec2 parametrisation)
 {
     // todo: remove evaluation mode - no differences
     auto evaluationMode = EvaluationDirection::AlongXAxis;
-    auto numSubcurves = _controlPointsGridSize.x;
+    auto numSubcurves = _controlPointsGridSize.y;
+
+    numSubcurves += _foldingMode == SurfaceFoldingMode::ContinuousV
+        ? _degree
+        : 0;
 
     std::vector<glm::dvec3> subcurveControlPoints;
     for (auto i = 0; i < numSubcurves; ++i)
     {
-        auto subcontrol = evaluateSubcontrolPoints(i, evaluationMode);
+        auto subcontrol = evaluateSubcontrolPoints(
+            i % _controlPointsGridSize.y,
+            evaluationMode
+        );
+
         auto point = evaluateCurve(subcontrol, parametrisation.x);
         subcurveControlPoints.push_back(point);
-    }
-
-    if (_foldingMode == SurfaceFoldingMode::ContinuousV)
-    {
-        for (auto i = 0; i < _degree; ++i)
-        {
-            subcurveControlPoints.push_back(subcurveControlPoints[i]);
-        }
     }
 
     return evaluateCurve(subcurveControlPoints, parametrisation.y);
@@ -126,9 +126,9 @@ std::vector<glm::dvec3> BsplineSurface::evaluateSubcontrolPoints(
         auto y = pt.y % _controlPointsGridSize.y;
 
         subcontrolPoints.push_back(
-            _controlPoints[_controlPointsGridSize.y * y + x]
+            _controlPoints[_controlPointsGridSize.x * y + x]
         );
-        
+
         pt += increase;
     }
 
@@ -146,7 +146,7 @@ glm::dvec3 BsplineSurface::evaluateCurve(
         knots
     );
 
-    auto linearSolver = 
+    auto linearSolver =
         std::make_shared<fw::LinearCombinationEvaluator<glm::dvec3>>(
             basisEvaluator,
             controlPoints

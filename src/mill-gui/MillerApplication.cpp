@@ -7,6 +7,7 @@
 #include "BsplineEquidistantKnotGenerator.hpp"
 #include "ParametricSurfaceMeshBuilder.hpp"
 #include "BsplineNonVanishingReparametrization.hpp"
+#include "CadioModelLoader.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -19,7 +20,7 @@ using namespace fw;
 using namespace ms;
 using namespace std;
 
-MillerApplication::MillerApplication() : 
+MillerApplication::MillerApplication() :
     _frame(0),
     _newBlockRequested(false),
     _mouseSensitivity(0.05f),
@@ -74,28 +75,18 @@ void MillerApplication::onCreate()
 
     _programManagerGUI->setVisibility(_showProgramManager);
 
-    std::vector<glm::dvec3> controlPoints {
-        {-200.0, 0.0, -200.0}, {-100.0, 10.0, -200.0}, {100.0, 10.0, -200.0}, {200.0, 0.0, -200.0},
-        {-200.0, 0.0, -100.0}, {-100.0, 100.0, -100.0}, {100.0, 100.0, -100.0}, {200.0, 0.0, -100.0},
-        {-200.0, 0.0, 100.0}, {-100.0, 100.0, 100.0}, {100.0, 100.0, 100.0}, {200.0, 0.0, 100.0},
-        {-200.0, 0.0, 200.0}, {-100.0, 10.0, 200.0}, {100.0, 10.0, 200.0}, {200.0, 0.0, 200.0},
-    };
-
-    _bsplineSurface = std::make_shared<fw::BsplineSurface>(
-        3,
-        glm::ivec2(4, 4),
-        controlPoints,
-        std::make_shared<fw::BsplineEquidistantKnotGenerator>(),
-        SurfaceFoldingMode::ContinuousV
-    );
-
-    auto reparam = std::make_shared<fw::BsplineNonVanishingReparametrization>(
-        _bsplineSurface
-    );
+    CadioModelLoader loader;
+    _loadedObjects = loader.loadModel(RESOURCE("models/sienkiewiczk.model"));
 
     ParametricSurfaceMeshBuilder parametricBuilder;
-    parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
-    _parametricSurfaceMesh = parametricBuilder.build(reparam);
+    parametricBuilder.setSamplingResolution(glm::ivec2(16, 16));
+
+    for (const auto &object: _loadedObjects)
+    {
+        _loadedObjectMeshes.push_back(
+            parametricBuilder.build(object)
+        );
+    }
 }
 
 void MillerApplication::onDestroy()
@@ -211,7 +202,7 @@ void MillerApplication::handleInput()
     auto movement = (mousePosition - _lastMousePosition)*_mouseSensitivity;
     _lastMousePosition = mousePosition;
 
-    if (!io.WantCaptureMouse && 
+    if (!io.WantCaptureMouse &&
         GLFW_PRESS == glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT))
     {
         _camera.rotate(movement.y, movement.x);
@@ -339,10 +330,15 @@ void MillerApplication::renderSceneGeometry()
     _effect.setTexture(_texture);
     //_cuttingTool.render(&_effect);
     _effect.setModelMatrix(glm::scale(
-        glm::mat4(), glm::vec3(0.5f, 0.5f, 0.5f))
+        glm::mat4(), glm::vec3(10.0f, 10.0f, 10.0f))
     );
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    _parametricSurfaceMesh->render();
+    for (const auto &mesh: _loadedObjectMeshes)
+    {
+        mesh->render();
+    }
+
     _effect.end();
 
     //_block->setViewMatrix(view);

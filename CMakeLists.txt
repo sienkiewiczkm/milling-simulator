@@ -61,6 +61,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BsplineEquidistantKnotGenerator.cpp
     src/mill-gui/BsplineNonVanishingReparametrization.cpp
     src/mill-gui/BsplineSurface.cpp
+    src/mill-gui/CadioModelLoader.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp

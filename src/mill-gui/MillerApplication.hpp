@@ -84,11 +84,12 @@ private:
     CuttingToolModel _cuttingTool;
     CuttingToolGUI _cuttingToolGUI;
 
-    std::shared_ptr<fw::BsplineSurface> _bsplineSurface;
-    std::shared_ptr<Mesh<VertexNormalTexCoords>> _parametricSurfaceMesh;
-
     std::vector<ms::PathMovement> _movements;
     int _currentMoveIndex;
+
+    std::vector<std::shared_ptr<fw::IParametricSurfaceUV>> _loadedObjects;
+    std::vector<std::shared_ptr<Mesh<VertexNormalTexCoords>>>
+        _loadedObjectMeshes;
 
     double _lastTime;
     double _currentTime;
