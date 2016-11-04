@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OpenGLHeaders.hpp"
+#include "BasicEffect.hpp"
 #include "OrbitingCamera.hpp"
 #include "Config.hpp"
 #include "TextureUtils.hpp"
@@ -44,11 +45,21 @@ protected:
     GLFWwindow *_window;
 
 private:
+    void createMeshes();
+
     GLuint _texture;
     TexturedPhongEffect _effect;
+    std::shared_ptr<fw::BasicEffect> _basicEffect;
     std::vector<std::shared_ptr<fw::IParametricSurfaceUV>> _loadedObjects;
     std::vector<std::shared_ptr<Mesh<VertexNormalTexCoords>>>
         _loadedObjectMeshes;
+
+    glm::vec3 _blockSize;
+    float _baseHeight;
+
+    std::shared_ptr<Mesh<VertexNormalTexCoords>> _baseBox;
+    std::shared_ptr<Mesh<VertexNormalTexCoords>> _blockBoxLimits;
+    glm::mat4 _baseBoxModelMatrix, _blockBoxLimitsModelMatrix;
 
     ImGuizmo::OPERATION _activeOperation;
     glm::mat4 _loadedModelMatrix;

@@ -82,6 +82,75 @@ vector<GLfloat> createCube(float width, float height, float length)
 	};
 }
 
+std::shared_ptr<Mesh<VertexNormalTexCoords>> createBox(const glm::vec3 &size)
+{
+    std::vector<GLuint> indices;
+
+    auto halfWidth = size.x/2;
+    auto halfHeight = size.y/2;
+    auto halfLength = size.z/2;
+
+    auto xAxis = glm::vec3(1.0, 0.0, 0.0);
+    auto yAxis = glm::vec3(0.0, 1.0, 0.0);
+    auto zAxis = glm::vec3(0.0, 0.0, 1.0);
+
+    std::vector<VertexNormalTexCoords> vertices
+    {
+        {{-halfWidth, -halfHeight, -halfLength}, -zAxis, {0.0f, 0.0f}},
+        {{ halfWidth, -halfHeight, -halfLength}, -zAxis, {1.0f, 0.0f}},
+        {{ halfWidth,  halfHeight, -halfLength}, -zAxis, {1.0f, 1.0f}},
+        {{ halfWidth,  halfHeight, -halfLength}, -zAxis, {1.0f, 1.0f}},
+        {{-halfWidth,  halfHeight, -halfLength}, -zAxis, {0.0f, 1.0f}},
+        {{-halfWidth, -halfHeight, -halfLength}, -zAxis, {0.0f, 0.0f}},
+
+        {{-halfWidth, -halfHeight,  halfLength}, +zAxis, {0.0f, 0.0f}},
+        {{ halfWidth, -halfHeight,  halfLength}, +zAxis, {1.0f, 0.0f}},
+        {{ halfWidth,  halfHeight,  halfLength}, +zAxis, {1.0f, 1.0f}},
+        {{ halfWidth,  halfHeight,  halfLength}, +zAxis, {1.0f, 1.0f}},
+        {{-halfWidth,  halfHeight,  halfLength}, +zAxis, {0.0f, 1.0f}},
+        {{-halfWidth, -halfHeight,  halfLength}, +zAxis, {0.0f, 0.0f}},
+
+        {{-halfWidth,  halfHeight,  halfLength}, -xAxis, {1.0f, 0.0f}},
+        {{-halfWidth,  halfHeight, -halfLength}, -xAxis, {1.0f, 1.0f}},
+        {{-halfWidth, -halfHeight, -halfLength}, -xAxis, {0.0f, 1.0f}},
+        {{-halfWidth, -halfHeight, -halfLength}, -xAxis, {0.0f, 1.0f}},
+        {{-halfWidth, -halfHeight,  halfLength}, -xAxis, {0.0f, 0.0f}},
+        {{-halfWidth,  halfHeight,  halfLength}, -xAxis, {1.0f, 0.0f}},
+
+        {{ halfWidth,  halfHeight,  halfLength}, +xAxis, {1.0f, 0.0f}},
+        {{ halfWidth,  halfHeight, -halfLength}, +xAxis, {1.0f, 1.0f}},
+        {{ halfWidth, -halfHeight, -halfLength}, +xAxis, {0.0f, 1.0f}},
+        {{ halfWidth, -halfHeight, -halfLength}, +xAxis, {0.0f, 1.0f}},
+        {{ halfWidth, -halfHeight,  halfLength}, +xAxis, {0.0f, 0.0f}},
+        {{ halfWidth,  halfHeight,  halfLength}, +xAxis, {1.0f, 0.0f}},
+
+        {{-halfWidth, -halfHeight, -halfLength}, -yAxis, {0.0f, 1.0f}},
+        {{ halfWidth, -halfHeight, -halfLength}, -yAxis, {1.0f, 1.0f}},
+        {{ halfWidth, -halfHeight,  halfLength}, -yAxis, {1.0f, 0.0f}},
+        {{ halfWidth, -halfHeight,  halfLength}, -yAxis, {1.0f, 0.0f}},
+        {{-halfWidth, -halfHeight,  halfLength}, -yAxis, {0.0f, 0.0f}},
+        {{-halfWidth, -halfHeight, -halfLength}, -yAxis, {0.0f, 1.0f}},
+
+        {{-halfWidth,  halfHeight, -halfLength}, +yAxis, {0.0f, 1.0f}},
+        {{ halfWidth,  halfHeight, -halfLength}, +yAxis, {1.0f, 1.0f}},
+        {{ halfWidth,  halfHeight,  halfLength}, +yAxis, {1.0f, 0.0f}},
+        {{ halfWidth,  halfHeight,  halfLength}, +yAxis, {1.0f, 0.0f}},
+        {{-halfWidth,  halfHeight,  halfLength}, +yAxis, {0.0f, 0.0f}},
+        {{-halfWidth,  halfHeight, -halfLength}, +yAxis, {0.0f, 1.0f}}
+	};
+
+    for (auto i = 0; i < 6; ++i)
+    {
+        auto base = 6 * i;
+        for (auto j = 0; j < 6; ++j)
+        {
+            indices.push_back(base+j);
+        }
+    }
+
+    return std::make_shared<Mesh<VertexNormalTexCoords>>(vertices, indices);
+}
+
 Mesh<VertexNormalTexCoords> createCylinder(
     float height, float radius, float circleSubdivisions
 )
@@ -144,7 +213,7 @@ Mesh<VertexNormalTexCoords> createCylinder(
         {
             float theta = 2.0f * common::pif()
                 * angleStep/static_cast<float>(circleSubdivisions);
-            
+
             float fx = sinf(theta);
             float fz = cosf(theta);
 
@@ -183,7 +252,7 @@ Mesh<VertexNormalTexCoords> createSphere(
              longtitude < longtitudeSubdivisions;
              ++longtitude)
         {
-            float theta = 2.0f * common::pif() * 
+            float theta = 2.0f * common::pif() *
                 latitude / static_cast<float>(latitudeSubdivisions);
             float phi = common::pif() *
                 longtitude / (static_cast<float>(longtitudeSubdivisions) - 1);
@@ -217,7 +286,7 @@ Mesh<VertexNormalTexCoords> createSphere(
              ++longtitude)
         {
             int baseIndex = latitude * longtitudeSubdivisions + longtitude;
-            int neighbourIndex = ((latitude + 1) % latitudeSubdivisions) 
+            int neighbourIndex = ((latitude + 1) % latitudeSubdivisions)
                 * longtitudeSubdivisions + longtitude;
 
             indices.push_back(baseIndex);
