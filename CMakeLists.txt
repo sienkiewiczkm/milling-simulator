@@ -58,6 +58,8 @@ include_directories(
 add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BasicEffect.cpp
     src/mill-gui/BoundariesMillingTechnique.cpp
+    src/mill-gui/SimulationModeController.cpp
+    src/mill-gui/DesignModeController.cpp
     src/mill-gui/BsplineBasisEvaluator.cpp
     src/mill-gui/BsplineEquidistantKnotGenerator.cpp
     src/mill-gui/BsplineNonVanishingReparametrization.cpp

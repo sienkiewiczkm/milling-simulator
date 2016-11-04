@@ -1,29 +1,20 @@
 #pragma once
 
-#include "CuttingToolGUI.hpp"
-#include "CuttingToolModel.hpp"
-#include "HeightmapGeometry.hpp"
 #include "OpenGLApplication.hpp"
 #include "OrbitingCamera.hpp"
-#include "TexturedPhongEffect.hpp"
-#include "CuttingToolController.hpp"
-#include "MillPathFormatReader.hpp"
-#include "HeightmapVisualizationEffect.hpp"
-#include "HeightmapTextureConverter.hpp"
-#include "MillingBlock.hpp"
-#include "ProgramManagerGUI.hpp"
-#include "MillingProgramExecutor.hpp"
-#include "MillingProgramExecutorGUI.hpp"
-#include "MillingBlockCreationWindow.hpp"
-#include "BsplineSurface.hpp"
+
+#include "SimulationModeController.hpp"
+#include "DesignModeController.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
-#include <ImGuizmo.h>
-
-class ShaderProgram;
+enum class MillerAppMode
+{
+    Simulation,
+    Design
+};
 
 class MillerApplication :
     public OpenGLApplication
@@ -47,57 +38,21 @@ protected:
 
 protected:
     void updateMainMenuBar();
-    bool isGUIHidden();
-    void updateMillingErrorPopup();
-
-    void updateRenderables();
-    void updateCuttingTool();
-
-    bool isGeometryRenderingEnabled();
-    void renderSceneGeometry();
 
 private:
-    unsigned int _heightmapResolutionX;
-    unsigned int _heightmapResolutionY;
-
     unsigned int _frame;
-
-    bool _newBlockRequested;
-
     float _mouseSensitivity;
     glm::vec2 _lastMousePosition;
-
-    TexturedPhongEffect _effect;
-
-    std::shared_ptr<ms::MillingBlock> _block;
-
-    GLuint _texture;
-
     bool _showImguiDemo;
-    bool _showProgramManager;
+
+    std::shared_ptr<ms::IModeController> _activeMode;
+    std::shared_ptr<ms::SimulationModeController> _simulationMode;
+    std::shared_ptr<ms::DesignModeController> _designMode;
 
     OrbitingCamera _camera;
-    std::shared_ptr<ms::ProgramManagerGUI> _programManagerGUI;
-    std::shared_ptr<ms::CuttingToolController> _toolController;
-    std::shared_ptr<ms::MillingProgramExecutor> _programExecutor;
-    std::shared_ptr<ms::MillingProgramExecutorGUI> _programExecutorGUI;
-    std::shared_ptr<ms::MillingBlockCreationWindow> _createBlockGUI;
-
-    CuttingToolModel _cuttingTool;
-    CuttingToolGUI _cuttingToolGUI;
-
-    std::vector<ms::PathMovement> _movements;
-    int _currentMoveIndex;
-
-    std::vector<std::shared_ptr<fw::IParametricSurfaceUV>> _loadedObjects;
-    std::vector<std::shared_ptr<Mesh<VertexNormalTexCoords>>>
-        _loadedObjectMeshes;
-
-    ImGuizmo::OPERATION _activeOperation;
-    glm::mat4 _loadedModelMatrix;
+    MillerAppMode _appMode, _previousAppMode;
 
     double _lastTime;
     double _currentTime;
     double _deltaTime;
-    ms::MillingError _lastErrorState;
 };

@@ -15,8 +15,8 @@ public:
 
   void rotate(float dx, float dy);
 
-  glm::mat4 getViewMatrix();
-  glm::vec3 getPosition();
+  glm::mat4 getViewMatrix() const;
+  glm::vec3 getPosition() const;
 
 private:
   float _xMin, _xMax;

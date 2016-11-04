@@ -2,12 +2,9 @@
 #include "Shaders.hpp"
 #include "ImGuiBinding.hpp"
 #include "Config.hpp"
-#include "TextureUtils.hpp"
-#include "MillPathFormatReader.hpp"
-#include "BsplineEquidistantKnotGenerator.hpp"
-#include "ParametricSurfaceMeshBuilder.hpp"
-#include "BsplineNonVanishingReparametrization.hpp"
-#include "CadioModelLoader.hpp"
+
+#include "SimulationModeController.hpp"
+#include "DesignModeController.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -23,19 +20,9 @@ using namespace std;
 
 MillerApplication::MillerApplication() :
     _frame(0),
-    _newBlockRequested(false),
     _mouseSensitivity(0.05f),
-    _heightmapResolutionX(32),
-    _heightmapResolutionY(32),
-    _showImguiDemo(false),
-    _showProgramManager(false),
-    _lastErrorState(MillingError::None),
-    _activeOperation{ImGuizmo::TRANSLATE}
+    _showImguiDemo(false)
 {
-    _loadedModelMatrix = glm::scale(
-        glm::mat4(),
-        glm::vec3(10.0f, 10.0f, 10.0f)
-    );
 }
 
 MillerApplication::~MillerApplication()
@@ -48,51 +35,18 @@ void MillerApplication::onCreate()
     _lastMousePosition = getMousePosition();
     _camera.setDist(100.0f);
 
-    _effect.create();
-    _texture = loadTextureFromFile(RESOURCE("textures/opengameart-metal.jpg"));
+    _simulationMode = std::make_shared<SimulationModeController>();
+    _simulationMode->setWindow(_window);
+    _simulationMode->onCreate();
+    _simulationMode->onActivate();
 
-    _block = make_shared<MillingBlock>();
-    _block->setTexture(_texture);
+    _designMode = std::make_shared<DesignModeController>();
+    _designMode->setWindow(_window);
+    _designMode->onCreate();
 
-    _cuttingTool.create(10.0f, 10.0f, 0.0f, 30.0f, 3.5f, 3.5f);
-    _toolController = make_shared<CuttingToolController>();
-    _toolController->setMovementSpeed(25.0f);
-    _toolController->setStartingPosition(_block->getSafePosition());
-
-    _programExecutor = make_shared<MillingProgramExecutor>(
-        _toolController
+    _activeMode = std::static_pointer_cast<ms::IModeController>(
+        _simulationMode
     );
-
-    _programExecutor->setMillingBlock(_block);
-
-    _programExecutorGUI = make_shared<MillingProgramExecutorGUI>(
-        _programExecutor
-    );
-
-    _programManagerGUI = make_shared<ProgramManagerGUI>(
-        _programExecutor
-    );
-
-    _createBlockGUI = make_shared<MillingBlockCreationWindow>();
-
-    _cuttingToolGUI.setController(_toolController);
-    _cuttingToolGUI.setVisibility(_showProgramManager);
-    _cuttingToolGUI.setWindowName("Cutting tool controller");
-
-    _programManagerGUI->setVisibility(_showProgramManager);
-
-    CadioModelLoader loader;
-    _loadedObjects = loader.loadModel(RESOURCE("models/sienkiewiczk.model"));
-
-    ParametricSurfaceMeshBuilder parametricBuilder;
-    parametricBuilder.setSamplingResolution(glm::ivec2(16, 16));
-
-    for (const auto &object: _loadedObjects)
-    {
-        _loadedObjectMeshes.push_back(
-            parametricBuilder.build(object)
-        );
-    }
 }
 
 void MillerApplication::onDestroy()
@@ -102,6 +56,7 @@ void MillerApplication::onDestroy()
 
 void MillerApplication::onUpdate()
 {
+    _previousAppMode = _appMode;
     ++_frame;
 
     ImGuiBinding::newFrame();
@@ -115,43 +70,26 @@ void MillerApplication::onUpdate()
 
     updateMainMenuBar();
 
-    if (_newBlockRequested)
+    if (_appMode != _previousAppMode)
     {
-        _newBlockRequested = false;
-        _createBlockGUI->open();
+        _activeMode->onDeactivate();
+
+        switch (_appMode)
+        {
+        case MillerAppMode::Simulation:
+            _activeMode = std::static_pointer_cast<ms::IModeController>(
+                _simulationMode
+            );
+            break;
+        case MillerAppMode::Design:
+            _activeMode = std::static_pointer_cast<ms::IModeController>(
+                _designMode
+            );
+            break;
+        }
     }
 
-    if (!isGUIHidden())
-    {
-        _createBlockGUI->update();
-        _cuttingToolGUI.update();
-        _programManagerGUI->update();
-    }
-
-    _programExecutorGUI->update();
-
-    auto newBlock = _createBlockGUI->getNewBlock();
-    if (newBlock != nullptr)
-    {
-        _block = newBlock;
-        _block->setTexture(_texture);
-        _programExecutor->setMillingBlock(_block);
-        _toolController->setStartingPosition(_block->getSafePosition());
-    }
-
-    auto errorState = _programExecutor->update(_deltaTime);
-    if (errorState != MillingError::None)
-    {
-        _lastErrorState = errorState;
-    }
-
-    if ( _lastErrorState != MillingError::None)
-    {
-        ImGui::OpenPopup("Milling error");
-    }
-
-    updateMillingErrorPopup();
-    updateRenderables();
+    _activeMode->onUpdate(_deltaTime);
 
     if (_showImguiDemo) {
         ImGui::ShowTestWindow();
@@ -169,10 +107,7 @@ void MillerApplication::onRender()
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (isGeometryRenderingEnabled())
-    {
-        renderSceneGeometry();
-    }
+    _activeMode->onRender(_camera);
 
     ImGui::Render();
 }
@@ -199,20 +134,7 @@ void MillerApplication::onKey(int key, int scancode, int action, int mods)
     if (io.WantCaptureKeyboard)
         return;
 
-    switch (key)
-    {
-    case GLFW_KEY_Q:
-        break;
-    case GLFW_KEY_W:
-        _activeOperation = ImGuizmo::TRANSLATE;
-        break;
-    case GLFW_KEY_E:
-        _activeOperation = ImGuizmo::ROTATE;
-        break;
-    case GLFW_KEY_R:
-        _activeOperation = ImGuizmo::SCALE;
-        break;
-    }
+    _activeMode->onKey(key, scancode, action, mods);
 }
 
 void MillerApplication::onChar(unsigned int c)
@@ -224,6 +146,7 @@ void MillerApplication::handleInput()
 {
     ImGuiIO &io = ImGui::GetIO();
 
+    /* todo: move to framework */
     auto mousePosition = getMousePosition();
     auto movement = (mousePosition - _lastMousePosition)*_mouseSensitivity;
     _lastMousePosition = mousePosition;
@@ -233,148 +156,34 @@ void MillerApplication::handleInput()
     {
         _camera.rotate(movement.y, movement.x);
     }
-
 }
 
 void MillerApplication::updateMainMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("File"))
+        if (ImGui::BeginMenu("Mode"))
         {
-            if(ImGui::MenuItem("New"))
+            bool isInSimulationMode = _appMode == MillerAppMode::Simulation;
+            bool isInDesignMode = _appMode == MillerAppMode::Design;
+
+            if (ImGui::MenuItem("Simulation", nullptr, &isInSimulationMode))
             {
-                _newBlockRequested = true;
+                _appMode = MillerAppMode::Simulation;
+            }
+
+            if (ImGui::MenuItem("Design", nullptr, &isInDesignMode))
+            {
+                _appMode = MillerAppMode::Design;
             }
 
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Tools"))
-        {
-            ImGui::MenuItem(
-                "Program manager",
-                nullptr,
-                _programManagerGUI->getVisibilityFlagPointer()
-            );
-
-            ImGui::MenuItem(
-                "ImGui Test Window",
-                nullptr,
-                &_showImguiDemo
-            );
-
-            ImGui::EndMenu();
-        }
+        _activeMode->updateMainMenuBar();
 
         ImGui::EndMainMenuBar();
     }
 }
 
-bool MillerApplication::isGUIHidden()
-{
-    return _programExecutor->isInFastForwardMode();
-}
-
-void MillerApplication::updateMillingErrorPopup()
-{
-    if (ImGui::BeginPopupModal(
-            "Milling error",
-            nullptr,
-            ImGuiWindowFlags_AlwaysAutoResize
-        ))
-    {
-        std::string errorText = "Unknown error.";
-        switch (_lastErrorState)
-        {
-        case MillingError::None:
-            errorText = "No error. Weird.";
-            break;
-        case MillingError::SafeZoneReached:
-            errorText = "Tool has reached the safe zone. Check your program.";
-            break;
-        case MillingError::DrillingHolesWithFlatTool:
-            errorText = "Cannot drill holes using flat tool.";
-            break;
-        case MillingError::FastMovementCollision:
-            errorText = "Tool cannot touch the material during fast move.";
-            break;
-        }
-
-        ImGui::TextColored(
-            ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
-            errorText.c_str()
-        );
-
-        if (ImGui::Button("OK"))
-        {
-            ImGui::CloseCurrentPopup();
-            _lastErrorState = MillingError::None;
-        }
-
-        ImGui::EndPopup();
-    }
-}
-
-void MillerApplication::updateRenderables()
-{
-    updateCuttingTool();
-    _block->update();
-}
-
-void MillerApplication::updateCuttingTool()
-{
-    glm::mat4 toolHeightMatrix = glm::translate(
-        glm::dmat4(),
-        _toolController->getCurrentPosition()
-    );
-
-    _cuttingTool.ensureCompability(_toolController->getCuttingToolParams());
-    _cuttingTool.setModelMatrix(toolHeightMatrix);
-}
-
-bool MillerApplication::isGeometryRenderingEnabled()
-{
-    return !(_programExecutor->isInFastForwardMode());
-}
-
-void MillerApplication::renderSceneGeometry()
-{
-    int display_w, display_h;
-    glfwGetFramebufferSize(_window, &display_w, &display_h);
-
-    glm::mat4 model, view, projection;
-    float aspectRatio = (float)display_w/display_h;
-
-    model = glm::scale(glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f));
-    view = _camera.getViewMatrix();
-    projection = glm::perspective(45.0f, aspectRatio, 5.0f, 700.0f);
-
-    ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
-        _activeOperation, ImGuizmo::LOCAL,
-        glm::value_ptr(_loadedModelMatrix),
-        nullptr,
-        nullptr
-    );
-
-    _effect.begin();
-    _effect.setModelMatrix(model);
-    _effect.setViewMatrix(view);
-    _effect.setProjectionMatrix(projection);
-    _effect.setTexture(_texture);
-    //_cuttingTool.render(&_effect);
-    _effect.setModelMatrix(_loadedModelMatrix);
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    for (const auto &mesh: _loadedObjectMeshes)
-    {
-        mesh->render();
-    }
-
-    _effect.end();
-
-    //_block->setViewMatrix(view);
-    //_block->setProjectionMatrix(projection);
-    //_block->render();
-}
 
