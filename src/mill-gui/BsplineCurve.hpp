@@ -19,19 +19,24 @@ public:
     BsplineCurve(
         int degree,
         std::vector<TPoint> controlPoints,
-        std::vector<TFloating> knots
+        std::vector<TFloating> knots,
+        int derivativeOrder = 0
     );
     virtual ~BsplineCurve() = default;
 
-    virtual TPoint evaluate(TFloating parameter) override;
+    virtual TPoint evaluate(TFloating parameter) const override;
+    virtual std::shared_ptr<ICurve<TPoint, TFloating>> getDerivativeCurve(
+    ) const override;
 
 private:
     int _degree;
+    int _derivativeOrder;
     std::vector<TPoint> _controlPoints;
     std::vector<TFloating> _knots;
     std::shared_ptr<BsplineBasisEvaluator> _basisEvaluator;
     std::shared_ptr<LinearCombinationEvaluator<TPoint, TFloating>>
         _linearCombination;
+    mutable std::shared_ptr<BsplineCurve<TPoint, TFloating>> _derivativeCurve;
 };
 
 using BsplineCurve2f = BsplineCurve<glm::vec2, float>;
@@ -43,12 +48,19 @@ template<typename TPoint, typename TFloating>
 BsplineCurve<TPoint, TFloating>::BsplineCurve(
     int degree,
     std::vector<TPoint> controlPoints,
-    std::vector<TFloating> knots
+    std::vector<TFloating> knots,
+    int derivativeOrder
 ):
     _degree{degree},
-    _controlPoints{controlPoints},
+    _derivativeOrder{derivativeOrder},
+    _controlPoints(_derivativeOrder + controlPoints.size()),
     _knots{knots}
 {
+    for (auto i = 0; i < controlPoints.size(); ++i)
+    {
+        _controlPoints[_derivativeOrder + i] = controlPoints[i];
+    }
+
     _basisEvaluator = std::make_shared<BsplineBasisEvaluator>(
         _degree,
         _knots
@@ -62,9 +74,38 @@ BsplineCurve<TPoint, TFloating>::BsplineCurve(
 }
 
 template<typename TPoint, typename TFloating>
-TPoint BsplineCurve<TPoint, TFloating>::evaluate(TFloating parameter)
+TPoint BsplineCurve<TPoint, TFloating>::evaluate(TFloating parameter) const
 {
     return _linearCombination->evaluate(parameter);
+}
+
+template<typename TPoint, typename TFloating>
+std::shared_ptr<ICurve<TPoint, TFloating>>
+        BsplineCurve<TPoint, TFloating>::getDerivativeCurve() const
+{
+    if (_derivativeCurve == nullptr)
+    {
+        std::vector<TPoint> derivativeControlPoints(_controlPoints.size() - 1);
+        for (auto i = 0; i < _controlPoints.size() - 1; ++i)
+        {
+            auto coefficient = (_degree) / (_knots[i+_degree+1] - _knots[i+1]);
+            auto newControlPoint =
+                coefficient * (_controlPoints[i+1] - _controlPoints[i]);
+
+            derivativeControlPoints[i] = newControlPoint;
+        }
+
+        _derivativeCurve = std::make_shared<BsplineCurve<TPoint, TFloating>>(
+            _degree - 1,
+            derivativeControlPoints,
+            _knots,
+            _derivativeOrder + 1
+        );
+    }
+
+    return std::static_pointer_cast<ICurve<TPoint, TFloating>>(
+        _derivativeCurve
+    );
 }
 
 }

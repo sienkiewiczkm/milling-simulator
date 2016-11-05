@@ -31,10 +31,10 @@ public:
         auto basis = _basisEvaluator->evaluate(parameter);
 
         assert(basis.size() > 0);
-        assert(basis.size() == _controlPoints.size());
+        assert(basis.size() >= _controlPoints.size());
 
         TPoint output = basis[0] * _controlPoints[0];
-        for (auto i = 1; i < basis.size(); ++i)
+        for (auto i = 1; i < _controlPoints.size(); ++i)
         {
             output += basis[i] * _controlPoints[i];
         }
