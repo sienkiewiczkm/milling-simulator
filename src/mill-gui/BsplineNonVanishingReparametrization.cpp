@@ -14,6 +14,15 @@ BsplineNonVanishingReparametrization::~BsplineNonVanishingReparametrization()
 {
 }
 
+std::shared_ptr<ICurve3d>
+        BsplineNonVanishingReparametrization::getConstParameterCurve(
+    ParametrizationAxis constParameter,
+    double parameter
+) const
+{
+    return _bsplineSurface->getConstParameterCurve(constParameter, parameter);
+}
+
 glm::dvec3 BsplineNonVanishingReparametrization::getPosition(
     glm::dvec2 parametrization
 )

@@ -17,15 +17,13 @@ public:
         };
 
         _knots = { 0.0, 1.0/7, 2.0/7, 3.0/7, 4.0/7, 5.0/7, 6.0/7, 1.0 };
-        _knotGenerator = std::make_shared<IBsplineKnotGeneratorMock>();
-        EXPECT_CALL(*_knotGenerator, generate(4, 3))
-            .WillRepeatedly(Return(_knots));
 
         _surface = std::make_shared<fw::BsplineSurface>(
             3,
             glm::ivec2(4, 4),
             _controlPoints,
-            std::static_pointer_cast<fw::IBsplineKnotGenerator>(_knotGenerator)
+            _knots,
+            _knots
         );
     }
 
@@ -36,7 +34,6 @@ public:
 protected:
     std::vector<double> _knots;
     std::vector<glm::dvec3> _controlPoints;
-    std::shared_ptr<IBsplineKnotGeneratorMock> _knotGenerator;
     std::shared_ptr<fw::BsplineSurface> _surface;
 };
 

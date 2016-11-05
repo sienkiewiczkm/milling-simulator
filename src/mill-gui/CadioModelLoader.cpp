@@ -98,12 +98,20 @@ std::vector<std::shared_ptr<fw::IParametricSurfaceUV>>
                 : fw::SurfaceFoldingMode::ContinuousV;
         }
 
+        auto numControlPointsUFolded = numControlPointsU
+            + (foldingMode == fw::SurfaceFoldingMode::ContinuousU ? 3 : 0);
+
+        auto numControlPointsVFolded = numControlPointsV
+            + (foldingMode == fw::SurfaceFoldingMode::ContinuousV ? 3 : 0);
+
         auto bsplineSurface = std::make_shared<fw::BsplineSurface>(
             3,
             glm::ivec2(numControlPointsU, numControlPointsV),
             surfaceControlPoints,
-            knotGenerator,
-            foldingMode
+            knotGenerator->generate(numControlPointsUFolded, 3),
+            knotGenerator->generate(numControlPointsVFolded, 3),
+            foldingMode,
+            3
         );
 
         std::string fileLine;

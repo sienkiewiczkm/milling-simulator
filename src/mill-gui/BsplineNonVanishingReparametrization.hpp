@@ -2,6 +2,8 @@
 
 #include "BsplineSurface.hpp"
 
+#include <memory>
+
 namespace fw
 {
 
@@ -14,6 +16,11 @@ public:
     );
 
     virtual ~BsplineNonVanishingReparametrization();
+
+    virtual std::shared_ptr<ICurve3d> getConstParameterCurve(
+        ParametrizationAxis constParameter,
+        double parameter
+    ) const override;
 
     virtual glm::dvec3 getPosition(glm::dvec2 parametrization) override;
     virtual glm::dvec3 getNormal(glm::dvec2 parmetrization) override;

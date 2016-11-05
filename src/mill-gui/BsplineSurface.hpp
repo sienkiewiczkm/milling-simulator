@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LinearCombinationEvaluator.hpp"
 #include "IParametricSurfaceUV.hpp"
+#include "BsplineCurve.hpp"
 
 #include <glm/glm.hpp>
 
@@ -19,9 +19,8 @@ enum class SurfaceFoldingMode
     ContinuousV,
 };
 
-/** \brief BsplinePatch with maximum possible degree on edge.
- *
- */
+using BsplineCurve3d = BsplineCurve<glm::dvec3, double>;
+
 class BsplineSurface:
     public IParametricSurfaceUV
 {
@@ -30,8 +29,10 @@ public:
         int surfaceDegree,
         glm::ivec2 controlPointsGridSize,
         std::vector<glm::dvec3> controlPoints,
-        std::shared_ptr<IBsplineKnotGenerator> knotGenerator,
-        SurfaceFoldingMode foldingMode = SurfaceFoldingMode::None
+        std::vector<double> knotsU,
+        std::vector<double> knotsV,
+        SurfaceFoldingMode foldingMode = SurfaceFoldingMode::None,
+        int foldDepth = 3
     );
 
     virtual ~BsplineSurface();
@@ -39,35 +40,29 @@ public:
     virtual glm::dvec3 getPosition(glm::dvec2 parametrisation);
     virtual glm::dvec3 getNormal(glm::dvec2 parmetrisation);
 
+    virtual std::shared_ptr<ICurve3d> getConstParameterCurve(
+        ParametrizationAxis constParameter,
+        double parameter
+    ) const;
+
     int getDegree() const;
     const std::vector<glm::dvec3> &getControlPoints() const;
     const std::vector<double> &getKnotsOnU() const;
     const std::vector<double> &getKnotsOnV() const;
 
 protected:
-    enum class EvaluationDirection
-    {
-        AlongXAxis,
-        AlongYAxis
-    };
-
-    std::vector<glm::dvec3> evaluateSubcontrolPoints(
+    std::vector<glm::dvec3> evaluateConstParamControlPoints(
         int rowOrColumn,
-        EvaluationDirection direction
+        ParametrizationAxis constDirection
     ) const;
-
-    glm::dvec3 evaluateCurve(
-        const std::vector<glm::dvec3> &controlPoints,
-        double parameter
-    );
 
 private:
     int _degree;
+    int _foldDepth;
     glm::ivec2 _controlPointsGridSize;
     std::vector<glm::dvec3> _controlPoints;
-    std::shared_ptr<IBsplineKnotGenerator> _knotGenerator;
-    std::vector<double> _knotsX;
-    std::vector<double> _knotsY;
+    std::vector<double> _knotsU;
+    std::vector<double> _knotsV;
     SurfaceFoldingMode _foldingMode;
 };
 
