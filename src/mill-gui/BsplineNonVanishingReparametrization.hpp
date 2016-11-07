@@ -26,7 +26,7 @@ public:
     virtual glm::dvec3 getNormal(glm::dvec2 parmetrization) override;
 
 private:
-    glm::dvec2 calculateReparametrization(glm::dvec2 parametrization);
+    glm::dvec2 calculateReparametrization(glm::dvec2 parametrization) const;
 
     std::shared_ptr<BsplineSurface> _bsplineSurface;
 };

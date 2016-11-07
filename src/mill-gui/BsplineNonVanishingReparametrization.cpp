@@ -1,4 +1,5 @@
 #include "BsplineNonVanishingReparametrization.hpp"
+#include "BsplineNonVanishingCurveReparametrization.hpp"
 
 namespace fw
 {
@@ -20,15 +21,31 @@ std::shared_ptr<ICurve3d>
     double parameter
 ) const
 {
-    return _bsplineSurface->getConstParameterCurve(constParameter, parameter);
+    auto surfaceReparametrization =
+        calculateReparametrization({parameter, parameter});
+
+    auto bsplineCurve = _bsplineSurface->getConstParameterCurve(
+        constParameter,
+        constParameter == ParametrizationAxis::U
+            ? surfaceReparametrization.x
+            : surfaceReparametrization.y
+    );
+
+    return std::make_shared<BsplineNonVanishingCurveReparametrization3d>(
+        std::static_pointer_cast<BsplineCurve3d>(bsplineCurve)
+    );
 }
 
 glm::dvec3 BsplineNonVanishingReparametrization::getPosition(
     glm::dvec2 parametrization
 )
 {
+    return getConstParameterCurve(ParametrizationAxis::U, parametrization.x)
+        ->evaluate(parametrization.y);
+    /*
     auto reparametrization = calculateReparametrization(parametrization);
     return _bsplineSurface->getPosition(reparametrization);
+    */
 }
 
 glm::dvec3 BsplineNonVanishingReparametrization::getNormal(
@@ -41,7 +58,7 @@ glm::dvec3 BsplineNonVanishingReparametrization::getNormal(
 
 glm::dvec2 BsplineNonVanishingReparametrization::calculateReparametrization(
     glm::dvec2 parametrization
-)
+) const
 {
     auto knotsX = _bsplineSurface->getKnotsOnU();
     auto knotsY = _bsplineSurface->getKnotsOnV();

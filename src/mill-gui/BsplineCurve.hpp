@@ -24,9 +24,18 @@ public:
     );
     virtual ~BsplineCurve() = default;
 
+    int getDegree() const { return _degree; }
+    virtual const std::vector<TPoint> &getControlPoints() const;
+    virtual const std::vector<TFloating> &getKnots() const;
+
     virtual TPoint evaluate(TFloating parameter) const override;
+
     virtual std::shared_ptr<ICurve<TPoint, TFloating>> getDerivativeCurve(
     ) const override;
+
+    virtual std::shared_ptr<BsplineCurve<TPoint, TFloating>>
+            getBsplineDerivativeCurve(
+    ) const;
 
 private:
     int _degree;
@@ -80,8 +89,32 @@ TPoint BsplineCurve<TPoint, TFloating>::evaluate(TFloating parameter) const
 }
 
 template<typename TPoint, typename TFloating>
+const std::vector<TPoint> &BsplineCurve<TPoint, TFloating>::getControlPoints(
+) const
+{
+    return _controlPoints;
+}
+
+template<typename TPoint, typename TFloating>
+const std::vector<TFloating> &BsplineCurve<TPoint, TFloating>::getKnots(
+) const
+{
+    return _knots;
+}
+
+template<typename TPoint, typename TFloating>
 std::shared_ptr<ICurve<TPoint, TFloating>>
         BsplineCurve<TPoint, TFloating>::getDerivativeCurve() const
+{
+    return std::static_pointer_cast<ICurve<TPoint, TFloating>>(
+        getBsplineDerivativeCurve()
+    );
+}
+
+template<typename TPoint, typename TFloating>
+std::shared_ptr<BsplineCurve<TPoint, TFloating>>
+        BsplineCurve<TPoint, TFloating>::getBsplineDerivativeCurve(
+) const
 {
     if (_derivativeCurve == nullptr)
     {
@@ -103,9 +136,7 @@ std::shared_ptr<ICurve<TPoint, TFloating>>
         );
     }
 
-    return std::static_pointer_cast<ICurve<TPoint, TFloating>>(
-        _derivativeCurve
-    );
+    return _derivativeCurve;
 }
 
 }
