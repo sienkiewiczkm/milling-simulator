@@ -3,6 +3,8 @@
 #include <vector>
 #include <boost/filesystem.hpp>
 
+#include "MillPathFormatReader.hpp"
+
 namespace ms
 {
 

@@ -58,8 +58,6 @@ include_directories(
 add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BasicEffect.cpp
     src/mill-gui/BoundariesMillingTechnique.cpp
-    src/mill-gui/SimulationModeController.cpp
-    src/mill-gui/DesignModeController.cpp
     src/mill-gui/BsplineBasisEvaluator.cpp
     src/mill-gui/BsplineEquidistantKnotGenerator.cpp
     src/mill-gui/BsplineNonVanishingReparametrization.cpp
@@ -71,6 +69,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/CuttingToolModel.cpp
     src/mill-gui/CuttingToolParams.cpp
     src/mill-gui/DebugShapes.cpp
+    src/mill-gui/DesignModeController.cpp
     src/mill-gui/Effect.cpp
     src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/HeightmapTextureConverter.cpp
@@ -87,8 +86,10 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/OrbitingCamera.cpp
     src/mill-gui/ParametricSurfaceMeshBuilder.cpp
     src/mill-gui/ProgramManagerGUI.cpp
+    src/mill-gui/RoughMillingPathGenerator.cpp
     src/mill-gui/SamplingMillingTechnique.cpp
     src/mill-gui/Shaders.cpp
+    src/mill-gui/SimulationModeController.cpp
     src/mill-gui/StbImplementation.c
     src/mill-gui/TextureUtils.cpp
     src/mill-gui/TexturedPhongEffect.cpp

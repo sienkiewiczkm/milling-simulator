@@ -12,6 +12,9 @@
 #include "BsplineEquidistantKnotGenerator.hpp"
 #include "ParametricSurfaceMeshBuilder.hpp"
 #include "BsplineNonVanishingReparametrization.hpp"
+#include "MillingProgramExecutor.hpp"
+
+#include "RoughMillingPathGenerator.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -41,6 +44,8 @@ public:
     virtual void updateMainMenuBar();
     virtual void onKey(int key, int scancode, int action, int mods);
 
+    std::shared_ptr<MillingProgramExecutor> executor;
+
 protected:
     GLFWwindow *_window;
 
@@ -60,6 +65,8 @@ private:
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _baseBox;
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _blockBoxLimits;
     glm::mat4 _baseBoxModelMatrix, _blockBoxLimitsModelMatrix;
+
+    std::shared_ptr<RoughMillingPathGenerator> _roughPathGenerator;
 
     ImGuizmo::OPERATION _activeOperation;
     glm::mat4 _loadedModelMatrix;

@@ -44,6 +44,8 @@ void MillerApplication::onCreate()
     _designMode->setWindow(_window);
     _designMode->onCreate();
 
+    _designMode->executor = _simulationMode->getProgramExecutor();
+
     _activeMode = std::static_pointer_cast<ms::IModeController>(
         _simulationMode
     );

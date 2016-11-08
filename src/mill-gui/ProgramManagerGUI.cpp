@@ -1,5 +1,5 @@
 #include "ProgramManagerGUI.hpp"
-#include "Config.hpp" 
+#include "Config.hpp"
 #include "MillPathFormatReader.hpp"
 #include "MillingProgramExecutor.hpp"
 

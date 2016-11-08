@@ -32,16 +32,6 @@ void DesignModeController::onCreate()
     CadioModelLoader loader;
     _loadedObjects = loader.loadModel(RESOURCE("models/sienkiewiczk.model"));
 
-    fw::ParametricSurfaceMeshBuilder parametricBuilder;
-    parametricBuilder.setSamplingResolution(glm::ivec2(16, 16));
-
-    for (const auto &object: _loadedObjects)
-    {
-        _loadedObjectMeshes.push_back(
-            parametricBuilder.build(object)
-        );
-    }
-
     _loadedModelMatrix = glm::translate(
         _loadedModelMatrix,
         glm::vec3{0, 21.35f, 0}
@@ -57,6 +47,26 @@ void DesignModeController::onCreate()
         _loadedModelMatrix,
         glm::vec3(23.06f, 23.06f, 23.06f)
     );
+
+    fw::ParametricSurfaceMeshBuilder parametricBuilder;
+    parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
+
+    _roughPathGenerator = std::make_shared<RoughMillingPathGenerator>();
+    _roughPathGenerator->setCuttingToolRadius(8.0f);
+    _roughPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
+    _roughPathGenerator->setWorkingAreaResolution({300, 300});//0.5mm
+
+    for (const auto &object: _loadedObjects)
+    {
+        _loadedObjectMeshes.push_back(
+            parametricBuilder.build(object)
+        );
+
+        _roughPathGenerator->addParametricSurface(
+            object,
+            _loadedModelMatrix
+        );
+    }
 
     createMeshes();
 }
@@ -75,6 +85,21 @@ void DesignModeController::onDestroy()
 
 void DesignModeController::onUpdate(float deltaTime)
 {
+    if (ImGui::Begin("Baking process"))
+    {
+        if (ImGui::Button("Rough milling process"))
+        {
+            _roughPathGenerator->bake();
+            auto program = _roughPathGenerator->buildPaths();
+
+            executor->setProgram("Local program", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 8.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+    }
+    ImGui::End();
 }
 
 void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)

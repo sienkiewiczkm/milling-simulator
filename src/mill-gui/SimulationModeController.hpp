@@ -47,6 +47,8 @@ public:
     virtual void onKey(int key, int scancode, int action, int mods);
     virtual void updateMainMenuBar();
 
+    std::shared_ptr<ms::MillingProgramExecutor> getProgramExecutor();
+
 protected:
     GLFWwindow *_window;
 

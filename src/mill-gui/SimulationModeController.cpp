@@ -245,4 +245,10 @@ void SimulationModeController::onKey(int key, int scancode, int action, int mods
 {
 }
 
+std::shared_ptr<ms::MillingProgramExecutor>
+    SimulationModeController::getProgramExecutor()
+{
+    return _programExecutor;
+}
+
 }
