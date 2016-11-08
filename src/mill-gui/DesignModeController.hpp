@@ -13,6 +13,7 @@
 #include "ParametricSurfaceMeshBuilder.hpp"
 #include "BsplineNonVanishingReparametrization.hpp"
 #include "MillingProgramExecutor.hpp"
+#include "PolygonalLine.hpp"
 
 #include "RoughMillingPathGenerator.hpp"
 
@@ -51,6 +52,7 @@ protected:
 
 private:
     void createMeshes();
+    void updateMainWindow();
 
     GLuint _texture;
     TexturedPhongEffect _effect;
@@ -70,6 +72,10 @@ private:
 
     ImGuizmo::OPERATION _activeOperation;
     glm::mat4 _loadedModelMatrix;
+
+    int _selectedGizmo;
+    bool _displayLimits;
+    bool _gizmosEnabled;
 };
 
 }
