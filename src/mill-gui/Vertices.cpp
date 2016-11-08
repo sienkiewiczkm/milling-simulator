@@ -1,5 +1,46 @@
 #include "Vertices.hpp"
 
+namespace fw
+{
+
+VertexColor::VertexColor()
+{
+}
+
+VertexColor::VertexColor(
+    glm::vec3 position,
+    glm::vec3 color
+):
+    position{position},
+    color{color}
+{
+}
+
+void VertexColor::setupAttribPointers()
+{
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexColor),
+        (GLvoid*)0
+    );
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexColor),
+        (GLvoid*)offsetof(VertexColor, color)
+    );
+}
+
+}
+
 VertexNormalTexCoords::VertexNormalTexCoords()
 {
 }
@@ -15,12 +56,12 @@ VertexNormalTexCoords::VertexNormalTexCoords(
 void VertexNormalTexCoords::setupAttribPointers()
 {
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
         sizeof(VertexNormalTexCoords), (GLvoid*)0);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
-        sizeof(VertexNormalTexCoords), 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+        sizeof(VertexNormalTexCoords),
         (GLvoid*)offsetof(VertexNormalTexCoords, normal));
 
     glEnableVertexAttribArray(2);
@@ -47,14 +88,14 @@ Vertex3D2TexCoord::Vertex3D2TexCoord(
 void Vertex3D2TexCoord::setupAttribPointers()
 {
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
         sizeof(Vertex3D2TexCoord),
         reinterpret_cast<GLvoid*>(0)
     );
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 
-        sizeof(Vertex3D2TexCoord), 
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex3D2TexCoord),
         reinterpret_cast<GLvoid*>(offsetof(Vertex3D2TexCoord, texCoord1))
     );
 
@@ -85,20 +126,20 @@ Vertex3DNormal2TexCoord::Vertex3DNormal2TexCoord(
 void Vertex3DNormal2TexCoord::setupAttribPointers()
 {
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
         sizeof(Vertex3DNormal2TexCoord),
         reinterpret_cast<GLvoid*>(0)
     );
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
         sizeof(Vertex3DNormal2TexCoord),
         reinterpret_cast<GLvoid*>(offsetof(Vertex3DNormal2TexCoord, normal))
     );
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 
-        sizeof(Vertex3DNormal2TexCoord), 
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex3DNormal2TexCoord),
         reinterpret_cast<GLvoid*>(offsetof(Vertex3DNormal2TexCoord, texCoord1))
     );
 

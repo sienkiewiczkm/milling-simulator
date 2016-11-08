@@ -85,6 +85,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
     src/mill-gui/ParametricSurfaceMeshBuilder.cpp
+    src/mill-gui/PolygonalLine.cpp
     src/mill-gui/ProgramManagerGUI.cpp
     src/mill-gui/RoughMillingPathGenerator.cpp
     src/mill-gui/SamplingMillingTechnique.cpp

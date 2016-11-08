@@ -3,6 +3,25 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+namespace fw
+{
+
+struct VertexColor
+{
+    VertexColor();
+    VertexColor(
+        glm::vec3 position,
+        glm::vec3 color
+    );
+
+    glm::vec3 position;
+    glm::vec3 color;
+
+    static void setupAttribPointers();
+};
+
+}
+
 struct VertexNormalTexCoords
 {
     VertexNormalTexCoords();
