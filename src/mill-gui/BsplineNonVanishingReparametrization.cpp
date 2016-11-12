@@ -42,18 +42,48 @@ glm::dvec3 BsplineNonVanishingReparametrization::getPosition(
 {
     return getConstParameterCurve(ParametrizationAxis::U, parametrization.x)
         ->evaluate(parametrization.y);
-    /*
-    auto reparametrization = calculateReparametrization(parametrization);
-    return _bsplineSurface->getPosition(reparametrization);
-    */
 }
 
 glm::dvec3 BsplineNonVanishingReparametrization::getNormal(
-    glm::dvec2 parametrization
+    glm::dvec2 parametrisation
 )
 {
-    auto reparametrization = calculateReparametrization(parametrization);
-    return _bsplineSurface->getNormal(reparametrization);
+    auto du = getDerivativeU(parametrisation);
+    auto dv = getDerivativeV(parametrisation);
+    return glm::normalize(glm::cross(dv, du));
+}
+
+glm::dvec3 BsplineNonVanishingReparametrization::getDerivativeU(
+    glm::dvec2 parametrisation
+)
+{
+    auto derivFactors = calculateReparametrizationDerivativeFactors();
+    return derivFactors.y *
+        getConstParameterCurve(ParametrizationAxis::V, parametrisation.y)
+            ->getDerivativeCurve()->evaluate(parametrisation.x);
+}
+
+glm::dvec3 BsplineNonVanishingReparametrization::getDerivativeV(
+    glm::dvec2 parametrisation
+)
+{
+    auto derivFactors = calculateReparametrizationDerivativeFactors();
+    return derivFactors.x *
+        getConstParameterCurve(ParametrizationAxis::U, parametrisation.x)
+            ->getDerivativeCurve()->evaluate(parametrisation.y);
+}
+
+glm::dvec2 BsplineNonVanishingReparametrization::
+        calculateReparametrizationDerivativeFactors() const
+{
+    auto knotsX = _bsplineSurface->getKnotsOnU();
+    auto knotsY = _bsplineSurface->getKnotsOnV();
+    auto degree = _bsplineSurface->getDegree();
+    auto duFactor = knotsX[knotsX.size() - degree - 1] - knotsX[degree];
+    auto dvFactor = knotsY[knotsY.size() - degree - 1] - knotsY[degree];
+    // todo: investigate why intersection works better with ones
+    //return {duFactor, dvFactor};
+    return {1.0, 1.0};
 }
 
 glm::dvec2 BsplineNonVanishingReparametrization::calculateReparametrization(

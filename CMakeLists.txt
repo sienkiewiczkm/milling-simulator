@@ -84,6 +84,8 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/MillingProgramExecutorGUI.cpp
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
+    src/mill-gui/ParametricSurfaceClosestPointNaiveFinder.cpp
+    src/mill-gui/ParametricSurfaceIntersectionFinder.cpp
     src/mill-gui/ParametricSurfaceMeshBuilder.cpp
     src/mill-gui/PolygonalLine.cpp
     src/mill-gui/ProgramManagerGUI.cpp
@@ -92,6 +94,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/Shaders.cpp
     src/mill-gui/SimulationModeController.cpp
     src/mill-gui/StbImplementation.c
+    src/mill-gui/SurfaceIntersectionNewtonIterable.cpp
     src/mill-gui/TextureUtils.cpp
     src/mill-gui/TexturedPhongEffect.cpp
     src/mill-gui/Vertices.cpp

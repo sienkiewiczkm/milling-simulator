@@ -68,6 +68,8 @@ private:
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _blockBoxLimits;
     glm::mat4 _baseBoxModelMatrix, _blockBoxLimitsModelMatrix;
 
+    std::shared_ptr<fw::PolygonalLine> _intersection;
+
     std::shared_ptr<RoughMillingPathGenerator> _roughPathGenerator;
 
     ImGuizmo::OPERATION _activeOperation;

@@ -85,15 +85,23 @@ glm::dvec3 BsplineSurface::getPosition(glm::dvec2 parametrization)
         ->evaluate(parametrization.y);
 }
 
-glm::dvec3 BsplineSurface::getNormal(glm::dvec2 parametrization)
+glm::dvec3 BsplineSurface::getNormal(glm::dvec2 parametrisation)
 {
-    auto du = getConstParameterCurve(ParametrizationAxis::U, parametrization.x)
-        ->getDerivativeCurve()->evaluate(parametrization.y);
+    auto du = getDerivativeU(parametrisation);
+    auto dv = getDerivativeV(parametrisation);
+    return glm::normalize(glm::cross(dv, du));
+}
 
-    auto dv = getConstParameterCurve(ParametrizationAxis::V, parametrization.y)
-        ->getDerivativeCurve()->evaluate(parametrization.x);
+glm::dvec3 BsplineSurface::getDerivativeU(glm::dvec2 parametrisation)
+{
+    return getConstParameterCurve(ParametrizationAxis::V, parametrisation.y)
+        ->getDerivativeCurve()->evaluate(parametrisation.x);
+}
 
-    return glm::cross(du, dv);
+glm::dvec3 BsplineSurface::getDerivativeV(glm::dvec2 parametrisation)
+{
+    return getConstParameterCurve(ParametrizationAxis::U, parametrisation.x)
+        ->getDerivativeCurve()->evaluate(parametrisation.y);
 }
 
 int BsplineSurface::getDegree() const
@@ -159,5 +167,6 @@ std::vector<glm::dvec3> BsplineSurface::evaluateConstParamControlPoints(
 
     return subcontrolPoints;
 }
+
 
 }

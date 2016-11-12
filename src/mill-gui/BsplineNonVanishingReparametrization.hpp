@@ -24,8 +24,11 @@ public:
 
     virtual glm::dvec3 getPosition(glm::dvec2 parametrization) override;
     virtual glm::dvec3 getNormal(glm::dvec2 parmetrization) override;
+    virtual glm::dvec3 getDerivativeU(glm::dvec2 parametrisation) override;
+    virtual glm::dvec3 getDerivativeV(glm::dvec2 parametrisation) override;
 
 private:
+    glm::dvec2 calculateReparametrizationDerivativeFactors() const;
     glm::dvec2 calculateReparametrization(glm::dvec2 parametrization) const;
 
     std::shared_ptr<BsplineSurface> _bsplineSurface;

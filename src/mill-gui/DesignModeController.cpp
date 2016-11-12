@@ -1,5 +1,8 @@
 #include "DesignModeController.hpp"
 #include "DebugShapes.hpp"
+#include "ParametricSurfaceIntersectionFinder.hpp"
+
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <ImGuizmo.h>
 
@@ -71,6 +74,27 @@ void DesignModeController::onCreate()
             _loadedModelMatrix
         );
     }
+
+    fw::ParametricSurfaceIntersectionFinder intersectionFinder;
+    auto intersectionPoints = intersectionFinder.intersect(
+        _loadedObjects[0],
+        _loadedObjects[1],
+        //glm::dvec3{2.05, 1.8, 0.05}
+        //glm::dvec3{0.05, 1.8, 0.05}
+        glm::dvec3{-0.55, 1.8, 0.05}
+    );
+
+    std::vector<fw::VertexColor> intersectionVertices;
+    for (const auto &point: intersectionPoints)
+    {
+        intersectionVertices.push_back({
+            point.scenePosition, {1.0, 1.0, 1.0}
+        });
+    }
+
+    _intersection = std::make_shared<fw::PolygonalLine>(
+        intersectionVertices
+    );
 
     createMeshes();
 }
@@ -145,21 +169,32 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
     _baseBox->render();
 
     _effect.setModelMatrix(_loadedModelMatrix);
+    _intersection->render();
     for (const auto &mesh: _loadedObjectMeshes)
     {
         mesh->render();
     }
     _effect.end();
 
+    _basicEffect->begin();
+    _basicEffect->setViewMatrix(view);
+    _basicEffect->setProjectionMatrix(projection);
+    _basicEffect->setModelMatrix(_loadedModelMatrix);
+
+    glDisable(GL_DEPTH_TEST);
+    _intersection->render();
+    glEnable(GL_DEPTH_TEST);
+
     if (_displayLimits)
     {
-        _basicEffect->begin();
         _basicEffect->setModelMatrix(_blockBoxLimitsModelMatrix);
-        _basicEffect->setViewMatrix(view);
-        _basicEffect->setProjectionMatrix(projection);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         _blockBoxLimits->render();
-        _basicEffect->end();
+        glDisable(GL_BLEND);
     }
+
+    _basicEffect->end();
 }
 
 void DesignModeController::updateMainMenuBar()

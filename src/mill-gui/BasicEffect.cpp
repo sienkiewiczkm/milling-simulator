@@ -27,13 +27,10 @@ void BasicEffect::destroy()
 void BasicEffect::begin()
 {
     _shaderProgram->use();
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void BasicEffect::end()
 {
-    glDisable(GL_BLEND);
 }
 
 void BasicEffect::createShaders()
