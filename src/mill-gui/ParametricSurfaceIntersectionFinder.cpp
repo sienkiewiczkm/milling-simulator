@@ -32,7 +32,7 @@ std::vector<ParametricSurfaceIntersection>
     auto rhsClosest = closestPointFinder.find(*rhs);
 
     _newtonIterable.setCovergenceThreshold(0.00001);
-    _newtonIterable.setPlaneDistance(0.08);
+    _newtonIterable.setPlaneDistance(0.04);
     _newtonIterable.setSurfaces(lhs, rhs);
 
     _intersectionCurve.setLooping(true);

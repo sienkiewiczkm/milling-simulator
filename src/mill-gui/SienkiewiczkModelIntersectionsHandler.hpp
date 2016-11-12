@@ -33,8 +33,25 @@ protected:
         const std::vector<fw::ParametricSurfaceIntersection>& rhs
     );
 
+    enum class ContourMoveParameter
+    {
+        LHS,
+        RHS,
+    };
+
+    std::vector<glm::dvec3> moveContourAlongFlattenedNormal(
+        const std::vector<fw::ParametricSurfaceIntersection>& intersection,
+        std::shared_ptr<fw::IParametricSurfaceUV> surface,
+        ContourMoveParameter moveParameter,
+        double distance
+    );
+
     void makeRenderable(
         const std::vector<fw::ParametricSurfaceIntersection>& intersection
+    );
+
+    void makeRenderable(
+        const std::vector<glm::dvec3>& contour
     );
 
 private:

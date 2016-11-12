@@ -35,15 +35,50 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
     auto bodyFront =
         _intersectionFinder.intersect(_base, _body, bodyFrontSidePoint);
     auto handleOuter =
-        _intersectionFinder.intersect(_handle, _base, handleTop);
+        _intersectionFinder.intersect(_base, _handle, handleTop);
     auto drillLowerPart =
         _intersectionFinder.intersect(_base, _drill, drillLowerCorner);
     auto drillUpperPart =
         _intersectionFinder.intersect(_base, _drill, drillUpperCorner);
 
-    makeRenderable(joinIntersections(bodyBack, bodyFront));
-    makeRenderable(joinIntersections(drillLowerPart, drillUpperPart));
-    makeRenderable(handleOuter);
+    auto bodyDrill =
+        _intersectionFinder.intersect(_body, _drill, drillLowerCorner);
+    auto bodyUpperHandle =
+        _intersectionFinder.intersect(_body, _handle, handleHole1Inside);
+    auto bodyLowerHandle =
+        _intersectionFinder.intersect(_body, _handle, handleHole2Outside);
+
+    makeRenderable(bodyDrill);
+    makeRenderable(bodyUpperHandle);
+    makeRenderable(bodyLowerHandle);
+
+    auto moveDistance = 0.2;
+    auto bodyContour = joinIntersections(bodyBack, bodyFront);
+    makeRenderable(bodyContour);
+    makeRenderable(moveContourAlongFlattenedNormal(
+        bodyContour,
+        _body,
+        ContourMoveParameter::RHS,
+        moveDistance
+    ));
+
+    auto drillContour = drillLowerPart;
+    makeRenderable(drillLowerPart);
+    makeRenderable(moveContourAlongFlattenedNormal(
+        drillContour,
+        _drill,
+        ContourMoveParameter::RHS,
+        moveDistance
+    ));
+
+    auto handleContour = handleOuter;
+    makeRenderable(handleContour);
+    makeRenderable(moveContourAlongFlattenedNormal(
+        handleContour,
+        _handle,
+        ContourMoveParameter::RHS,
+        moveDistance
+    ));
 }
 
 std::vector<fw::ParametricSurfaceIntersection>
@@ -83,6 +118,33 @@ std::vector<fw::ParametricSurfaceIntersection>
     return output;
 }
 
+std::vector<glm::dvec3>
+        SienkiewiczkModelIntersectionsHandler::moveContourAlongFlattenedNormal(
+    const std::vector<fw::ParametricSurfaceIntersection>& intersection,
+    std::shared_ptr<fw::IParametricSurfaceUV> surface,
+    SienkiewiczkModelIntersectionsHandler::ContourMoveParameter moveParameter,
+    double distance
+)
+{
+    std::vector<glm::dvec3> output;
+
+    for (const auto &param: intersection)
+    {
+        glm::dvec2 parameter = moveParameter == ContourMoveParameter::LHS
+            ? param.lhsParameters
+            : param.rhsParameters;
+
+        auto normal = surface->getNormal(parameter);
+        normal.z = 0.0;
+        normal = glm::normalize(normal);
+
+        auto moved = param.scenePosition + distance * normal;
+        output.push_back(moved);
+    }
+
+    return output;
+}
+
 void SienkiewiczkModelIntersectionsHandler::makeRenderable(
     const std::vector<fw::ParametricSurfaceIntersection>& intersection
 )
@@ -92,6 +154,25 @@ void SienkiewiczkModelIntersectionsHandler::makeRenderable(
     {
         intersectionVertices.push_back({
             point.scenePosition, {1.0, 1.0, 1.0}
+        });
+    }
+
+    auto intersectionLine = std::make_shared<fw::PolygonalLine>(
+        intersectionVertices
+    );
+
+    _intersectionsRepresentations.push_back(intersectionLine);
+}
+
+void SienkiewiczkModelIntersectionsHandler::makeRenderable(
+    const std::vector<glm::dvec3>& contour
+)
+{
+    std::vector<fw::VertexColor> intersectionVertices;
+    for (const auto &point: contour)
+    {
+        intersectionVertices.push_back({
+            point, {1.0, 1.0, 1.0}
         });
     }
 
