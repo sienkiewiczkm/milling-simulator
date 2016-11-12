@@ -64,11 +64,13 @@ bool SurfaceIntersectionNewtonIterable::areParametersValid(
     const glm::dvec4& parameters
 ) const
 {
+    bool uOutsideOfBounds = parameters.x < 0 || parameters.x > 1
+        || parameters.z < 0 || parameters.z > 1;
     bool anyFieldIsNaN = std::isnan(parameters.x)
         || std::isnan(parameters.y)
         || std::isnan(parameters.z)
         || std::isnan(parameters.w);
-    return !anyFieldIsNaN;
+    return !uOutsideOfBounds && !anyFieldIsNaN;
 }
 
 bool SurfaceIntersectionNewtonIterable::hasParameterConverged(

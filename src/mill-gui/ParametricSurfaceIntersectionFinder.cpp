@@ -1,28 +1,9 @@
 #include "ParametricSurfaceIntersectionFinder.hpp"
 #include "ParametricSurfaceClosestPointNaiveFinder.hpp"
-#include "SurfaceIntersectionNewtonIterable.hpp"
 #include <iostream>
 
 namespace fw
 {
-
-ParametricSurfaceIntersection::ParametricSurfaceIntersection():
-    lhsParameters{},
-    rhsParameters{},
-    scenePosition{}
-{
-}
-
-ParametricSurfaceIntersection::ParametricSurfaceIntersection(
-    glm::dvec2 lhsParameters,
-    glm::dvec2 rhsParameters,
-    glm::dvec3 scenePosition
-):
-    lhsParameters{lhsParameters},
-    rhsParameters{rhsParameters},
-    scenePosition{scenePosition}
-{
-}
 
 ParametricSurfaceIntersectionFinder::ParametricSurfaceIntersectionFinder()
 {
@@ -41,9 +22,11 @@ std::vector<ParametricSurfaceIntersection>
 {
     // todo: parametric surface transformations should be taken into the account
 
-    std::vector<ParametricSurfaceIntersection> intersectionCurve{};
     //intersectionCurve.push_back(neighbourhoodPoint);
     //intersectionCurve.push_back(neighbourhoodPoint + glm::vec3(0,1,0));
+
+    _lhs = lhs;
+    _rhs = rhs;
 
     ParametricSurfaceClosestPointNaiveFinder closestPointFinder;
     closestPointFinder.setReferencePoint(neighbourhoodPoint);
@@ -51,26 +34,43 @@ std::vector<ParametricSurfaceIntersection>
     auto lhsClosest = closestPointFinder.find(*lhs);
     auto rhsClosest = closestPointFinder.find(*rhs);
 
-    SurfaceIntersectionNewtonIterator newtonIterator;
-    SurfaceIntersectionNewtonIterable newtonIterable;
-    newtonIterable.setCovergenceThreshold(0.00001);
-    newtonIterable.setPlaneDistance(0.1);
-    newtonIterable.setSurfaces(lhs, rhs);
+    _newtonIterable.setCovergenceThreshold(0.00001);
+    _newtonIterable.setPlaneDistance(0.08);
+    _newtonIterable.setSurfaces(lhs, rhs);
 
-    auto currentLhsParams = lhsClosest;
-    auto currentRhsParams = rhsClosest;
+    _intersectionCurve.setLooping(true);
+    _intersectionCurve.setLoopbackMinimumIndexDifference(20);
+    _intersectionCurve.setLoopBackDistance(0.05);
 
-    for (int i = 0; i < 100; ++i)
+    if (!iterateInDirection(1.0, lhsClosest, rhsClosest))
     {
-        auto lhsNormal = lhs->getNormal(currentLhsParams);
-        auto rhsNormal = rhs->getNormal(currentRhsParams);
+        _intersectionCurve.reverse();
+        iterateInDirection(-1.0, lhsClosest, rhsClosest);
+    }
+
+    return _intersectionCurve.getCurvePoints();
+}
+
+bool ParametricSurfaceIntersectionFinder::iterateInDirection(
+    double tangentMultipler,
+    glm::dvec2 initialLhsParams,
+    glm::dvec2 initialRhsParams
+)
+{
+    auto currentLhsParams = initialLhsParams;
+    auto currentRhsParams = initialRhsParams;
+
+    for (int i = 0; i < 500; ++i)
+    {
+        auto lhsNormal = _lhs->getNormal(currentLhsParams);
+        auto rhsNormal = _rhs->getNormal(currentRhsParams);
         auto currentTangent = glm::cross(lhsNormal, rhsNormal);
 
-        newtonIterable.setTangentVector(currentTangent);
+        _newtonIterable.setTangentVector(tangentMultipler * currentTangent);
 
         // todo: check if intersection is valid
-        auto intersectionResult = newtonIterator.iterate(
-            newtonIterable,
+        auto intersectionResult = _newtonIterator.iterate(
+            _newtonIterable,
             glm::dvec4{currentLhsParams, currentRhsParams}
         );
 
@@ -90,28 +90,34 @@ std::vector<ParametricSurfaceIntersection>
             }
             std::cout << "Stopping, reason: " << stopReasonText << std::endl;
 
-            if (intersectionResult.exitStatus == NewtonIterationExitStatus::InvalidParameterReached)
+            if (intersectionResult.exitStatus
+                    == NewtonIterationExitStatus::InvalidParameterReached)
             {
                 break;
             }
         }
 
         auto intersectionParameters = intersectionResult.parameters;
-        auto intersectionPoint = lhs->getPosition(
+        auto intersectionPoint = _lhs->getPosition(
             {intersectionParameters.x, intersectionParameters.y}
         );
 
         currentLhsParams = {intersectionParameters.x, intersectionParameters.y};
         currentRhsParams = {intersectionParameters.z, intersectionParameters.w};
 
-        intersectionCurve.push_back({
+        auto addingResult = _intersectionCurve.addCurvePoint({
             currentLhsParams,
             currentRhsParams,
             intersectionPoint
         });
+
+        if (addingResult == IntersectionCurveAddingResult::LoopedBack)
+        {
+            return true;
+        }
     }
 
-    return intersectionCurve;
+    return false;
 }
 
 }

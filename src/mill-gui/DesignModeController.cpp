@@ -1,6 +1,7 @@
 #include "DesignModeController.hpp"
 #include "DebugShapes.hpp"
 #include "ParametricSurfaceIntersectionFinder.hpp"
+#include "CommonBsplineSurfaces.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -41,7 +42,7 @@ void DesignModeController::onCreate()
 
     _loadedModelMatrix = glm::translate(
         _loadedModelMatrix,
-        glm::vec3{0, 21.35f, 0}
+        glm::vec3{0, 20.05f, 0}
     );
 
     _loadedModelMatrix = glm::rotate(
@@ -55,8 +56,20 @@ void DesignModeController::onCreate()
         glm::vec3(20.05f, 23.05f, 22.95f)
     );
 
+    _baseBspline = std::make_shared<fw::BsplineNonVanishingReparametrization>(
+        fw::createBsplinePlane(
+            {-90.0, _baseHeight, -90.0},
+            {90.0, _baseHeight, -90.0},
+            {-90.0, _baseHeight, 90.0},
+            {90.0, _baseHeight, 90.0},
+            glm::inverse(_loadedModelMatrix)
+        )
+    );
+
     fw::ParametricSurfaceMeshBuilder parametricBuilder;
     parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
+
+    _baseBsplineMesh = parametricBuilder.build(_baseBspline);
 
     _roughPathGenerator = std::make_shared<RoughMillingPathGenerator>();
     _roughPathGenerator->setCuttingToolRadius(8.0f);
@@ -75,13 +88,16 @@ void DesignModeController::onCreate()
         );
     }
 
+    // point for finding back side of main element intersection
+    // glm::dvec3{0.05, 1.8, 0.05}
+
     fw::ParametricSurfaceIntersectionFinder intersectionFinder;
     auto intersectionPoints = intersectionFinder.intersect(
         _loadedObjects[0],
-        _loadedObjects[1],
+        _baseBspline,
         //glm::dvec3{2.05, 1.8, 0.05}
-        //glm::dvec3{0.05, 1.8, 0.05}
-        glm::dvec3{-0.55, 1.8, 0.05}
+        glm::dvec3{0.05, 1.8, 0.05}
+        //glm::dvec3{-0.55, 1.8, 0.05}
     );
 
     std::vector<fw::VertexColor> intersectionVertices;
@@ -169,11 +185,13 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
     _baseBox->render();
 
     _effect.setModelMatrix(_loadedModelMatrix);
-    _intersection->render();
+    _baseBsplineMesh->render();
+
     for (const auto &mesh: _loadedObjectMeshes)
     {
         mesh->render();
     }
+
     _effect.end();
 
     _basicEffect->begin();

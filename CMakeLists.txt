@@ -64,6 +64,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/BsplineSurface.cpp
     src/mill-gui/CadioModelLoader.cpp
     src/mill-gui/Common.cpp
+    src/mill-gui/CommonBsplineSurfaces.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
     src/mill-gui/CuttingToolModel.cpp
@@ -76,6 +77,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/HeightmapVisualizationEffect.cpp
     src/mill-gui/ImGuiBinding.cpp
     src/mill-gui/ImGuiToolboxWindow.cpp
+    src/mill-gui/IntersectionCurve.cpp
     src/mill-gui/MillPathFormatReader.cpp
     src/mill-gui/MillerApplication.cpp
     src/mill-gui/MillingBlock.cpp
@@ -85,6 +87,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
     src/mill-gui/ParametricSurfaceClosestPointNaiveFinder.cpp
+    src/mill-gui/ParametricSurfaceIntersection.cpp
     src/mill-gui/ParametricSurfaceIntersectionFinder.cpp
     src/mill-gui/ParametricSurfaceMeshBuilder.cpp
     src/mill-gui/PolygonalLine.cpp

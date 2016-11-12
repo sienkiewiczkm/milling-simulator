@@ -61,6 +61,9 @@ private:
     std::vector<std::shared_ptr<Mesh<VertexNormalTexCoords>>>
         _loadedObjectMeshes;
 
+    std::shared_ptr<fw::IParametricSurfaceUV> _baseBspline;
+    std::shared_ptr<Mesh<VertexNormalTexCoords>> _baseBsplineMesh;
+
     glm::vec3 _blockSize;
     float _baseHeight;
 
