@@ -12,7 +12,7 @@ public:
     PolygonalLine(const std::vector<VertexColor> &linePoints);
     virtual ~PolygonalLine();
 
-    void render();
+    void render() const;
 
 protected:
     GLuint _vao, _vbo;

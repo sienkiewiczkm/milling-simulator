@@ -16,7 +16,8 @@ DesignModeController::DesignModeController():
     _baseHeight{21.5f},
     _displayLimits{false},
     _gizmosEnabled{false},
-    _selectedGizmo{0}
+    _selectedGizmo{0},
+    _probeEnabled{false}
 {
 }
 
@@ -66,6 +67,14 @@ void DesignModeController::onCreate()
         )
     );
 
+    _modelIntersections =
+        std::make_shared<SienkiewiczkModelIntersectionsHandler>(
+            _loadedObjects[0],
+            _loadedObjects[1],
+            _loadedObjects[2],
+            _baseBspline
+        );
+
     fw::ParametricSurfaceMeshBuilder parametricBuilder;
     parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
 
@@ -88,29 +97,7 @@ void DesignModeController::onCreate()
         );
     }
 
-    // point for finding back side of main element intersection
-    // glm::dvec3{0.05, 1.8, 0.05}
-
-    fw::ParametricSurfaceIntersectionFinder intersectionFinder;
-    auto intersectionPoints = intersectionFinder.intersect(
-        _loadedObjects[0],
-        _baseBspline,
-        //glm::dvec3{2.05, 1.8, 0.05}
-        glm::dvec3{0.05, 1.8, 0.05}
-        //glm::dvec3{-0.55, 1.8, 0.05}
-    );
-
-    std::vector<fw::VertexColor> intersectionVertices;
-    for (const auto &point: intersectionPoints)
-    {
-        intersectionVertices.push_back({
-            point.scenePosition, {1.0, 1.0, 1.0}
-        });
-    }
-
-    _intersection = std::make_shared<fw::PolygonalLine>(
-        intersectionVertices
-    );
+    _modelIntersections->findIntersections();
 
     createMeshes();
 }
@@ -176,6 +163,19 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
         );
     }
 
+    if (_probeEnabled)
+    {
+        ImGuizmo::Manipulate(
+            glm::value_ptr(view),
+            glm::value_ptr(projection),
+            ImGuizmo::TRANSLATE,
+            ImGuizmo::LOCAL,
+            glm::value_ptr(_probeMatrix),
+            nullptr,
+            nullptr
+        );
+    }
+
     _effect.begin();
     _effect.setViewMatrix(view);
     _effect.setProjectionMatrix(projection);
@@ -200,7 +200,7 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
     _basicEffect->setModelMatrix(_loadedModelMatrix);
 
     glDisable(GL_DEPTH_TEST);
-    _intersection->render();
+    _modelIntersections->render();
     glEnable(GL_DEPTH_TEST);
 
     if (_displayLimits)
@@ -261,6 +261,24 @@ void DesignModeController::updateMainWindow()
     if (ImGui::CollapsingHeader("Visuals"))
     {
         ImGui::Checkbox("Display limits", &_displayLimits);
+    }
+
+    if (ImGui::CollapsingHeader("Measurements"))
+    {
+        ImGui::Checkbox("Enable position probe", &_probeEnabled);
+        if (_probeEnabled)
+        {
+            float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+
+            ImGuizmo::DecomposeMatrixToComponents(
+                glm::value_ptr(glm::inverse(_loadedModelMatrix) * _probeMatrix),
+                matrixTranslation,
+                matrixRotation,
+                matrixScale
+            );
+
+            ImGui::InputFloat3("Translation", matrixTranslation, 3);
+        }
     }
 
     if (ImGui::CollapsingHeader("Object placement"))

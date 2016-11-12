@@ -14,6 +14,7 @@
 #include "BsplineNonVanishingReparametrization.hpp"
 #include "MillingProgramExecutor.hpp"
 #include "PolygonalLine.hpp"
+#include "SienkiewiczkModelIntersectionsHandler.hpp"
 
 #include "RoughMillingPathGenerator.hpp"
 
@@ -64,8 +65,13 @@ private:
     std::shared_ptr<fw::IParametricSurfaceUV> _baseBspline;
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _baseBsplineMesh;
 
+    bool _probeEnabled;
+    glm::mat4 _probeMatrix;
+
     glm::vec3 _blockSize;
     float _baseHeight;
+
+    std::shared_ptr<SienkiewiczkModelIntersectionsHandler> _modelIntersections;
 
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _baseBox;
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _blockBoxLimits;

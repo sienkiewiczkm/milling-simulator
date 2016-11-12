@@ -12,7 +12,7 @@ PolygonalLine::~PolygonalLine()
 {
 }
 
-void PolygonalLine::render()
+void PolygonalLine::render() const
 {
     glBindVertexArray(_vao);
     glDrawArrays(GL_LINE_STRIP, 0, _numElements);

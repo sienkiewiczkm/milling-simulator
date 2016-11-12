@@ -95,6 +95,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/RoughMillingPathGenerator.cpp
     src/mill-gui/SamplingMillingTechnique.cpp
     src/mill-gui/Shaders.cpp
+    src/mill-gui/SienkiewiczkModelIntersectionsHandler.cpp
     src/mill-gui/SimulationModeController.cpp
     src/mill-gui/StbImplementation.c
     src/mill-gui/SurfaceIntersectionNewtonIterable.cpp

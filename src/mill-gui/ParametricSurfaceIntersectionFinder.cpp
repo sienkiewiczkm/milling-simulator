@@ -21,10 +21,7 @@ std::vector<ParametricSurfaceIntersection>
 )
 {
     // todo: parametric surface transformations should be taken into the account
-
-    //intersectionCurve.push_back(neighbourhoodPoint);
-    //intersectionCurve.push_back(neighbourhoodPoint + glm::vec3(0,1,0));
-
+    _intersectionCurve = IntersectionCurve();
     _lhs = lhs;
     _rhs = rhs;
 
