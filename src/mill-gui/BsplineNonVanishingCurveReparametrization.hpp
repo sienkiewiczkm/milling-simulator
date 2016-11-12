@@ -65,11 +65,11 @@ template<typename TPoint, typename TFloating>
 TFloating BsplineNonVanishingCurveReparametrization<TPoint, TFloating>::
     reparametrize(TFloating parameter) const
 {
-    // todo: it may be different for derivatives...
     const auto &knots = _bsplineCurve->getKnots();
     auto degree = _bsplineCurve->getDegree();
-    auto newParameter = (1 - parameter) * knots[degree]
-        + parameter * knots[knots.size() - degree - 1];
+    auto derivativeOrder = _bsplineCurve->getDerivativeOrder();
+    auto newParameter = (1 - parameter) * knots[degree+derivativeOrder]
+        + parameter * knots[knots.size() - (degree + derivativeOrder) - 1];
     return newParameter;
 }
 

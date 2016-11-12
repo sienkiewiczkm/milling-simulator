@@ -25,6 +25,7 @@ public:
     virtual ~BsplineCurve() = default;
 
     int getDegree() const { return _degree; }
+    int getDerivativeOrder() const { return _derivativeOrder; }
     virtual const std::vector<TPoint> &getControlPoints() const;
     virtual const std::vector<TFloating> &getKnots() const;
 

@@ -82,8 +82,7 @@ glm::dvec2 BsplineNonVanishingReparametrization::
     auto duFactor = knotsX[knotsX.size() - degree - 1] - knotsX[degree];
     auto dvFactor = knotsY[knotsY.size() - degree - 1] - knotsY[degree];
     // todo: investigate why intersection works better with ones
-    //return {duFactor, dvFactor};
-    return {1.0, 1.0};
+    return {duFactor, dvFactor};
 }
 
 glm::dvec2 BsplineNonVanishingReparametrization::calculateReparametrization(
