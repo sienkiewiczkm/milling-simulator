@@ -67,13 +67,7 @@ std::vector<TVector> CurveSimplifier<TVector, TPrecision>::simplify(
 
         simplifiedCurve.push_back(insertionCandidate);
         lastPoint = insertionCandidate;
-
-        if (i == curve.size() - 1)
-        {
-            continue;
-        }
-
-        insertionCandidate = curve[i+1];
+        insertionCandidate = nextPoint;
         candidateDirection = glm::normalize(insertionCandidate - lastPoint);
     }
 
