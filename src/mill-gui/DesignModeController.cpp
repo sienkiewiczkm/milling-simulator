@@ -185,7 +185,6 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
     _baseBox->render();
 
     _effect.setModelMatrix(_loadedModelMatrix);
-    _baseBsplineMesh->render();
 
     for (const auto &mesh: _loadedObjectMeshes)
     {
