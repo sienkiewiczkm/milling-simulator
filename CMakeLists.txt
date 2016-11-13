@@ -113,6 +113,7 @@ add_executable(${PROJECT_NAME_TEST}
     test/BsplineBasisEvaluatorTests.cpp
     test/BsplineEquidistantKnotGeneratorTests.cpp
     test/BsplineSurfaceTests.cpp
+    test/GeometricIntersectionsTests.cpp
     test/CommonTest.cpp
     test/LinearCombinationEvaluatorTests.cpp
 )
