@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <ImGuizmo.h>
 
 namespace ms
@@ -74,6 +75,13 @@ void DesignModeController::onCreate()
             _loadedObjects[2],
             _baseBspline
         );
+
+    glm::dvec4 origin{0,0,0,1};
+    glm::dvec4 radius{6,6,6,1};
+
+    auto scaledToolRadius = glm::inverse(_loadedModelMatrix) * radius
+        - glm::inverse(_loadedModelMatrix) * origin;
+    _modelIntersections->setScaledToolRadius(scaledToolRadius.y);
 
     fw::ParametricSurfaceMeshBuilder parametricBuilder;
     parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));

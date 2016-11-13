@@ -14,12 +14,20 @@ SienkiewiczkModelIntersectionsHandler::SienkiewiczkModelIntersectionsHandler(
     _body(body),
     _handle(handle),
     _drill(drill),
-    _base(base)
+    _base(base),
+    _toolRadius{0.2}
 {
 }
 
 SienkiewiczkModelIntersectionsHandler::~SienkiewiczkModelIntersectionsHandler()
 {
+}
+
+void SienkiewiczkModelIntersectionsHandler::setScaledToolRadius(
+    double toolRadius
+)
+{
+    _toolRadius = toolRadius;
 }
 
 void SienkiewiczkModelIntersectionsHandler::findIntersections()
@@ -50,7 +58,7 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
     auto bodyLowerHandle =
         _intersectionFinder.intersect(_body, _handle, handleHole2Outside);
 
-    auto moveDistance = 0.2;
+    auto moveDistance = _toolRadius;
     auto bodyContour = joinIntersections(bodyBack, bodyFront);
     auto bodyToolControur = moveContourAlongFlattenedNormal(
         bodyContour,

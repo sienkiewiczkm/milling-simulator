@@ -22,6 +22,7 @@ public:
 
     ~SienkiewiczkModelIntersectionsHandler();
 
+    void setScaledToolRadius(double toolRadius);
     void findIntersections();
     void render() const;
 
@@ -62,6 +63,7 @@ private:
     std::shared_ptr<fw::IParametricSurfaceUV> _base;
     std::vector<std::shared_ptr<fw::PolygonalLine>>
         _intersectionsRepresentations;
+    double _toolRadius;
 };
 
 }

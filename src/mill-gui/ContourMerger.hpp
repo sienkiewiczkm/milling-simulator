@@ -16,6 +16,15 @@ public:
         const std::vector<glm::dvec3> &lhs,
         const std::vector<glm::dvec3> &rhs
     ) const;
+
+private:
+    void followContourAdding(
+        const std::vector<glm::dvec3> &lhs,
+        std::vector<glm::dvec3>& output,
+        int from,
+        int to,
+        int increase = 1
+    ) const;
 };
 
 }
