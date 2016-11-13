@@ -1,4 +1,6 @@
 #include "SienkiewiczkModelIntersectionsHandler.hpp"
+#include "ContourMerger.hpp"
+#include <algorithm>
 
 namespace ms
 {
@@ -48,37 +50,42 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
     auto bodyLowerHandle =
         _intersectionFinder.intersect(_body, _handle, handleHole2Outside);
 
-    makeRenderable(bodyDrill);
-    makeRenderable(bodyUpperHandle);
-    makeRenderable(bodyLowerHandle);
-
     auto moveDistance = 0.2;
     auto bodyContour = joinIntersections(bodyBack, bodyFront);
-    makeRenderable(bodyContour);
-    makeRenderable(moveContourAlongFlattenedNormal(
+    auto bodyToolControur = moveContourAlongFlattenedNormal(
         bodyContour,
         _body,
         ContourMoveParameter::RHS,
         moveDistance
-    ));
+    );
 
     auto drillContour = drillLowerPart;
-    makeRenderable(drillLowerPart);
-    makeRenderable(moveContourAlongFlattenedNormal(
+    auto drillToolContour = moveContourAlongFlattenedNormal(
         drillContour,
         _drill,
         ContourMoveParameter::RHS,
         moveDistance
-    ));
+    );
 
     auto handleContour = handleOuter;
-    makeRenderable(handleContour);
-    makeRenderable(moveContourAlongFlattenedNormal(
+    auto handleToolContour = moveContourAlongFlattenedNormal(
         handleContour,
         _handle,
         ContourMoveParameter::RHS,
         moveDistance
-    ));
+    );
+
+    ContourMerger contourMerger;
+    auto contour = contourMerger.merge2D(bodyToolControur, handleToolContour);
+    auto finalContour = contourMerger.merge2D(contour, drillToolContour);
+    makeRenderable(finalContour);
+
+    makeRenderable(bodyContour);
+    makeRenderable(drillLowerPart);
+    makeRenderable(handleContour);
+    makeRenderable(bodyDrill);
+    makeRenderable(bodyUpperHandle);
+    makeRenderable(bodyLowerHandle);
 }
 
 std::vector<fw::ParametricSurfaceIntersection>
