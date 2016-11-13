@@ -107,6 +107,14 @@ void DesignModeController::onCreate()
 
     _modelIntersections->findIntersections();
 
+    _flatteningPathGenerator = std::make_shared<BaseFlatteningPathGenerator>();
+    _flatteningPathGenerator->setCuttingToolRadius(6.0f);
+    _flatteningPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
+    _flatteningPathGenerator->setObjectContours(
+        _modelIntersections->getObjectContour(_loadedModelMatrix)
+    );
+
+
     createMeshes();
 }
 
@@ -327,6 +335,18 @@ void DesignModeController::updateMainWindow()
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
             defaultParameters.radius = 8.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        if (ImGui::Button("Flatten base around the object"))
+        {
+            _flatteningPathGenerator->bake();
+            auto program = _flatteningPathGenerator->buildPaths();
+
+            executor->setProgram("Local program (flattening)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Flat;
+            defaultParameters.radius = 6.0f;
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
     }

@@ -56,6 +56,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME_LIB}
+    src/mill-gui/BaseFlatteningPathGenerator.cpp
     src/mill-gui/BasicEffect.cpp
     src/mill-gui/BoundariesMillingTechnique.cpp
     src/mill-gui/BsplineBasisEvaluator.cpp

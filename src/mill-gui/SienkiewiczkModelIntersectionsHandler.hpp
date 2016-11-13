@@ -24,6 +24,7 @@ public:
 
     void setScaledToolRadius(double toolRadius);
     void findIntersections();
+    std::vector<glm::dvec3> getObjectContour(glm::dmat4 objectTransformation);
     void render() const;
 
 protected:
@@ -56,6 +57,8 @@ protected:
     );
 
 private:
+    std::vector<glm::dvec3> _objectShiftedContour;
+
     fw::ParametricSurfaceIntersectionFinder _intersectionFinder;
     std::shared_ptr<fw::IParametricSurfaceUV> _body;
     std::shared_ptr<fw::IParametricSurfaceUV> _handle;

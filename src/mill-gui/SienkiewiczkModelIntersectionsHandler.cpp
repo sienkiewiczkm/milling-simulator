@@ -85,8 +85,8 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
 
     ContourMerger contourMerger;
     auto contour = contourMerger.merge2D(bodyToolControur, handleToolContour);
-    auto finalContour = contourMerger.merge2D(contour, drillToolContour);
-    makeRenderable(finalContour);
+    _objectShiftedContour = contourMerger.merge2D(contour, drillToolContour);
+    makeRenderable(_objectShiftedContour);
 
     makeRenderable(bodyContour);
     makeRenderable(drillLowerPart);
@@ -94,6 +94,26 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
     makeRenderable(bodyDrill);
     makeRenderable(bodyUpperHandle);
     makeRenderable(bodyLowerHandle);
+}
+
+std::vector<glm::dvec3>
+    SienkiewiczkModelIntersectionsHandler::getObjectContour(
+        glm::dmat4 objectTransformation
+    )
+{
+    std::vector<glm::dvec3> output;
+
+    std::transform(
+        std::begin(_objectShiftedContour),
+        std::end(_objectShiftedContour),
+        std::back_inserter(output),
+        [objectTransformation](const glm::dvec3 &pos)
+        {
+            return glm::dvec3{objectTransformation * glm::dvec4{pos, 1.0}};
+        }
+    );
+
+    return output;
 }
 
 std::vector<fw::ParametricSurfaceIntersection>

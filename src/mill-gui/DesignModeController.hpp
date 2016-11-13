@@ -17,6 +17,7 @@
 #include "SienkiewiczkModelIntersectionsHandler.hpp"
 
 #include "RoughMillingPathGenerator.hpp"
+#include "BaseFlatteningPathGenerator.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -80,6 +81,7 @@ private:
     std::shared_ptr<fw::PolygonalLine> _intersection;
 
     std::shared_ptr<RoughMillingPathGenerator> _roughPathGenerator;
+    std::shared_ptr<BaseFlatteningPathGenerator> _flatteningPathGenerator;
 
     ImGuizmo::OPERATION _activeOperation;
     glm::mat4 _loadedModelMatrix;
