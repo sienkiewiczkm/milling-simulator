@@ -1,5 +1,6 @@
 #include "RoughMillingPathGenerator.hpp"
 #include "IParametricSurfaceUV.hpp"
+#include "CurveSimplifier.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -209,49 +210,16 @@ void RoughMillingPathGenerator::bakeZigZagPath()
 
 void RoughMillingPathGenerator::simplifyPath()
 {
-    if (_path.size() <= 2)
-        return;
-
-    glm::dvec3 safeEntryPoint{_path[0].x, _safeHeight, _path[0].z};
-    std::vector<glm::dvec3> simplifiedPath{safeEntryPoint, _path[0]};
-
-    glm::dvec3 lastPoint = _path[0];
-    glm::dvec3 insertionCandidate = _path[1];
-    glm::dvec3 candidateDirection = glm::normalize(
-        insertionCandidate - lastPoint
-    );
-
-    for (auto i = 2; i < _path.size(); ++i)
-    {
-        const glm::dvec3 &nextPoint = _path[i];
-        auto nextDirection = glm::normalize(nextPoint - lastPoint);
-        auto deviation = glm::dot(candidateDirection, nextDirection);
-
-        if (deviation > 0.9999)
-        {
-            insertionCandidate = nextPoint;
-            continue;
-        }
-
-        simplifiedPath.push_back(insertionCandidate);
-        lastPoint = insertionCandidate;
-
-        if (i == _path.size() - 1)
-        {
-            continue;
-        }
-
-        insertionCandidate = _path[i+1];
-        candidateDirection = glm::normalize(
-            insertionCandidate - lastPoint
-        );
-    }
-
-    simplifiedPath.push_back(lastPoint);
+    fw::CurveSimplifier<glm::dvec3, double> curveSimplifier;
+    auto simplifiedPath = curveSimplifier.simplify(_path);
 
     std::cout << "Pre-simplified had " << _path.size() << "steps. "
         << "Simplified path has " << simplifiedPath.size() << "steps."
         << std::endl;
+
+    // todo: fix, it's slow!
+    glm::dvec3 safeEntryPoint{_path[0].x, _safeHeight, _path[0].z};
+    simplifiedPath.insert(begin(simplifiedPath), safeEntryPoint);
 
     _path = simplifiedPath;
 }
