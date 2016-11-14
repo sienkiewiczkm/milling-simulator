@@ -89,6 +89,7 @@ private:
     int _selectedGizmo;
     bool _displayLimits;
     bool _gizmosEnabled;
+    bool _intersectionsReady;
 };
 
 }

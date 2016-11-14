@@ -18,7 +18,8 @@ DesignModeController::DesignModeController():
     _displayLimits{false},
     _gizmosEnabled{false},
     _selectedGizmo{0},
-    _probeEnabled{false}
+    _probeEnabled{false},
+    _intersectionsReady{false}
 {
 }
 
@@ -78,7 +79,6 @@ void DesignModeController::onCreate()
 
     glm::dvec4 origin{0,0,0,1};
     glm::dvec4 radius{6,6,6,1};
-
     auto scaledToolRadius = glm::inverse(_loadedModelMatrix) * radius
         - glm::inverse(_loadedModelMatrix) * origin;
     _modelIntersections->setScaledToolRadius(scaledToolRadius.y);
@@ -105,14 +105,9 @@ void DesignModeController::onCreate()
         );
     }
 
-    _modelIntersections->findIntersections();
-
     _flatteningPathGenerator = std::make_shared<BaseFlatteningPathGenerator>();
     _flatteningPathGenerator->setCuttingToolRadius(6.0f);
     _flatteningPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
-    _flatteningPathGenerator->setObjectContours(
-        _modelIntersections->getObjectContour(_loadedModelMatrix)
-    );
 
 
     createMeshes();
@@ -338,7 +333,16 @@ void DesignModeController::updateMainWindow()
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
 
-        if (ImGui::Button("Flatten base around the object"))
+        if (ImGui::Button("Preprocess intersections"))
+        {
+            _modelIntersections->findIntersections();
+            _flatteningPathGenerator->setObjectContours(
+                _modelIntersections->getObjectContour(_loadedModelMatrix)
+            );
+            _intersectionsReady = true;
+        }
+
+        if (_intersectionsReady && ImGui::Button("Flatten base around the object"))
         {
             _flatteningPathGenerator->bake();
             auto program = _flatteningPathGenerator->buildPaths();
