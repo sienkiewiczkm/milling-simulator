@@ -51,9 +51,8 @@ void BaseFlatteningPathGenerator::bake()
 
 std::vector<PathMovement> BaseFlatteningPathGenerator::buildPaths()
 {
-    return _zigZagPathGenerator->buildPaths();
-
-    std::vector<PathMovement> assembledPath;
+    std::vector<PathMovement> assembledPath =
+       _zigZagPathGenerator->buildPaths();
 
     for (const auto &path: _paths)
     {
@@ -73,9 +72,14 @@ std::vector<PathMovement> BaseFlatteningPathGenerator::buildPaths()
         {
             assembledPath.push_back({
                 PathMovementType::Milling,
-                position
+                {position.x, _baseHeight, position.z}
             });
         }
+
+        assembledPath.push_back({
+            PathMovementType::Milling,
+            {path.back().x, _safeHeight, path.back().z}
+        });
     }
 
     return assembledPath;
@@ -107,7 +111,7 @@ glm::dvec3 BaseFlatteningPathGenerator::findSafeEntryPoint(
         return
         {
             (_blockSize.x/2+offset)*common::sgn(pos.x),
-            pos.y,
+            _baseHeight,
             pos.z
         };
     }
@@ -116,7 +120,7 @@ glm::dvec3 BaseFlatteningPathGenerator::findSafeEntryPoint(
         return
         {
             pos.x,
-            pos.y,
+            _baseHeight,
             (_blockSize.z/2+offset)*common::sgn(pos.z)
         };
     }

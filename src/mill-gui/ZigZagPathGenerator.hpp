@@ -33,6 +33,17 @@ public:
 protected:
     void createUncutZigZags();
     void subdivideZigZags();
+    void buildLinkMap();
+    void followZigZag();
+    void followLocalZigZag(int line, int segment);
+    void followContour(
+        std::vector<glm::dvec3> &collection,
+        int from,
+        int to,
+        int increase = 1
+    );
+
+    glm::dvec3 findSafeEntryPoint(const glm::dvec3& pos) const;
 
 private:
     ZigZagRejectionMode _rejectionMode;
@@ -46,10 +57,11 @@ private:
     glm::dmat4 _blockWorldMatrixInv;
     std::vector<std::vector<glm::dvec3>> _paths;
 
-    using SegmentTuple = std::tuple<glm::dvec2, glm::dvec2, int, int>;
+    using SegmentTuple = std::tuple<glm::dvec2, glm::dvec2, int, int, int>;
 
     std::vector<std::vector<SegmentTuple>> _segments;
     std::vector<std::tuple<int, int, int>> _intersectionDetails;
+    std::vector<std::tuple<int, int, int, int>> _linkMap;
 };
 
 }
