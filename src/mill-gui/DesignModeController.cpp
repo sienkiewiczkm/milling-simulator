@@ -354,6 +354,120 @@ void DesignModeController::updateMainWindow()
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
     }
+
+    if (ImGui::CollapsingHeader("Parametric previews"))
+    {
+        std::vector<std::vector<glm::dvec2>> contours;
+        auto drillContours = _modelIntersections->getDrillParametricContours();
+        auto drillBodyContours =
+            _modelIntersections->getDrillBodyIntersectionContours();
+
+        std::copy(
+            std::begin(drillContours),
+            std::end(drillContours),
+            std::back_inserter(contours)
+        );
+
+        std::copy(
+            std::begin(drillBodyContours),
+            std::end(drillBodyContours),
+            std::back_inserter(contours)
+        );
+
+        renderParametricPreviewCanvas(
+            "Drill",
+            contours
+        );
+
+        ImGui::Separator();
+
+        renderParametricPreviewCanvas(
+            "Handle",
+            _modelIntersections->getHandleParametricContours()
+        );
+
+        ImGui::Separator();
+
+        renderParametricPreviewCanvas(
+            "Body",
+            _modelIntersections->getBodyParametricContours()
+        );
+    }
+}
+
+void DesignModeController::renderParametricPreviewCanvas(
+    std::string name,
+    const std::vector<std::vector<glm::dvec2>>& contours
+)
+{
+    std::string title = "Parametric preview of \"" + name + "\"";
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImGui::Text(title.c_str());
+
+    ImVec4 bg = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+    ImVec4 fg = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4 fglight = ImVec4(0.5f, 0.0f, 0.0f, 1.0f);
+    const ImU32 bg32 = ImColor(bg);
+    const ImU32 fg32 = ImColor(fg);
+    const ImU32 fglight32 = ImColor(fglight);
+
+    float offset = 8;
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    ImVec2 size = ImVec2(512, 512);
+    ImVec2 p0{
+        p.x + offset,
+        p.y + offset
+    };
+
+    draw_list->AddRectFilled(
+        p0,
+        ImVec2(p0.x + size.x, p0.y + size.y),
+        bg32
+    );
+
+    for (auto& contour: contours)
+    {
+        for (auto i = 0; i+1 < contour.size(); ++i)
+        {
+            if (contour[i].x < 0 || contour[i].x > 1
+                || contour[i].y < 0 || contour[i].y > 1
+                || contour[i+1].x < 0 || contour[i+1].x > 1
+                || contour[i+1].y < 0 || contour[i+1].y > 1)
+            {
+                continue;
+            }
+
+            ImVec2 start{
+                static_cast<float>(contour[i].x * size.x),
+                static_cast<float>(contour[i].y * size.y)
+            };
+
+            ImVec2 end{
+                static_cast<float>(contour[i+1].x * size.x),
+                static_cast<float>(contour[i+1].y * size.y)
+            };
+
+            draw_list->AddCircle(
+                ImVec2(p0.x + start.x, p0.y + start.y),
+                4.0f,
+                fglight32
+            );
+
+            draw_list->AddCircle(
+                ImVec2(p0.x + end.x, p0.y + end.y),
+                4.0f,
+                fglight32
+            );
+
+            draw_list->AddLine(
+                ImVec2(start.x + p0.x, start.y + p0.y),
+                ImVec2(end.x + p0.x, end.y + p0.y),
+                fg32
+            );
+        }
+    }
+
+    ImGui::Dummy(ImVec2(offset + size.x, offset + size.y));
 }
 
 }

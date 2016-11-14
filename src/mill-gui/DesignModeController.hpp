@@ -56,6 +56,10 @@ protected:
 private:
     void createMeshes();
     void updateMainWindow();
+    void renderParametricPreviewCanvas(
+        std::string name,
+        const std::vector<std::vector<glm::dvec2>>& contour
+    );
 
     GLuint _texture;
     TexturedPhongEffect _effect;

@@ -27,6 +27,11 @@ public:
     std::vector<glm::dvec3> getObjectContour(glm::dmat4 objectTransformation);
     void render() const;
 
+    std::vector<std::vector<glm::dvec2>> getDrillParametricContours();
+    std::vector<std::vector<glm::dvec2>> getDrillBodyIntersectionContours();
+    std::vector<std::vector<glm::dvec2>> getHandleParametricContours();
+    std::vector<std::vector<glm::dvec2>> getBodyParametricContours();
+
 protected:
     /// \brief Forces join of two intersections. It connects closest end-points
     //         of the intersection together making a circle.
@@ -56,6 +61,18 @@ protected:
         const std::vector<glm::dvec3>& contour
     );
 
+    std::vector<std::vector<glm::dvec2>> fixParametricContour(
+        const std::vector<glm::dvec2> &contour
+    );
+
+    std::vector<glm::dvec2> extractRhs(
+        const std::vector<fw::ParametricSurfaceIntersection>& intersection
+    );
+
+    std::vector<glm::dvec2> extractLhs(
+        const std::vector<fw::ParametricSurfaceIntersection>& intersection
+    );
+
 private:
     std::vector<glm::dvec3> _objectShiftedContour;
 
@@ -67,6 +84,11 @@ private:
     std::vector<std::shared_ptr<fw::PolygonalLine>>
         _intersectionsRepresentations;
     double _toolRadius;
+
+    std::vector<std::vector<glm::dvec2>> _drillParametricContour;
+    std::vector<std::vector<glm::dvec2>> _drillBodyParametricContour;
+    std::vector<std::vector<glm::dvec2>> _handleParametricContour;
+    std::vector<std::vector<glm::dvec2>> _bodyParametricContours;
 };
 
 }
