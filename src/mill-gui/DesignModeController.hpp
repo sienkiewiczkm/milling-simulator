@@ -18,6 +18,7 @@
 
 #include "RoughMillingPathGenerator.hpp"
 #include "BaseFlatteningPathGenerator.hpp"
+#include "ZigZagPathGenerator.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

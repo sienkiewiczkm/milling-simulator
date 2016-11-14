@@ -104,6 +104,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/TextureUtils.cpp
     src/mill-gui/TexturedPhongEffect.cpp
     src/mill-gui/Vertices.cpp
+    src/mill-gui/ZigZagPathGenerator.cpp
     dependencies/generated/glad/src/glad.c
     dependencies/ImGuizmo/ImGuizmo.cpp
     dependencies/imgui/imgui.cpp

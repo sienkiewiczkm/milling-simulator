@@ -8,6 +8,7 @@ BaseFlatteningPathGenerator::BaseFlatteningPathGenerator():
     _baseHeight{20.5},
     _safeHeight{50.5}
 {
+    _zigZagPathGenerator = std::make_shared<ZigZagPathGenerator>();
 }
 
 BaseFlatteningPathGenerator::~BaseFlatteningPathGenerator()
@@ -44,11 +45,14 @@ void BaseFlatteningPathGenerator::setObjectContours(
 void BaseFlatteningPathGenerator::bake()
 {
     _paths.clear();
+    createZigZagsAroundObject();
     createBorderEqualizationPath();
 }
 
 std::vector<PathMovement> BaseFlatteningPathGenerator::buildPaths()
 {
+    return _zigZagPathGenerator->buildPaths();
+
     std::vector<PathMovement> assembledPath;
 
     for (const auto &path: _paths)
@@ -75,6 +79,17 @@ std::vector<PathMovement> BaseFlatteningPathGenerator::buildPaths()
     }
 
     return assembledPath;
+}
+
+void BaseFlatteningPathGenerator::createZigZagsAroundObject()
+{
+    _zigZagPathGenerator->setRejectionMode(ZigZagRejectionMode::Inside);
+    _zigZagPathGenerator->setBaseHeight(_baseHeight);
+    _zigZagPathGenerator->setCuttingToolRadius(_toolRadius);
+    _zigZagPathGenerator->setInbetweenDistance(_toolRadius);
+    _zigZagPathGenerator->setWorkingArea(_blockSize, _blockWorldMatrix);
+    _zigZagPathGenerator->setObjectContours(_objectContour);
+    _zigZagPathGenerator->bake();
 }
 
 void BaseFlatteningPathGenerator::createBorderEqualizationPath()
