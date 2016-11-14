@@ -46,7 +46,10 @@ private:
     glm::dmat4 _blockWorldMatrixInv;
     std::vector<std::vector<glm::dvec3>> _paths;
 
-    std::vector<std::vector<std::tuple<glm::dvec2, glm::dvec2>>> _segments;
+    using SegmentTuple = std::tuple<glm::dvec2, glm::dvec2, int, int>;
+
+    std::vector<std::vector<SegmentTuple>> _segments;
+    std::vector<std::tuple<int, int, int>> _intersectionDetails;
 };
 
 }
