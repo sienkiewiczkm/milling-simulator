@@ -28,7 +28,6 @@ public:
     void render() const;
 
     std::vector<std::vector<glm::dvec2>> getDrillParametricContours();
-    std::vector<std::vector<glm::dvec2>> getDrillBodyIntersectionContours();
     std::vector<std::vector<glm::dvec2>> getHandleParametricContours();
     std::vector<std::vector<glm::dvec2>> getBodyParametricContours();
 
@@ -46,11 +45,50 @@ protected:
         RHS,
     };
 
+    void prepareBodyTrimmedArea(
+        std::vector<std::vector<glm::dvec2>> backContour,
+        std::vector<std::vector<glm::dvec2>> frontContour,
+        std::vector<std::vector<glm::dvec2>> drillHole,
+        std::vector<std::vector<glm::dvec2>> handleUpperHole,
+        std::vector<std::vector<glm::dvec2>> handleLowerHole
+    );
+
+    void prepareDrillTrimmedArea(
+        const std::vector<std::vector<glm::dvec2>>&
+            visibleParametrizationContour,
+        const std::vector<std::vector<glm::dvec2>>& bodyIntersectionContour
+    );
+
+    void prepareHandleTrimmedArea(
+        const std::vector<std::vector<glm::dvec2>>& handleOuterContours,
+        const std::vector<std::vector<glm::dvec2>>& handleInnerContours,
+        const std::vector<std::vector<glm::dvec2>>& handleUpperConnection,
+        const std::vector<std::vector<glm::dvec2>>& handleLowerConnection
+    );
+
     std::vector<glm::dvec3> moveContourAlongFlattenedNormal(
         const std::vector<fw::ParametricSurfaceIntersection>& intersection,
         std::shared_ptr<fw::IParametricSurfaceUV> surface,
         ContourMoveParameter moveParameter,
         double distance
+    );
+
+    std::vector<glm::dvec2> cutCurveUsingCurves(
+        const std::vector<glm::dvec2>& input,
+        const std::vector<glm::dvec2>& lhs,
+        const std::vector<glm::dvec2>& rhs
+    );
+
+    glm::dvec2 getIntersectionPoint(
+        const glm::dvec2& aStart,
+        const glm::dvec2& aEnd,
+        const glm::dvec2& bStart,
+        const glm::dvec2& bEnd
+    );
+
+    std::pair<int, int> findAnyCurveIntersection(
+        const std::vector<glm::dvec2>& lhs,
+        const std::vector<glm::dvec2>& rhs
     );
 
     void makeRenderable(
@@ -86,7 +124,6 @@ private:
     double _toolRadius;
 
     std::vector<std::vector<glm::dvec2>> _drillParametricContour;
-    std::vector<std::vector<glm::dvec2>> _drillBodyParametricContour;
     std::vector<std::vector<glm::dvec2>> _handleParametricContour;
     std::vector<std::vector<glm::dvec2>> _bodyParametricContours;
 };

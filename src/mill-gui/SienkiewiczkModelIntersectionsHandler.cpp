@@ -1,6 +1,7 @@
 #include "SienkiewiczkModelIntersectionsHandler.hpp"
 #include "ContourMerger.hpp"
 #include "CurveSimplifier.hpp"
+#include "GeometricIntersections.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -79,43 +80,10 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
         moveDistance
     );
 
-    _drillParametricContour = fixParametricContour(extractRhs(drillContour));
-    _drillBodyParametricContour = fixParametricContour(extractRhs(bodyDrill));
-
     auto handleOuterContours = fixParametricContour(extractRhs(handleOuter));
     auto handleInnerContours = fixParametricContour(extractRhs(handleInner));
     auto fixedHandleUpper = fixParametricContour(extractRhs(bodyUpperHandle));
     auto fixedHandleLower = fixParametricContour(extractRhs(bodyLowerHandle));
-    _handleParametricContour.clear();
-
-    _handleParametricContour.reserve(
-        handleOuterContours.size() + handleInnerContours.size() +
-            fixedHandleLower.size() + fixedHandleUpper.size()
-    );
-
-    _handleParametricContour.insert(
-        std::end(_handleParametricContour),
-        std::begin(handleOuterContours),
-        std::end(handleOuterContours)
-    );
-
-    _handleParametricContour.insert(
-        std::end(_handleParametricContour),
-        std::begin(handleInnerContours),
-        std::end(handleInnerContours)
-    );
-
-    _handleParametricContour.insert(
-        std::end(_handleParametricContour),
-        std::begin(fixedHandleUpper),
-        std::end(fixedHandleUpper)
-    );
-
-    _handleParametricContour.insert(
-        std::end(_handleParametricContour),
-        std::begin(fixedHandleLower),
-        std::end(fixedHandleLower)
-    );
 
     auto bodyParametricBodyBackCont = fixParametricContour(
         extractRhs(bodyBack)
@@ -131,35 +99,26 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
         extractLhs(bodyLowerHandle)
     );
 
-    _bodyParametricContours.insert(
-        std::end(_bodyParametricContours),
-        std::begin(bodyParametricBodyBackCont),
-        std::end(bodyParametricBodyBackCont)
+    prepareBodyTrimmedArea(
+        bodyParametricBodyBackCont,
+        bodyParametricBodyFrontCont,
+        contBodyDrill,
+        contBodyUpperHandle,
+        contBodyLowerHandle
     );
 
-    _bodyParametricContours.insert(
-        std::end(_bodyParametricContours),
-        std::begin(bodyParametricBodyFrontCont),
-        std::end(bodyParametricBodyFrontCont)
+    prepareHandleTrimmedArea(
+        handleOuterContours,
+        handleInnerContours,
+        fixedHandleUpper,
+        fixedHandleLower
     );
 
-    _bodyParametricContours.insert(
-        std::end(_bodyParametricContours),
-        std::begin(contBodyDrill),
-        std::end(contBodyDrill)
-    );
+    auto drillParametricCont  = fixParametricContour(extractRhs(drillContour));
+    auto drillBodyParametricContour =
+        fixParametricContour(extractRhs(bodyDrill));
 
-    _bodyParametricContours.insert(
-        std::end(_bodyParametricContours),
-        std::begin(contBodyUpperHandle),
-        std::end(contBodyUpperHandle)
-    );
-
-    _bodyParametricContours.insert(
-        std::end(_bodyParametricContours),
-        std::begin(contBodyLowerHandle),
-        std::end(contBodyLowerHandle)
-    );
+    prepareDrillTrimmedArea(drillParametricCont, drillBodyParametricContour);
 
     auto handleContour = handleOuter;
     auto handleToolContour = moveContourAlongFlattenedNormal(
@@ -238,6 +197,270 @@ std::vector<fw::ParametricSurfaceIntersection>
 
     output.push_back(lhs.front());
     return output;
+}
+
+void SienkiewiczkModelIntersectionsHandler::prepareBodyTrimmedArea(
+    std::vector<std::vector<glm::dvec2>> backContour,
+    std::vector<std::vector<glm::dvec2>> frontContour,
+    std::vector<std::vector<glm::dvec2>> drillHole,
+    std::vector<std::vector<glm::dvec2>> handleUpperHole,
+    std::vector<std::vector<glm::dvec2>> handleLowerHole
+)
+{
+    /*
+    _bodyParametricContours.insert(
+        std::end(_bodyParametricContours),
+        std::begin(backContour),
+        std::end(backContour)
+    );
+
+    _bodyParametricContours.insert(
+        std::end(_bodyParametricContours),
+        std::begin(frontContour),
+        std::end(frontContour)
+    );
+
+    _bodyParametricContours.insert(
+        std::end(_bodyParametricContours),
+        std::begin(drillHole),
+        std::end(drillHole)
+    );
+
+    _bodyParametricContours.insert(
+        std::end(_bodyParametricContours),
+        std::begin(handleUpperHole),
+        std::end(handleUpperHole)
+    );
+
+    _bodyParametricContours.insert(
+        std::end(_bodyParametricContours),
+        std::begin(handleLowerHole),
+        std::end(handleLowerHole)
+    );
+    */
+
+    // hack: assume that zero index is all we want
+    ContourMerger merger;
+    _bodyParametricContours.push_back(backContour[0]);
+    _bodyParametricContours.push_back(handleUpperHole[0]);
+
+    auto temp = merger.merge2D(backContour[0], handleUpperHole[0]);
+    //auto mergedContour = merger.merge2D(temp, handleLowerHole[0]);
+    //_bodyParametricContours.push_back(temp);
+}
+
+void SienkiewiczkModelIntersectionsHandler::prepareDrillTrimmedArea(
+    const std::vector<std::vector<glm::dvec2>>& visibleParametrizationContour,
+    const std::vector<std::vector<glm::dvec2>>& bodyIntersectionContour
+)
+{
+    _drillParametricContour.clear();
+
+    auto drillBaseContour = visibleParametrizationContour[0];
+    auto drillBaseContourRev = drillBaseContour;
+
+    std::reverse(
+        std::begin(drillBaseContourRev),
+        std::end(drillBaseContourRev)
+    );
+
+    auto drillBodyContour = bodyIntersectionContour[0];
+    auto drillBodyContourRev = drillBodyContour;
+
+    std::reverse(
+        std::begin(drillBodyContourRev),
+        std::end(drillBodyContourRev)
+    );
+
+    auto cutBase = cutCurveUsingCurves(
+        drillBaseContour,
+        drillBodyContour,
+        drillBodyContourRev
+    );
+
+    auto cutBody = cutCurveUsingCurves(
+        drillBodyContour,
+        drillBaseContour,
+        drillBaseContourRev
+    );
+
+    std::vector<glm::dvec2> unifiedContour(cutBase);
+
+    std::reverse_copy(
+        std::begin(cutBody),
+        std::end(cutBody),
+        std::back_inserter(unifiedContour)
+    );
+
+    _drillParametricContour.push_back(unifiedContour);
+}
+
+void SienkiewiczkModelIntersectionsHandler::prepareHandleTrimmedArea(
+    const std::vector<std::vector<glm::dvec2>>& handleOuterContours,
+    const std::vector<std::vector<glm::dvec2>>& handleInnerContours,
+    const std::vector<std::vector<glm::dvec2>>& handleUpperConnection,
+    const std::vector<std::vector<glm::dvec2>>& handleLowerConnection
+)
+{
+    _handleParametricContour.clear();
+
+    auto trimmedInner = cutCurveUsingCurves(
+        handleInnerContours[0],
+        handleUpperConnection[0],
+        handleLowerConnection[0]
+    );
+
+    auto trimmedOuter = cutCurveUsingCurves(
+        handleOuterContours[0],
+        handleLowerConnection[0],
+        handleUpperConnection[0]
+    );
+
+    auto trimmedLower = cutCurveUsingCurves(
+        handleLowerConnection[0],
+        handleOuterContours[0],
+        handleInnerContours[0]
+    );
+
+    auto trimmedUpper = cutCurveUsingCurves(
+        handleUpperConnection[0],
+        handleInnerContours[0],
+        handleOuterContours[0]
+    );
+
+    std::vector<glm::dvec2> unifiedContour(trimmedInner);
+
+    std::reverse_copy(
+        std::begin(trimmedLower),
+        std::end(trimmedLower),
+        std::back_inserter(unifiedContour)
+    );
+
+    std::copy(
+        std::begin(trimmedOuter),
+        std::end(trimmedOuter),
+        std::back_inserter(unifiedContour)
+    );
+
+    std::reverse_copy(
+        std::begin(trimmedUpper),
+        std::end(trimmedUpper),
+        std::back_inserter(unifiedContour)
+    );
+
+    _handleParametricContour.push_back(unifiedContour);
+}
+
+std::vector<glm::dvec2>
+        SienkiewiczkModelIntersectionsHandler::cutCurveUsingCurves(
+    const std::vector<glm::dvec2>& input,
+    const std::vector<glm::dvec2>& lhs,
+    const std::vector<glm::dvec2>& rhs
+)
+{
+    std::cout << "Cutting curve..." << std::endl;
+    auto lhsInters = findAnyCurveIntersection(input, lhs);
+    auto rhsInters = findAnyCurveIntersection(input, rhs);
+
+    auto firstInt = lhsInters.first;
+    auto secondInt = rhsInters.first;
+
+    std::cout << "Found cut points: " << firstInt << " + " << secondInt
+        << std::endl;
+
+    if (firstInt == -1 && secondInt == -1) { return input; }
+
+    if (secondInt == -1) secondInt = input.size() - 1;
+    if (firstInt > secondInt)
+    {
+        std::swap(firstInt, secondInt);
+    }
+
+    std::cout << "Cutting segment:" << firstInt << " + " << secondInt
+        << std::endl;
+
+    std::vector<glm::dvec2> output;
+
+    if (firstInt >= 0)
+    {
+        auto pt = getIntersectionPoint(
+            input[lhsInters.first],
+            input[lhsInters.first+1],
+            lhs[lhsInters.second],
+            lhs[lhsInters.second+1]
+        );
+
+        output.push_back(pt);
+    }
+
+    std::copy(
+        std::begin(input) + firstInt + 1,
+        std::begin(input) + secondInt,
+        std::back_inserter(output)
+    );
+
+    if (secondInt + 1 < input.size())
+    {
+        auto pt = getIntersectionPoint(
+            input[rhsInters.first],
+            input[rhsInters.first+1],
+            rhs[rhsInters.second],
+            rhs[rhsInters.second+1]
+        );
+
+        output.push_back(pt);
+    }
+
+    return output;
+}
+
+glm::dvec2 SienkiewiczkModelIntersectionsHandler::getIntersectionPoint(
+    const glm::dvec2& aStart,
+    const glm::dvec2& aEnd,
+    const glm::dvec2& bStart,
+    const glm::dvec2& bEnd
+)
+{
+    auto intersection = fw::intersectSegments<glm::dvec2, double>(
+        aStart,
+        aEnd,
+        bStart,
+        bEnd
+    );
+
+    if (intersection.kind != fw::GeometricIntersectionKind::Single)
+    {
+        return aStart;
+    }
+
+    return aStart + (aEnd - aStart) * intersection.singleIntersectionParameter;
+}
+
+std::pair<int, int>
+        SienkiewiczkModelIntersectionsHandler::findAnyCurveIntersection(
+    const std::vector<glm::dvec2>& lhs,
+    const std::vector<glm::dvec2>& rhs
+)
+{
+    for (auto j = 0; j+1 < rhs.size(); ++j)
+    {
+        for (auto i = 0; i+1 < lhs.size(); ++i)
+        {
+            auto intersection = fw::intersectSegments<glm::dvec2, double>(
+                lhs[i],
+                lhs[i+1],
+                rhs[j],
+                rhs[j+1]
+            );
+
+            if (intersection.kind == fw::GeometricIntersectionKind::Single)
+            {
+                return {i, j};
+            }
+        }
+    }
+
+    return {-1, -1};
 }
 
 std::vector<glm::dvec3>
@@ -397,13 +620,6 @@ std::vector<std::vector<glm::dvec2>>
         SienkiewiczkModelIntersectionsHandler::getDrillParametricContours()
 {
     return _drillParametricContour;
-}
-
-std::vector<std::vector<glm::dvec2>>
-        SienkiewiczkModelIntersectionsHandler
-            ::getDrillBodyIntersectionContours()
-{
-    return _drillBodyParametricContour;
 }
 
 std::vector<std::vector<glm::dvec2>>

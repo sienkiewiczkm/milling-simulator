@@ -12,6 +12,11 @@ public:
     ContourMerger();
     ~ContourMerger();
 
+    std::vector<glm::dvec2> merge2D(
+        const std::vector<glm::dvec2> &lhs,
+        const std::vector<glm::dvec2> &rhs
+    ) const;
+
     std::vector<glm::dvec3> merge2D(
         const std::vector<glm::dvec3> &lhs,
         const std::vector<glm::dvec3> &rhs

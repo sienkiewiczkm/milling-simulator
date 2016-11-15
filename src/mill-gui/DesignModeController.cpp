@@ -357,26 +357,9 @@ void DesignModeController::updateMainWindow()
 
     if (ImGui::CollapsingHeader("Parametric previews"))
     {
-        std::vector<std::vector<glm::dvec2>> contours;
-        auto drillContours = _modelIntersections->getDrillParametricContours();
-        auto drillBodyContours =
-            _modelIntersections->getDrillBodyIntersectionContours();
-
-        std::copy(
-            std::begin(drillContours),
-            std::end(drillContours),
-            std::back_inserter(contours)
-        );
-
-        std::copy(
-            std::begin(drillBodyContours),
-            std::end(drillBodyContours),
-            std::back_inserter(contours)
-        );
-
         renderParametricPreviewCanvas(
             "Drill",
-            contours
+            _modelIntersections->getDrillParametricContours()
         );
 
         ImGui::Separator();

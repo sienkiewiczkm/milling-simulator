@@ -17,20 +17,62 @@ ContourMerger::~ContourMerger()
 {
 }
 
+std::vector<glm::dvec2> ContourMerger::merge2D(
+    const std::vector<glm::dvec2> &lhs,
+    const std::vector<glm::dvec2> &rhs
+) const
+{
+    std::vector<glm::dvec3> lhs3d, rhs3d;
+
+    std::transform(
+        std::begin(lhs),
+        std::end(lhs),
+        std::back_inserter(lhs3d),
+        [](const glm::dvec2& input)
+        {
+            return glm::dvec3{input.x, 0.0, input.y};
+        }
+    );
+
+    std::transform(
+        std::begin(rhs),
+        std::end(rhs),
+        std::back_inserter(rhs3d),
+        [](const glm::dvec2& input)
+        {
+            return glm::dvec3{input.x, 0.0, input.y};
+        }
+    );
+
+    auto merged3d = merge2D(lhs3d, rhs3d);
+    std::vector<glm::dvec2> output;
+
+    std::transform(
+        std::begin(merged3d),
+        std::end(merged3d),
+        std::back_inserter(output),
+        [](const glm::dvec3& input)
+        {
+            return glm::dvec2{input.x, input.z};
+        }
+    );
+
+    return output;
+}
+
 std::vector<glm::dvec3> ContourMerger::merge2D(
     const std::vector<glm::dvec3> &lhs,
     const std::vector<glm::dvec3> &rhs
 ) const
 {
     fw::CurveSimplifier<glm::dvec3, double> curveSimplifier;
-    curveSimplifier.setMinimumMergeCosine(0.9999);
+    curveSimplifier.setMinimumMergeCosine(0.99999);
     auto lhsSimplified = curveSimplifier.simplify(lhs);
     auto rhsSimplified = curveSimplifier.simplify(rhs);
 
     std::vector<glm::dvec3> mergedContour;
 
     // todo: ensure direction
-
     std::vector<std::tuple<int, int, glm::dvec3>> intersectionMarkers;
 
     for (auto i = 0; i < lhs.size() - 1; ++i)
@@ -52,10 +94,23 @@ std::vector<glm::dvec3> ContourMerger::merge2D(
                         (lhs[i+1] - lhs[i]);
                 intersectionMarkers.push_back({i, j, intPt});
             }
+
+            if (intersection.kind != fw::GeometricIntersectionKind::None)
+            {
+                std::cout << "Found non-None intersection: "
+                    << static_cast<int>(intersection.kind) << std::endl;
+            }
         }
     }
 
     // todo: fix to general algorithm
+    if (intersectionMarkers.size() == 0)
+    {
+        // no intersection
+        std::cout << "Contour: cannot merge because there is no intersection."
+            << std::endl;
+        return lhs;
+    }
 
     followContourAdding(
         lhs,
