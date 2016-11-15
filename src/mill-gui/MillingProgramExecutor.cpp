@@ -33,7 +33,8 @@ void MillingProgramExecutor::setProgram(
 {
     if (millingProgram.size() == 0)
     {
-        throw new string("Milling program must be non-empty");
+        //throw new string("Milling program must be non-empty");
+        return;
     }
 
     _programName = programName;
@@ -137,7 +138,7 @@ MillingError MillingProgramExecutor::update(double dt)
             timeLeft = _toolController->update(timeLeft);
         }
 
-        bool isCollisionProhibited = _millingProgram[_currentProgramStep].type 
+        bool isCollisionProhibited = _millingProgram[_currentProgramStep].type
             == PathMovementType::FastMovement;
 
         auto errorState = _block->moveTool(

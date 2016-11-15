@@ -93,6 +93,9 @@ void DesignModeController::onCreate()
     _roughPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
     _roughPathGenerator->setWorkingAreaResolution({300, 300});//0.5mm
 
+    _preciseMillingPathGenerator =
+        std::make_shared<PreciseMillingPathGenerator>();
+
     for (const auto &object: _loadedObjects)
     {
         _loadedObjectMeshes.push_back(
@@ -342,7 +345,8 @@ void DesignModeController::updateMainWindow()
             _intersectionsReady = true;
         }
 
-        if (_intersectionsReady && ImGui::Button("Flatten base around the object"))
+        if (_intersectionsReady
+            && ImGui::Button("Flatten base around the object"))
         {
             _flatteningPathGenerator->bake();
             auto program = _flatteningPathGenerator->buildPaths();
@@ -351,6 +355,49 @@ void DesignModeController::updateMainWindow()
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Flat;
             defaultParameters.radius = 6.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        // body handle drill <- order
+        if (_intersectionsReady && ImGui::Button("Mill DRILL precisely"))
+        {
+            _preciseMillingPathGenerator->setParametricSurface(
+                _loadedObjects[2],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setParametricSurfaceBoundaries(
+                _modelIntersections->getDrillParametricContours()[0]
+            );
+
+            _preciseMillingPathGenerator->bake();
+            auto program = _preciseMillingPathGenerator->buildPaths();
+
+            executor->setProgram("Local program (drill)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 4.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        if (_intersectionsReady && ImGui::Button("Mill HANDLE precisely"))
+        {
+            _preciseMillingPathGenerator->setParametricSurface(
+                _loadedObjects[1],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setParametricSurfaceBoundaries(
+                _modelIntersections->getHandleParametricContours()[0]
+            );
+
+            _preciseMillingPathGenerator->bake();
+            auto program = _preciseMillingPathGenerator->buildPaths();
+
+            executor->setProgram("Local program (handle)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 4.0f;
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
     }
