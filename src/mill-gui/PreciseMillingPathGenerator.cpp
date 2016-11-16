@@ -1,5 +1,6 @@
 #include "PreciseMillingPathGenerator.hpp"
 #include "GeometricIntersections.hpp"
+#include "CurveSimplifier.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtx/string_cast.hpp"
 #include <iostream>
@@ -10,9 +11,12 @@ namespace ms
 PreciseMillingPathGenerator::PreciseMillingPathGenerator():
     _safeHeight{50.5},
     _baseHeight{20.5},
-    _numScanLines{64},
-    _maxScanLineResolution{64},
-    _toolRadius{4.0}
+    _numScanLines{256},
+    _maxScanLineResolution{256},
+    _toolRadius{4.0},
+    _blockSize{150.0, 50.0, 150.0},
+    _workingAreaResolution{500, 500},
+    _samplingResolution{512, 512}
 {
 }
 
@@ -41,6 +45,55 @@ void PreciseMillingPathGenerator::setParametricSurface(
     _surfaceTransformation = surfaceTransformation;
 }
 
+void PreciseMillingPathGenerator::clearCheckSurfaces()
+{
+    _checkSurface.clear();
+    _checkSurfaceTransformation.clear();
+}
+
+void PreciseMillingPathGenerator::addCheckSurface(
+    std::shared_ptr<fw::IParametricSurfaceUV> surface,
+    const glm::dmat4& surfaceTransformation
+)
+{
+    _checkSurface.push_back(surface);
+    _checkSurfaceTransformation.push_back(surfaceTransformation);
+}
+
+void PreciseMillingPathGenerator::setBaseHeight(double baseHeight)
+{
+    _baseHeight = baseHeight;
+}
+
+void PreciseMillingPathGenerator::setCuttingToolRadius(double radius)
+{
+    _toolRadius = radius;
+}
+
+void PreciseMillingPathGenerator::setWorkingArea(
+    glm::dvec3 blockSize,
+    glm::dmat4 worldMatrix
+)
+{
+    _blockSize = blockSize;
+    _blockWorldMatrix = worldMatrix;
+    _blockWorldMatrixInv = glm::inverse(worldMatrix);
+}
+
+void PreciseMillingPathGenerator::setWorkingAreaResolution(
+    glm::ivec2 areaResolution
+)
+{
+    _workingAreaResolution = areaResolution;
+}
+
+void PreciseMillingPathGenerator::setSamplingResolution(
+    glm::ivec2 samplingResolution
+)
+{
+    _samplingResolution = samplingResolution;
+}
+
 void PreciseMillingPathGenerator::setParametricSurfaceBoundaries(
     const std::vector<glm::dvec2>& boundaries
 )
@@ -50,11 +103,15 @@ void PreciseMillingPathGenerator::setParametricSurfaceBoundaries(
 
 void PreciseMillingPathGenerator::bake()
 {
+    bakeCheckSurfaceHeightmap();
+
     _rawPaths.clear();
+
+    bool inversePath = false;
     for (auto row = 0; row < _numScanLines; ++row)
     {
         auto v = row / static_cast<double>(_numScanLines - 1);
-        auto scanPoints = getScanLineIntersections(v);
+        auto scanPoints = getScanLineIntersections(v, _boundaries);
 
         if (scanPoints.size()%2 == 1)
         {
@@ -67,7 +124,18 @@ void PreciseMillingPathGenerator::bake()
         {
             std::vector<glm::dvec3> currentPath;
             generatePathLine(currentPath, scanPoints[i], scanPoints[i+1], v);
-            _rawPaths.push_back(currentPath);
+
+            if (inversePath)
+            {
+                std::reverse(std::begin(currentPath), std::end(currentPath));
+            }
+
+            filterOutDamages(_rawPaths, currentPath);
+        }
+
+        if (scanPoints.size() > 1)
+        {
+            inversePath = !inversePath;
         }
     }
 
@@ -79,7 +147,7 @@ std::vector<PathMovement> PreciseMillingPathGenerator::buildPaths()
 
     for (const auto &path: _rawPaths)
     {
-        if (path.size() == 0) { continue; }
+        if (path.size() < 2) { continue; }
 
         movements.push_back({
             PathMovementType::Milling,
@@ -105,8 +173,171 @@ std::vector<PathMovement> PreciseMillingPathGenerator::buildPaths()
     return movements;
 }
 
+void PreciseMillingPathGenerator::bakeCheckSurfaceHeightmap()
+{
+    _toolHeightmapRadius = _toolRadius * (
+        glm::dvec2{_workingAreaResolution}
+            / glm::dvec2{_blockSize.x, _blockSize.z}
+    );
+
+    _checkHeightmap.resize(
+        _workingAreaResolution.x * _workingAreaResolution.y
+    );
+
+    std::fill(
+        std::begin(_checkHeightmap),
+        std::end(_checkHeightmap),
+        _baseHeight
+    );
+
+
+    for (auto surfId = 0; surfId < _checkSurface.size(); ++surfId)
+    {
+        auto surface = _checkSurface[surfId];
+        auto transformation = _checkSurfaceTransformation[surfId];
+
+        for (auto row = 0; row < _samplingResolution.y; ++row)
+        {
+            auto v = row / static_cast<double>(_samplingResolution.y - 1);
+
+            auto checkCurve = surface->getConstParameterCurve(
+                fw::ParametrizationAxis::V,
+                v
+            );
+
+            for (auto i = 1; i < _samplingResolution.x; i += 2)
+            {
+                auto u = i / static_cast<double>(_samplingResolution.x - 1);
+                auto pos = transformation
+                    * glm::dvec4(checkCurve->evaluate(u), 1.0);
+                bakePositionOnCheckHeightmap(glm::dvec3{pos});
+            }
+        }
+    }
+}
+
+void PreciseMillingPathGenerator::bakePositionOnCheckHeightmap(
+    const glm::dvec3& position
+)
+{
+    if (position.y < _baseHeight) { return; }
+
+    auto memoryCoord = getHeightmapCoord(position);
+
+    if (memoryCoord.x < 0 || memoryCoord.x >= _workingAreaResolution.x
+        || memoryCoord.y < 0 || memoryCoord.y >= _workingAreaResolution.y)
+    {
+        return;
+    }
+
+    auto index = _workingAreaResolution.x * memoryCoord.y + memoryCoord.x;
+
+    _checkHeightmap[index] = std::max(
+        _checkHeightmap[index],
+        position.y
+    );
+}
+
+bool PreciseMillingPathGenerator::doesPositionDamageCheckSurface(
+    const glm::dvec3& toolPosition
+)
+{
+    auto hcCoord = getHeightmapCoord(toolPosition);
+    auto minHcCoord = hcCoord - glm::ivec2{glm::ceil(_toolHeightmapRadius)};
+    auto maxHcCoord = hcCoord + glm::ivec2{glm::ceil(_toolHeightmapRadius)};
+
+    for (auto y = std::max(0, minHcCoord.y);
+        y < std::min(_workingAreaResolution.y, maxHcCoord.y + 1);
+        ++y)
+    {
+        for (auto x = std::max(0, minHcCoord.x);
+            x < std::min(_workingAreaResolution.x, maxHcCoord.x + 1);
+            ++x)
+        {
+            auto cellCenter = getCellWorldCenter({x,y});
+            auto distance = glm::length(
+                cellCenter - glm::dvec2{toolPosition.x, toolPosition.z}
+            );
+
+            if (distance > _toolRadius) { continue; }
+            auto gainedHeight = sqrt(
+                _toolRadius * _toolRadius - distance * distance
+            );
+
+            auto index = _workingAreaResolution.x * y + x;
+            if (toolPosition.y + gainedHeight < _checkHeightmap[index])
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+glm::ivec2 PreciseMillingPathGenerator::getHeightmapCoord(glm::dvec3 position)
+{
+    glm::dvec2 heightmapCoord {
+        position.x / _blockSize.x + 0.5,
+        position.z / _blockSize.z + 0.5
+    };
+
+    glm::ivec2 memoryCoord {
+        static_cast<int>(heightmapCoord.x * _workingAreaResolution.x),
+        static_cast<int>(heightmapCoord.y * _workingAreaResolution.y)
+    };
+
+    return memoryCoord;
+}
+
+glm::dvec2 PreciseMillingPathGenerator::getCellWorldCenter(
+    glm::ivec2 coordinate
+)
+{
+    auto x = (coordinate.x + 0.5)
+        / static_cast<double>(_workingAreaResolution.x);
+    auto y = (coordinate.y + 0.5)
+        / static_cast<double>(_workingAreaResolution.y);
+
+    return {
+        (x - 0.5) * _blockSize.x,
+        (y - 0.5) * _blockSize.z
+    };
+}
+
+void PreciseMillingPathGenerator::filterOutDamages(
+    std::vector<std::vector<glm::dvec3>>& output,
+    const std::vector<glm::dvec3>& input
+)
+{
+    std::vector<glm::dvec3> buffer;
+
+    for (const auto& position: input)
+    {
+        if (doesPositionDamageCheckSurface(position))
+        {
+            if (buffer.size() > 0)
+            {
+                output.push_back(buffer);
+                buffer.clear();
+            }
+        }
+        else
+        {
+            buffer.push_back(position);
+        }
+    }
+
+    if (buffer.size() > 0)
+    {
+        output.push_back(buffer);
+        buffer.clear();
+    }
+}
+
 std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
-    double constV
+    double constV,
+    std::vector<glm::dvec2> boundaries
 ) const
 {
     glm::dvec2 scanStart{-0.1, constV};
@@ -114,13 +345,13 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
 
     std::vector<double> intersectionPoints;
 
-    for (auto i = 0; i+1 < _boundaries.size(); ++i)
+    for (auto i = 0; i+1 < boundaries.size(); ++i)
     {
         auto intersection = fw::intersectSegments<glm::dvec2, double>(
             scanStart,
             scanEnd,
-            _boundaries[i],
-            _boundaries[i+1]
+            boundaries[i],
+            boundaries[i+1]
         );
 
         if (intersection.kind == fw::GeometricIntersectionKind::Single)
@@ -128,6 +359,10 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
             auto intersectionPoint = scanStart
                 + intersection.t0 * (scanEnd - scanStart);
             intersectionPoints.push_back(intersectionPoint.x);
+        }
+        else if (intersection.kind != fw::GeometricIntersectionKind::None)
+        {
+            std::cout << "intersection: " << (int)intersection.kind << std::endl;
         }
     }
 
@@ -156,8 +391,8 @@ void PreciseMillingPathGenerator::generatePathLine(
 
     // todo: fix derivatives
     // hack: there is something wrong with derivatives
-    minU = std::max(0.01, minU);
-    maxU = std::min(0.99, maxU);
+    minU = std::max(0.02, minU);
+    maxU = std::min(0.98, maxU);
 
     for (int i = 0; i < samples; ++i)
     {

@@ -1,7 +1,9 @@
 #include "MillPathFormatReader.hpp"
 #include "Common.hpp"
 
+#include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 using namespace common;
@@ -79,7 +81,7 @@ void MillPathFormatReader::readFromFile(const std::string &filename)
                     int factor = 1;
                     int beginning = charactersRead;
                     int numberLength = 0;
-                    if (line[beginning] == '-') 
+                    if (line[beginning] == '-')
                     {
                         factor = -1;
                         ++beginning;
@@ -107,6 +109,33 @@ void MillPathFormatReader::readFromFile(const std::string &filename)
             }
         }
     }
+}
+
+MillPathFormatWriter::MillPathFormatWriter()
+{
+}
+
+MillPathFormatWriter::~MillPathFormatWriter()
+{
+}
+
+void MillPathFormatWriter::writeToFile(
+    const std::string &filename,
+    const std::vector<PathMovement>& movements
+)
+{
+    int commandId = 3;
+    std::ofstream file(filename, std::ios_base::trunc);
+    for (const auto& movement: movements)
+    {
+        file << "N" << commandId++ << "G01"
+            << std::setprecision(3) << std::fixed
+            << "X" << movement.position.x
+            << "Y" << movement.position.z
+            << "Z" << movement.position.y
+            << std::endl;
+    }
+    file.close();
 }
 
 }

@@ -23,6 +23,19 @@ public:
         const glm::dmat4 &surfaceTransformation
     );
 
+    void clearCheckSurfaces();
+
+    void addCheckSurface(
+        std::shared_ptr<fw::IParametricSurfaceUV> surface,
+        const glm::dmat4& surfaceTransformation
+    );
+
+    void setBaseHeight(double baseHeight);
+    void setCuttingToolRadius(double radius);
+    void setWorkingArea(glm::dvec3 blockSize, glm::dmat4 worldMatrix);
+    void setWorkingAreaResolution(glm::ivec2 areaResolution);
+    void setSamplingResolution(glm::ivec2 samplingResolution);
+
     void setParametricSurfaceBoundaries(
         const std::vector<glm::dvec2>& boundaries
     );
@@ -31,7 +44,22 @@ public:
     std::vector<PathMovement> buildPaths();
 
 protected:
-    std::vector<double> getScanLineIntersections(double constV) const;
+    void bakeCheckSurfaceHeightmap();
+    void bakePositionOnCheckHeightmap(const glm::dvec3& position);
+    bool doesPositionDamageCheckSurface(const glm::dvec3& toolPosition);
+    glm::ivec2 getHeightmapCoord(glm::dvec3 position);
+    glm::dvec2 getCellWorldCenter(glm::ivec2 coordinate);
+
+    void filterOutDamages(
+        std::vector<std::vector<glm::dvec3>>& output,
+        const std::vector<glm::dvec3>& input
+    );
+
+    std::vector<double> getScanLineIntersections(
+        double constV,
+        std::vector<glm::dvec2> boundaries
+    ) const;
+
     void generatePathLine(
         std::vector<glm::dvec3> &path,
         double minU,
@@ -43,15 +71,25 @@ private:
     double _baseHeight;
     double _safeHeight;
     double _toolRadius;
+    glm::dvec2 _toolHeightmapRadius;
     int _numScanLines;
     int _maxScanLineResolution;
+
+    glm::dvec3 _blockSize;
+    glm::dmat4 _blockWorldMatrix;
+    glm::dmat4 _blockWorldMatrixInv;
+    glm::ivec2 _workingAreaResolution;
+    glm::ivec2 _samplingResolution;
+    std::vector<double> _checkHeightmap;
 
     std::vector<std::vector<glm::dvec3>> _rawPaths;
 
     std::shared_ptr<fw::IParametricSurfaceUV> _surface;
     glm::dmat4 _surfaceTransformation;
-
     std::vector<glm::dvec2> _boundaries;
+
+    std::vector<std::shared_ptr<fw::IParametricSurfaceUV>> _checkSurface;
+    std::vector<glm::dmat4> _checkSurfaceTransformation;
 };
 
 }

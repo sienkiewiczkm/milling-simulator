@@ -2,6 +2,7 @@
 #include "DebugShapes.hpp"
 #include "ParametricSurfaceIntersectionFinder.hpp"
 #include "CommonBsplineSurfaces.hpp"
+#include "Config.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -329,6 +330,9 @@ void DesignModeController::updateMainWindow()
             _roughPathGenerator->bake();
             auto program = _roughPathGenerator->buildPaths();
 
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_roughing.f16"), program);
+
             executor->setProgram("Local program", program);
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
@@ -351,6 +355,9 @@ void DesignModeController::updateMainWindow()
             _flatteningPathGenerator->bake();
             auto program = _flatteningPathGenerator->buildPaths();
 
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_flattening.f12"), program);
+
             executor->setProgram("Local program (flattening)", program);
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Flat;
@@ -370,8 +377,20 @@ void DesignModeController::updateMainWindow()
                 _modelIntersections->getDrillParametricContours()[0]
             );
 
+            _preciseMillingPathGenerator->clearCheckSurfaces();
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[0],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setNumScanLines(64);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
+
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
+
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_drill.k8"), program);
 
             executor->setProgram("Local program (drill)", program);
             CuttingToolParams defaultParameters;
@@ -391,8 +410,19 @@ void DesignModeController::updateMainWindow()
                 _modelIntersections->getHandleParametricContours()[0]
             );
 
+            _preciseMillingPathGenerator->clearCheckSurfaces();
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[0],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setNumScanLines(64);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
+
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_handle.k8"), program);
 
             executor->setProgram("Local program (handle)", program);
             CuttingToolParams defaultParameters;
@@ -412,10 +442,26 @@ void DesignModeController::updateMainWindow()
                 _modelIntersections->getBodyParametricContours()[0]
             );
 
+            _preciseMillingPathGenerator->clearCheckSurfaces();
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[1],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[2],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setNumScanLines(128);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
 
-            executor->setProgram("Local program (handle)", program);
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_body.k8"), program);
+
+            executor->setProgram("Local program (body)", program);
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
             defaultParameters.radius = 4.0f;

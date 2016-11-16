@@ -56,6 +56,7 @@ std::vector<TVector> CurveSimplifier<TVector, TPrecision>::simplify(
     for (auto i = 2; i < curve.size(); ++i)
     {
         const auto &nextPoint = curve[i];
+        if (glm::length(nextPoint - lastPoint) < 10e-6) { continue; }
         auto nextDirection = glm::normalize(nextPoint - lastPoint);
         auto deviation = glm::dot(candidateDirection, nextDirection);
 

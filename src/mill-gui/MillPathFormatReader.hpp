@@ -18,7 +18,7 @@ struct PathMovement
 {
     PathMovement();
     PathMovement(PathMovementType type, glm::vec3 position);
- 
+
     PathMovementType type;
     glm::vec3 position;
 };
@@ -35,4 +35,17 @@ public:
 private:
     std::vector<PathMovement> _movements;
 };
+
+class MillPathFormatWriter
+{
+public:
+    MillPathFormatWriter();
+    ~MillPathFormatWriter();
+
+    void writeToFile(
+        const std::string &filename,
+        const std::vector<PathMovement>& movements
+    );
+};
+
 }
