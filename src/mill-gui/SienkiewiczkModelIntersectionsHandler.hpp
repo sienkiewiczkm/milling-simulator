@@ -30,6 +30,7 @@ public:
     std::vector<std::vector<glm::dvec2>> getDrillParametricContours();
     std::vector<std::vector<glm::dvec2>> getHandleParametricContours();
     std::vector<std::vector<glm::dvec2>> getBodyParametricContours();
+    std::vector<std::vector<glm::dvec2>> getBaseParametricContours();
 
 protected:
     /// \brief Forces join of two intersections. It connects closest end-points
@@ -69,6 +70,11 @@ protected:
         const std::vector<std::vector<glm::dvec2>>& handleInnerContours,
         const std::vector<std::vector<glm::dvec2>>& handleUpperConnection,
         const std::vector<std::vector<glm::dvec2>>& handleLowerConnection
+    );
+
+    void prepareBaseTrimmedArea(
+        const std::vector<std::vector<glm::dvec2>>& handleInnerContours,
+        const std::vector<std::vector<glm::dvec2>>& bodyBackContour
     );
 
     std::vector<glm::dvec3> moveContourAlongFlattenedNormal(
@@ -149,6 +155,7 @@ private:
     std::vector<std::vector<glm::dvec2>> _drillParametricContour;
     std::vector<std::vector<glm::dvec2>> _handleParametricContour;
     std::vector<std::vector<glm::dvec2>> _bodyParametricContours;
+    std::vector<std::vector<glm::dvec2>> _baseParametricContours;
 };
 
 }

@@ -91,11 +91,13 @@ void DesignModeController::onCreate()
 
     _roughPathGenerator = std::make_shared<RoughMillingPathGenerator>();
     _roughPathGenerator->setCuttingToolRadius(8.0f);
+    _roughPathGenerator->setBaseHeight(_baseHeight);
     _roughPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
     _roughPathGenerator->setWorkingAreaResolution({300, 300});//0.5mm
 
     _preciseMillingPathGenerator =
         std::make_shared<PreciseMillingPathGenerator>();
+    _preciseMillingPathGenerator->setBaseHeight(_baseHeight);
 
     for (const auto &object: _loadedObjects)
     {
@@ -110,6 +112,7 @@ void DesignModeController::onCreate()
     }
 
     _flatteningPathGenerator = std::make_shared<BaseFlatteningPathGenerator>();
+    _flatteningPathGenerator->setBaseHeight(_baseHeight);
     _flatteningPathGenerator->setCuttingToolRadius(6.0f);
     _flatteningPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
 
@@ -383,9 +386,9 @@ void DesignModeController::updateMainWindow()
                 _loadedModelMatrix
             );
 
+            _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(64);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
-
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
 
@@ -416,6 +419,7 @@ void DesignModeController::updateMainWindow()
                 _loadedModelMatrix
             );
 
+            _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(64);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
@@ -453,6 +457,7 @@ void DesignModeController::updateMainWindow()
                 _loadedModelMatrix
             );
 
+            _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(128);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
@@ -465,6 +470,45 @@ void DesignModeController::updateMainWindow()
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
             defaultParameters.radius = 4.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        if (_intersectionsReady && ImGui::Button("Mill HANDLE HOLE precisely"))
+        {
+            _preciseMillingPathGenerator->setParametricSurface(
+                _baseBspline,
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setParametricSurfaceBoundaries(
+                _modelIntersections->getBaseParametricContours()[0]
+            );
+
+            _preciseMillingPathGenerator->clearCheckSurfaces();
+
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[0],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[1],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setCuttingToolRadius(0.5);
+            _preciseMillingPathGenerator->setNumScanLines(512);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
+            _preciseMillingPathGenerator->bake();
+            auto program = _preciseMillingPathGenerator->buildPaths();
+
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_handle_hole.k1"), program);
+
+            executor->setProgram("Local program (handle hole)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 0.5f;
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
     }
@@ -488,6 +532,13 @@ void DesignModeController::updateMainWindow()
         renderParametricPreviewCanvas(
             "Body",
             _modelIntersections->getBodyParametricContours()
+        );
+
+        ImGui::Separator();
+
+        renderParametricPreviewCanvas(
+            "Base",
+            _modelIntersections->getBaseParametricContours()
         );
     }
 }
@@ -544,6 +595,7 @@ void DesignModeController::renderParametricPreviewCanvas(
                 static_cast<float>(contour[i+1].y * size.y)
             };
 
+            /*
             draw_list->AddCircle(
                 ImVec2(p0.x + start.x, p0.y + start.y),
                 4.0f,
@@ -555,6 +607,7 @@ void DesignModeController::renderParametricPreviewCanvas(
                 4.0f,
                 fglight32
             );
+            */
 
             draw_list->AddLine(
                 ImVec2(start.x + p0.x, start.y + p0.y),

@@ -101,7 +101,7 @@ void PreciseMillingPathGenerator::setParametricSurfaceBoundaries(
     _boundaries = boundaries;
 }
 
-void PreciseMillingPathGenerator::bake()
+void PreciseMillingPathGenerator::bake(bool inverseTrimmingSide)
 {
     bakeCheckSurfaceHeightmap();
 
@@ -120,9 +120,15 @@ void PreciseMillingPathGenerator::bake()
             continue;
         }
 
-        for (auto i = 1; i < scanPoints.size(); i += 2)
+        auto start = inverseTrimmingSide ? 0 : 1;
+
+        for (auto i = start; i+1 < scanPoints.size(); i += 2)
         {
             std::vector<glm::dvec3> currentPath;
+
+            std::cout << "total: " << scanPoints.size()
+                << " generating from " << scanPoints[i] << " to "
+                << scanPoints[i+1] << " ! " << std::endl;
             generatePathLine(currentPath, scanPoints[i], scanPoints[i+1], v);
 
             if (inversePath)
@@ -343,7 +349,7 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
     glm::dvec2 scanStart{-0.1, constV};
     glm::dvec2 scanEnd{+1.1, constV};
 
-    std::vector<double> intersectionPoints;
+    std::vector<double> intersectionPoints{0.0, 1.0};
 
     for (auto i = 0; i+1 < boundaries.size(); ++i)
     {
@@ -358,6 +364,7 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
         {
             auto intersectionPoint = scanStart
                 + intersection.t0 * (scanEnd - scanStart);
+            std::cout << "int at t0=" << intersection.t0 << std::endl;
             intersectionPoints.push_back(intersectionPoint.x);
         }
         else if (intersection.kind != fw::GeometricIntersectionKind::None)

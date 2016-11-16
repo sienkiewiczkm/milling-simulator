@@ -120,6 +120,10 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
 
     prepareDrillTrimmedArea(drillParametricCont, drillBodyParametricContour);
 
+    auto baseHandleInner = fixParametricContour(extractLhs(handleInner));
+    auto baseBodyBack = fixParametricContour(extractLhs(bodyBack));
+    prepareBaseTrimmedArea(baseHandleInner, baseBodyBack);
+
     auto handleContour = handleOuter;
     auto handleToolContour = moveContourAlongFlattenedNormal(
         handleContour,
@@ -373,6 +377,47 @@ void SienkiewiczkModelIntersectionsHandler::prepareHandleTrimmedArea(
     );
 
     _handleParametricContour.push_back(unifiedContour);
+}
+
+void SienkiewiczkModelIntersectionsHandler::prepareBaseTrimmedArea(
+    const std::vector<std::vector<glm::dvec2>>& handleInnerContours,
+    const std::vector<std::vector<glm::dvec2>>& bodyBackContour
+)
+{
+    std::cout << "prepping base trimmed area" << std::endl;
+    auto handleInner = handleInnerContours[0];
+    auto handleInnerRev = handleInner;
+    std::reverse(std::begin(handleInnerRev), std::end(handleInnerRev));
+
+    auto bodyBack = bodyBackContour[0];
+    auto bodyBackRev = bodyBack;
+    std::reverse(std::begin(bodyBackRev), std::end(bodyBackRev));
+
+    auto cutBase = cutCurveUsingCurves(
+        handleInner,
+        bodyBackRev,
+        bodyBack
+    );
+
+    auto cutBody = cutCurveUsingCurves(
+        bodyBack,
+        handleInnerRev,
+        handleInner
+    );
+
+    std::vector<glm::dvec2> unifiedContour(cutBase);
+
+    std::copy(
+        std::begin(cutBody),
+        std::end(cutBody),
+        std::back_inserter(unifiedContour)
+    );
+
+    std::reverse(std::begin(unifiedContour), std::end(unifiedContour));
+
+    _baseParametricContours.clear();
+    _baseParametricContours.push_back(unifiedContour);
+    std::cout << "finito" << std::endl;
 }
 
 std::vector<glm::dvec2>
@@ -743,6 +788,12 @@ std::vector<std::vector<glm::dvec2>>
         SienkiewiczkModelIntersectionsHandler::getBodyParametricContours()
 {
     return _bodyParametricContours;
+}
+
+std::vector<std::vector<glm::dvec2>>
+        SienkiewiczkModelIntersectionsHandler::getBaseParametricContours()
+{
+    return _baseParametricContours;
 }
 
 }

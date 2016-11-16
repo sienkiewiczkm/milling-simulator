@@ -40,7 +40,7 @@ public:
         const std::vector<glm::dvec2>& boundaries
     );
 
-    void bake();
+    void bake(bool inverseTrimmingSide = false);
     std::vector<PathMovement> buildPaths();
 
 protected:
