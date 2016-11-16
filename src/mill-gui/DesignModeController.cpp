@@ -400,6 +400,27 @@ void DesignModeController::updateMainWindow()
             defaultParameters.radius = 4.0f;
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
+
+        if (_intersectionsReady && ImGui::Button("Mill BODY precisely"))
+        {
+            _preciseMillingPathGenerator->setParametricSurface(
+                _loadedObjects[0],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setParametricSurfaceBoundaries(
+                _modelIntersections->getBodyParametricContours()[0]
+            );
+
+            _preciseMillingPathGenerator->bake();
+            auto program = _preciseMillingPathGenerator->buildPaths();
+
+            executor->setProgram("Local program (handle)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 4.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
     }
 
     if (ImGui::CollapsingHeader("Parametric previews"))

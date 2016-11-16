@@ -86,19 +86,11 @@ std::vector<glm::dvec3> ContourMerger::merge2D(
                 rhs[j+1]
             );
 
-            if (intersection.kind == fw::GeometricIntersectionKind::Single)
-            {
-                std::cout << i << " with " << j << std::endl;
-                auto intPt = lhs[i]
-                    + intersection.singleIntersectionParameter *
-                        (lhs[i+1] - lhs[i]);
-                intersectionMarkers.push_back({i, j, intPt});
-            }
-
             if (intersection.kind != fw::GeometricIntersectionKind::None)
             {
-                std::cout << "Found non-None intersection: "
-                    << static_cast<int>(intersection.kind) << std::endl;
+                std::cout << i << " with " << j << std::endl;
+                auto intPt = lhs[i] + intersection.t0 * (lhs[i+1] - lhs[i]);
+                intersectionMarkers.push_back({i, j, intPt});
             }
         }
     }

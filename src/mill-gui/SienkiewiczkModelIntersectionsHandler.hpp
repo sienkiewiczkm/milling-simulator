@@ -39,6 +39,11 @@ protected:
         const std::vector<fw::ParametricSurfaceIntersection>& rhs
     );
 
+    std::vector<glm::dvec2> joinIntersections(
+        const std::vector<glm::dvec2>& lhs,
+        const std::vector<glm::dvec2>& rhs
+    );
+
     enum class ContourMoveParameter
     {
         LHS,
@@ -77,6 +82,24 @@ protected:
         const std::vector<glm::dvec2>& input,
         const std::vector<glm::dvec2>& lhs,
         const std::vector<glm::dvec2>& rhs
+    );
+
+    std::vector<glm::dvec2> joinSegmentWithLooped(
+        const std::vector<glm::dvec2>& lhs,
+        const std::vector<glm::dvec2>& rhs,
+        int direction = -1
+    );
+
+    std::vector<glm::dvec2> removeJoinedVertices(
+        const std::vector<glm::dvec2>& contour
+    );
+
+    void copyContourInDirection(
+        std::vector<glm::dvec2> &output,
+        const std::vector<glm::dvec2> contour,
+        int from,
+        int to,
+        int direction
     );
 
     glm::dvec2 getIntersectionPoint(

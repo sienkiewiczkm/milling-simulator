@@ -49,7 +49,7 @@ TEST(intersectSegments, ShouldHandleSingleIntersection)
     );
 
     EXPECT_EQ(fw::GeometricIntersectionKind::Single, result.kind);
-    EXPECT_DOUBLE_EQ(0.5, result.singleIntersectionParameter);
+    EXPECT_DOUBLE_EQ(0.5, result.t0);
 }
 
 TEST(intersectSegments, ShouldHandlePerpendicularNonColliding)
@@ -74,6 +74,6 @@ TEST(intersectSegments, ShouldHandleNonParallelCommonEnd)
     );
 
     EXPECT_EQ(fw::GeometricIntersectionKind::Single, result.kind);
-    EXPECT_DOUBLE_EQ(1.0, result.singleIntersectionParameter);
+    EXPECT_DOUBLE_EQ(1.0, result.t0);
 }
 

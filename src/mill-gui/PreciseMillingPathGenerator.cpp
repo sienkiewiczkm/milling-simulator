@@ -50,6 +50,7 @@ void PreciseMillingPathGenerator::setParametricSurfaceBoundaries(
 
 void PreciseMillingPathGenerator::bake()
 {
+    _rawPaths.clear();
     for (auto row = 0; row < _numScanLines; ++row)
     {
         auto v = row / static_cast<double>(_numScanLines - 1);
@@ -125,8 +126,7 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
         if (intersection.kind == fw::GeometricIntersectionKind::Single)
         {
             auto intersectionPoint = scanStart
-                + intersection.singleIntersectionParameter
-                    * (scanEnd - scanStart);
+                + intersection.t0 * (scanEnd - scanStart);
             intersectionPoints.push_back(intersectionPoint.x);
         }
     }

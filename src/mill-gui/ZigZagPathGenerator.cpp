@@ -112,8 +112,7 @@ void ZigZagPathGenerator::subdivideZigZags()
                     continue;
                 }
 
-                auto intersectionPoint = from
-                    + (to-from) * intersection.singleIntersectionParameter;
+                auto intersectionPoint = from + (to-from) * intersection.t0;
 
                 intersections.push_back({intersectionPoint.x, i});
             }

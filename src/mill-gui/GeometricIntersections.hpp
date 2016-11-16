@@ -18,17 +18,22 @@ template <typename TPrecision>
 struct GeometricIntersectionResult
 {
     GeometricIntersectionResult():
-        kind{GeometricIntersectionKind::Unknown}
+        kind{GeometricIntersectionKind::Unknown},
+        t0{},
+        t1{}
     {
     }
 
     GeometricIntersectionResult(const GeometricIntersectionKind &kind):
-        kind{kind}
+        kind{kind},
+        t0{},
+        t1{}
     {
     }
 
     GeometricIntersectionKind kind;
-    TPrecision singleIntersectionParameter;
+    TPrecision t0;
+    TPrecision t1;
 };
 
 template <typename TVector2D, typename TPrecision>
@@ -62,7 +67,8 @@ GeometricIntersectionResult<TPrecision> intersectSegments(
         t1 = std::min(static_cast<TPrecision>(1), t1);
         if (0 <= t0 && t0 <= 1 && 0 <= t1 && t1 <= 1)
         {
-            // todo: return t0 and t1 somehow
+            result.t0 = t0;
+            result.t1 = t1;
             result.kind = GeometricIntersectionKind::Infinite;
         }
         else
@@ -85,7 +91,7 @@ GeometricIntersectionResult<TPrecision> intersectSegments(
         auto u = qpxr / rxs;
         if (0 <= t && t <= 1 && 0 <= u && u <= 1)
         {
-            result.singleIntersectionParameter = t;
+            result.t0 = result.t1 = t;
             result.kind = GeometricIntersectionKind::Single;
             return result;
         }
