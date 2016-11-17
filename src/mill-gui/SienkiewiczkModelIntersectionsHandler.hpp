@@ -32,6 +32,8 @@ public:
     std::vector<std::vector<glm::dvec2>> getBodyParametricContours();
     std::vector<std::vector<glm::dvec2>> getBaseParametricContours();
 
+    std::vector<std::vector<glm::dvec3>> getRefinementCurves();
+
 protected:
     /// \brief Forces join of two intersections. It connects closest end-points
     //         of the intersection together making a circle.
@@ -79,6 +81,13 @@ protected:
 
     std::vector<glm::dvec3> moveContourAlongFlattenedNormal(
         const std::vector<fw::ParametricSurfaceIntersection>& intersection,
+        std::shared_ptr<fw::IParametricSurfaceUV> surface,
+        ContourMoveParameter moveParameter,
+        double distance
+    );
+
+    void inplaceMoveContourAlongNormal(
+        std::vector<fw::ParametricSurfaceIntersection>& intersection,
         std::shared_ptr<fw::IParametricSurfaceUV> surface,
         ContourMoveParameter moveParameter,
         double distance
@@ -140,6 +149,10 @@ protected:
         const std::vector<fw::ParametricSurfaceIntersection>& intersection
     );
 
+    std::vector<glm::dvec3> extractPositions(
+        const std::vector<fw::ParametricSurfaceIntersection>& intersection
+    );
+
 private:
     std::vector<glm::dvec3> _objectShiftedContour;
 
@@ -156,6 +169,8 @@ private:
     std::vector<std::vector<glm::dvec2>> _handleParametricContour;
     std::vector<std::vector<glm::dvec2>> _bodyParametricContours;
     std::vector<std::vector<glm::dvec2>> _baseParametricContours;
+
+    std::vector<std::vector<glm::dvec3>> _refinementCurves;
 };
 
 }

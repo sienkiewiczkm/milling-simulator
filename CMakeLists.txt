@@ -67,6 +67,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/Common.cpp
     src/mill-gui/CommonBsplineSurfaces.cpp
     src/mill-gui/ContourMerger.cpp
+    src/mill-gui/CurvePathGenerator.cpp
     src/mill-gui/CuttingToolController.cpp
     src/mill-gui/CuttingToolGUI.cpp
     src/mill-gui/CuttingToolModel.cpp

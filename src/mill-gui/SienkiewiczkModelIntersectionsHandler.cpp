@@ -80,6 +80,57 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
         moveDistance
     );
 
+    auto refineBodyDrill = bodyDrill;
+    inplaceMoveContourAlongNormal(
+        refineBodyDrill,
+        _body,
+        ContourMoveParameter::LHS,
+        _toolRadius
+    );
+    inplaceMoveContourAlongNormal(
+        refineBodyDrill,
+        _drill,
+        ContourMoveParameter::RHS,
+        _toolRadius
+    );
+
+    auto refineBodyUpperHandle = bodyUpperHandle;
+    inplaceMoveContourAlongNormal(
+        refineBodyUpperHandle,
+        _body,
+        ContourMoveParameter::LHS,
+        _toolRadius
+    );
+    inplaceMoveContourAlongNormal(
+        refineBodyUpperHandle,
+        _handle,
+        ContourMoveParameter::RHS,
+        _toolRadius
+    );
+
+    auto refineBodyLowerHandle = bodyLowerHandle;
+    inplaceMoveContourAlongNormal(
+        refineBodyLowerHandle,
+        _body,
+        ContourMoveParameter::LHS,
+        _toolRadius
+    );
+    inplaceMoveContourAlongNormal(
+        refineBodyLowerHandle,
+        _handle,
+        ContourMoveParameter::RHS,
+        _toolRadius
+    );
+
+    _refinementCurves.clear();
+    _refinementCurves.push_back(extractPositions(refineBodyDrill));
+    _refinementCurves.push_back(extractPositions(refineBodyUpperHandle));
+    _refinementCurves.push_back(extractPositions(refineBodyLowerHandle));
+
+    makeRenderable(refineBodyDrill);
+    makeRenderable(refineBodyUpperHandle);
+    makeRenderable(refineBodyLowerHandle);
+
     auto handleOuterContours = fixParametricContour(extractRhs(handleOuter));
     auto handleInnerContours = fixParametricContour(extractRhs(handleInner));
     auto fixedHandleUpper = fixParametricContour(extractRhs(bodyUpperHandle));
@@ -647,6 +698,27 @@ std::vector<glm::dvec3>
     return output;
 }
 
+void SienkiewiczkModelIntersectionsHandler
+        ::inplaceMoveContourAlongNormal(
+    std::vector<fw::ParametricSurfaceIntersection>& intersection,
+    std::shared_ptr<fw::IParametricSurfaceUV> surface,
+    ContourMoveParameter moveParameter,
+    double distance
+)
+{
+    for (auto &param: intersection)
+    {
+        glm::dvec2 parameter = moveParameter == ContourMoveParameter::LHS
+            ? param.lhsParameters
+            : param.rhsParameters;
+
+        auto normal = surface->getNormal(parameter);
+        normal = glm::normalize(normal);
+
+        param.scenePosition = param.scenePosition + distance * normal;
+    }
+}
+
 void SienkiewiczkModelIntersectionsHandler::makeRenderable(
     const std::vector<fw::ParametricSurfaceIntersection>& intersection
 )
@@ -772,6 +844,18 @@ std::vector<glm::dvec2> SienkiewiczkModelIntersectionsHandler::extractLhs(
     return output;
 }
 
+std::vector<glm::dvec3> SienkiewiczkModelIntersectionsHandler::extractPositions(
+    const std::vector<fw::ParametricSurfaceIntersection>& intersection
+)
+{
+    std::vector<glm::dvec3> output;
+    for (auto& el: intersection)
+    {
+        output.push_back(el.scenePosition);
+    }
+    return output;
+}
+
 std::vector<std::vector<glm::dvec2>>
         SienkiewiczkModelIntersectionsHandler::getDrillParametricContours()
 {
@@ -794,6 +878,12 @@ std::vector<std::vector<glm::dvec2>>
         SienkiewiczkModelIntersectionsHandler::getBaseParametricContours()
 {
     return _baseParametricContours;
+}
+
+std::vector<std::vector<glm::dvec3>>
+        SienkiewiczkModelIntersectionsHandler::getRefinementCurves()
+{
+    return _refinementCurves;
 }
 
 }

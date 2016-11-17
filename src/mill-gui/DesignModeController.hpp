@@ -20,6 +20,7 @@
 #include "BaseFlatteningPathGenerator.hpp"
 #include "PreciseMillingPathGenerator.hpp"
 #include "ZigZagPathGenerator.hpp"
+#include "CurvePathGenerator.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -89,6 +90,7 @@ private:
     std::shared_ptr<RoughMillingPathGenerator> _roughPathGenerator;
     std::shared_ptr<BaseFlatteningPathGenerator> _flatteningPathGenerator;
     std::shared_ptr<PreciseMillingPathGenerator> _preciseMillingPathGenerator;
+    std::shared_ptr<CurvePathGenerator> _curveMillingPathGenerator;
 
     ImGuizmo::OPERATION _activeOperation;
     glm::mat4 _loadedModelMatrix;

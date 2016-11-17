@@ -95,6 +95,9 @@ void DesignModeController::onCreate()
     _roughPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
     _roughPathGenerator->setWorkingAreaResolution({300, 300});//0.5mm
 
+    _curveMillingPathGenerator = std::make_shared<CurvePathGenerator>();
+    _curveMillingPathGenerator->setBaseHeight(_baseHeight);
+
     _preciseMillingPathGenerator =
         std::make_shared<PreciseMillingPathGenerator>();
     _preciseMillingPathGenerator->setBaseHeight(_baseHeight);
@@ -509,6 +512,26 @@ void DesignModeController::updateMainWindow()
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
             defaultParameters.radius = 0.5f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        if (_intersectionsReady && ImGui::Button("Refine connections"))
+        {
+            _curveMillingPathGenerator->setTransform(_loadedModelMatrix);
+            _curveMillingPathGenerator->setRefinementCurves(
+                _modelIntersections->getRefinementCurves()
+            );
+
+            _curveMillingPathGenerator->bake();
+            auto program = _curveMillingPathGenerator->buildPaths();
+
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_refinement.k8"), program);
+
+            executor->setProgram("Local program (refinement)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 4.0f;
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
     }
