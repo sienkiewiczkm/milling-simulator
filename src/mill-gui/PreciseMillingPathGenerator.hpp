@@ -46,7 +46,9 @@ public:
 protected:
     void bakeCheckSurfaceHeightmap();
     void bakePositionOnCheckHeightmap(const glm::dvec3& position);
-    bool doesPositionDamageCheckSurface(const glm::dvec3& toolPosition);
+    bool doesPositionDamageCheckSurface(
+        const glm::dvec3& toolPosition
+    );
     glm::ivec2 getHeightmapCoord(glm::dvec3 position);
     glm::dvec2 getCellWorldCenter(glm::ivec2 coordinate);
 

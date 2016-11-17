@@ -260,7 +260,7 @@ double RoughMillingPathGenerator::getHighestValueInArea(
         }
     }
 
-    return maxValue;
+    return maxValue + 1.5; // add 1.5mm just to be safe
 }
 
 }

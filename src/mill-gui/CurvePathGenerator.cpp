@@ -19,7 +19,9 @@ void CurvePathGenerator::bake()
         std::cout << "refinement curve found!" << std::endl;
         for (const auto& pos: curve)
         {
-            auto transformed = _transform * glm::dvec4{pos, 1.0};
+            auto transformed = _transform * glm::dvec4{pos, 1.0}
+                - glm::dvec4{0, 4.0, 0.0, 0.0};
+
             std::cout << "refinement position found!" << std::endl;
             if (transformed.y >= _baseHeight)
             {

@@ -22,7 +22,7 @@ public:
 
     ~SienkiewiczkModelIntersectionsHandler();
 
-    void setScaledToolRadius(double toolRadius);
+    void setScaledToolRadius(double toolRadius, double refineToolRadius);
     void findIntersections();
     std::vector<glm::dvec3> getObjectContour(glm::dmat4 objectTransformation);
     void render() const;
@@ -163,7 +163,9 @@ private:
     std::shared_ptr<fw::IParametricSurfaceUV> _base;
     std::vector<std::shared_ptr<fw::PolygonalLine>>
         _intersectionsRepresentations;
+
     double _toolRadius;
+    double _refineToolRadius;
 
     std::vector<std::vector<glm::dvec2>> _drillParametricContour;
     std::vector<std::vector<glm::dvec2>> _handleParametricContour;

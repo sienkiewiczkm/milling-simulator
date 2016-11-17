@@ -18,7 +18,8 @@ SienkiewiczkModelIntersectionsHandler::SienkiewiczkModelIntersectionsHandler(
     _handle(handle),
     _drill(drill),
     _base(base),
-    _toolRadius{0.2}
+    _toolRadius{0.2},
+    _refineToolRadius{0.2}
 {
 }
 
@@ -27,10 +28,12 @@ SienkiewiczkModelIntersectionsHandler::~SienkiewiczkModelIntersectionsHandler()
 }
 
 void SienkiewiczkModelIntersectionsHandler::setScaledToolRadius(
-    double toolRadius
+    double toolRadius,
+    double refineToolRadius
 )
 {
     _toolRadius = toolRadius;
+    _refineToolRadius = refineToolRadius;
 }
 
 void SienkiewiczkModelIntersectionsHandler::findIntersections()
@@ -85,13 +88,13 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
         refineBodyDrill,
         _body,
         ContourMoveParameter::LHS,
-        _toolRadius
+        _refineToolRadius
     );
     inplaceMoveContourAlongNormal(
         refineBodyDrill,
         _drill,
         ContourMoveParameter::RHS,
-        _toolRadius
+        _refineToolRadius
     );
 
     auto refineBodyUpperHandle = bodyUpperHandle;
@@ -99,13 +102,13 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
         refineBodyUpperHandle,
         _body,
         ContourMoveParameter::LHS,
-        _toolRadius
+        _refineToolRadius
     );
     inplaceMoveContourAlongNormal(
         refineBodyUpperHandle,
         _handle,
         ContourMoveParameter::RHS,
-        _toolRadius
+        _refineToolRadius
     );
 
     auto refineBodyLowerHandle = bodyLowerHandle;
@@ -113,13 +116,13 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
         refineBodyLowerHandle,
         _body,
         ContourMoveParameter::LHS,
-        _toolRadius
+        _refineToolRadius
     );
     inplaceMoveContourAlongNormal(
         refineBodyLowerHandle,
         _handle,
         ContourMoveParameter::RHS,
-        _toolRadius
+        _refineToolRadius
     );
 
     _refinementCurves.clear();

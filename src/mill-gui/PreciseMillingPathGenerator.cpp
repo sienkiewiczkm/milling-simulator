@@ -252,6 +252,9 @@ bool PreciseMillingPathGenerator::doesPositionDamageCheckSurface(
     auto minHcCoord = hcCoord - glm::ivec2{glm::ceil(_toolHeightmapRadius)};
     auto maxHcCoord = hcCoord + glm::ivec2{glm::ceil(_toolHeightmapRadius)};
 
+    double damageMagnitude = 0.0;
+    bool objectDamaged = false;
+
     for (auto y = std::max(0, minHcCoord.y);
         y < std::min(_workingAreaResolution.y, maxHcCoord.y + 1);
         ++y)
@@ -271,14 +274,19 @@ bool PreciseMillingPathGenerator::doesPositionDamageCheckSurface(
             );
 
             auto index = _workingAreaResolution.x * y + x;
-            if (toolPosition.y + gainedHeight < _checkHeightmap[index])
+            auto effectiveCut = toolPosition.y + gainedHeight;
+            if (effectiveCut < _checkHeightmap[index])
             {
-                return true;
+                objectDamaged = true;
+                damageMagnitude = std::max(
+                    damageMagnitude,
+                    _checkHeightmap[index] - effectiveCut
+                );
             }
         }
     }
 
-    return false;
+    return objectDamaged;
 }
 
 glm::ivec2 PreciseMillingPathGenerator::getHeightmapCoord(glm::dvec3 position)

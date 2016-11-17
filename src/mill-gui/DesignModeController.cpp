@@ -84,7 +84,16 @@ void DesignModeController::onCreate()
     glm::dvec4 radius{6,6,6,1};
     auto scaledToolRadius = glm::inverse(_loadedModelMatrix) * radius
         - glm::inverse(_loadedModelMatrix) * origin;
-    _modelIntersections->setScaledToolRadius(scaledToolRadius.y);
+
+    glm::dvec4 origin2{0,0,0,1};
+    glm::dvec4 radius2{4,4,4,1};
+    auto refineToolRadius = glm::inverse(_loadedModelMatrix) * radius2
+        - glm::inverse(_loadedModelMatrix) * origin2;
+
+    _modelIntersections->setScaledToolRadius(
+        scaledToolRadius.y,
+        refineToolRadius.y
+    );
 
     fw::ParametricSurfaceMeshBuilder parametricBuilder;
     parametricBuilder.setSamplingResolution(glm::ivec2(64, 64));
@@ -392,7 +401,7 @@ void DesignModeController::updateMainWindow()
             );
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
-            _preciseMillingPathGenerator->setNumScanLines(64);
+            _preciseMillingPathGenerator->setNumScanLines(128);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
@@ -425,7 +434,7 @@ void DesignModeController::updateMainWindow()
             );
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
-            _preciseMillingPathGenerator->setNumScanLines(64);
+            _preciseMillingPathGenerator->setNumScanLines(128);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
@@ -463,7 +472,7 @@ void DesignModeController::updateMainWindow()
             );
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
-            _preciseMillingPathGenerator->setNumScanLines(128);
+            _preciseMillingPathGenerator->setNumScanLines(300);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
@@ -478,7 +487,46 @@ void DesignModeController::updateMainWindow()
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
 
-        if (_intersectionsReady && ImGui::Button("Mill HANDLE HOLE precisely"))
+        if (_intersectionsReady && ImGui::Button("Mill HANDLE HOLE K8"))
+        {
+            _preciseMillingPathGenerator->setParametricSurface(
+                _baseBspline,
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setParametricSurfaceBoundaries(
+                _modelIntersections->getBaseParametricContours()[0]
+            );
+
+            _preciseMillingPathGenerator->clearCheckSurfaces();
+
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[0],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->addCheckSurface(
+                _loadedObjects[1],
+                _loadedModelMatrix
+            );
+
+            _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
+            _preciseMillingPathGenerator->setNumScanLines(64);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(8);
+            _preciseMillingPathGenerator->bake();
+            auto program = _preciseMillingPathGenerator->buildPaths();
+
+            MillPathFormatWriter writer;
+            writer.writeToFile(RESOURCE("paths/last_handle_hole.k8"), program);
+
+            executor->setProgram("Local program (handle hole k8)", program);
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 4.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        if (_intersectionsReady && ImGui::Button("Mill HANDLE HOLE K1"))
         {
             _preciseMillingPathGenerator->setParametricSurface(
                 _baseBspline,
@@ -502,7 +550,7 @@ void DesignModeController::updateMainWindow()
             );
 
             _preciseMillingPathGenerator->setCuttingToolRadius(0.5);
-            _preciseMillingPathGenerator->setNumScanLines(512);
+            _preciseMillingPathGenerator->setNumScanLines(256);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
@@ -510,7 +558,7 @@ void DesignModeController::updateMainWindow()
             MillPathFormatWriter writer;
             writer.writeToFile(RESOURCE("paths/last_handle_hole.k1"), program);
 
-            executor->setProgram("Local program (handle hole)", program);
+            executor->setProgram("Local program (handle hole k1)", program);
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
             defaultParameters.radius = 0.5f;
