@@ -79,26 +79,26 @@ std::shared_ptr<ICurve3d> BsplineSurface::getConstParameterCurve(
     );
 }
 
-glm::dvec3 BsplineSurface::getPosition(glm::dvec2 parametrization)
+glm::dvec3 BsplineSurface::getPosition(glm::dvec2 parametrization) const
 {
     return getConstParameterCurve(ParametrizationAxis::U, parametrization.x)
         ->evaluate(parametrization.y);
 }
 
-glm::dvec3 BsplineSurface::getNormal(glm::dvec2 parametrisation)
+glm::dvec3 BsplineSurface::getNormal(glm::dvec2 parametrisation) const
 {
     auto du = getDerivativeU(parametrisation);
     auto dv = getDerivativeV(parametrisation);
     return glm::normalize(glm::cross(dv, du));
 }
 
-glm::dvec3 BsplineSurface::getDerivativeU(glm::dvec2 parametrisation)
+glm::dvec3 BsplineSurface::getDerivativeU(glm::dvec2 parametrisation) const
 {
     return getConstParameterCurve(ParametrizationAxis::V, parametrisation.y)
         ->getDerivativeCurve()->evaluate(parametrisation.x);
 }
 
-glm::dvec3 BsplineSurface::getDerivativeV(glm::dvec2 parametrisation)
+glm::dvec3 BsplineSurface::getDerivativeV(glm::dvec2 parametrisation) const
 {
     return getConstParameterCurve(ParametrizationAxis::U, parametrisation.x)
         ->getDerivativeCurve()->evaluate(parametrisation.y);

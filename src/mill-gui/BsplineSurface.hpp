@@ -37,10 +37,14 @@ public:
 
     virtual ~BsplineSurface();
 
-    virtual glm::dvec3 getPosition(glm::dvec2 parametrisation) override;
-    virtual glm::dvec3 getNormal(glm::dvec2 parmetrisation) override;
-    virtual glm::dvec3 getDerivativeU(glm::dvec2 parametrisation) override;
-    virtual glm::dvec3 getDerivativeV(glm::dvec2 parametrisation) override;
+    virtual glm::dvec3 getPosition(glm::dvec2 parametrisation) const override;
+    virtual glm::dvec3 getNormal(glm::dvec2 parmetrisation) const override;
+    virtual glm::dvec3 getDerivativeU(
+        glm::dvec2 parametrisation
+    ) const override;
+    virtual glm::dvec3 getDerivativeV(
+        glm::dvec2 parametrisation
+    ) const override;
 
     virtual std::shared_ptr<ICurve3d> getConstParameterCurve(
         ParametrizationAxis constParameter,

@@ -25,10 +25,10 @@ public:
         double parameter
     ) const = 0;
 
-    virtual glm::dvec3 getPosition(glm::dvec2 parametrisation) = 0;
-    virtual glm::dvec3 getNormal(glm::dvec2 parmetrisation) = 0;
-    virtual glm::dvec3 getDerivativeU(glm::dvec2 parametrisation) = 0;
-    virtual glm::dvec3 getDerivativeV(glm::dvec2 parametrisation) = 0;
+    virtual glm::dvec3 getPosition(glm::dvec2 parametrisation) const = 0;
+    virtual glm::dvec3 getNormal(glm::dvec2 parmetrisation) const = 0;
+    virtual glm::dvec3 getDerivativeU(glm::dvec2 parametrisation) const = 0;
+    virtual glm::dvec3 getDerivativeV(glm::dvec2 parametrisation) const = 0;
 };
 
 }

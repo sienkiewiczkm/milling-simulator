@@ -38,7 +38,7 @@ std::shared_ptr<ICurve3d>
 
 glm::dvec3 BsplineNonVanishingReparametrization::getPosition(
     glm::dvec2 parametrization
-)
+) const
 {
     return getConstParameterCurve(ParametrizationAxis::U, parametrization.x)
         ->evaluate(parametrization.y);
@@ -46,7 +46,7 @@ glm::dvec3 BsplineNonVanishingReparametrization::getPosition(
 
 glm::dvec3 BsplineNonVanishingReparametrization::getNormal(
     glm::dvec2 parametrisation
-)
+) const
 {
     auto du = getDerivativeU(parametrisation);
     auto dv = getDerivativeV(parametrisation);
@@ -55,7 +55,7 @@ glm::dvec3 BsplineNonVanishingReparametrization::getNormal(
 
 glm::dvec3 BsplineNonVanishingReparametrization::getDerivativeU(
     glm::dvec2 parametrisation
-)
+) const
 {
     auto derivFactors = calculateReparametrizationDerivativeFactors();
     return derivFactors.y *
@@ -65,7 +65,7 @@ glm::dvec3 BsplineNonVanishingReparametrization::getDerivativeU(
 
 glm::dvec3 BsplineNonVanishingReparametrization::getDerivativeV(
     glm::dvec2 parametrisation
-)
+) const
 {
     auto derivFactors = calculateReparametrizationDerivativeFactors();
     return derivFactors.x *

@@ -75,6 +75,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/DebugShapes.cpp
     src/mill-gui/DesignModeController.cpp
     src/mill-gui/Effect.cpp
+    src/mill-gui/EquidistantParametricSurface.cpp
     src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/HeightmapTextureConverter.cpp
     src/mill-gui/HeightmapVisualizationEffect.cpp

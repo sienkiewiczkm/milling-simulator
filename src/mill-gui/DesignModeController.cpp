@@ -1,13 +1,15 @@
 #include "DesignModeController.hpp"
-#include "DebugShapes.hpp"
-#include "ParametricSurfaceIntersectionFinder.hpp"
-#include "CommonBsplineSurfaces.hpp"
-#include "Config.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <ImGuizmo.h>
+
+#include "CommonBsplineSurfaces.hpp"
+#include "Config.hpp"
+#include "DebugShapes.hpp"
+#include "EquidistantParametricSurface.hpp"
+#include "ParametricSurfaceIntersectionFinder.hpp"
 
 namespace ms
 {
