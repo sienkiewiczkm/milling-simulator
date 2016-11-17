@@ -55,39 +55,30 @@ include_directories(
     dependencies/generated/glad/include
 )
 
-add_library(${PROJECT_NAME_LIB}
-    src/mill-gui/BaseFlatteningPathGenerator.cpp
+set(FRAMEWORK_DEPENDENCIES_SOURCE_FILES
+    dependencies/ImGuizmo/ImGuizmo.cpp
+    dependencies/generated/glad/src/glad.c
+    dependencies/imgui/imgui.cpp
+    dependencies/imgui/imgui_demo.cpp
+    dependencies/imgui/imgui_draw.cpp
+)
+
+set(FRAMEWORK_SOURCE_FILES
     src/mill-gui/BasicEffect.cpp
-    src/mill-gui/BoundariesMillingTechnique.cpp
     src/mill-gui/BsplineBasisEvaluator.cpp
     src/mill-gui/BsplineEquidistantKnotGenerator.cpp
     src/mill-gui/BsplineNonVanishingReparametrization.cpp
     src/mill-gui/BsplineSurface.cpp
-    src/mill-gui/CadioModelLoader.cpp
     src/mill-gui/Common.cpp
     src/mill-gui/CommonBsplineSurfaces.cpp
-    src/mill-gui/ContourMerger.cpp
-    src/mill-gui/CurvePathGenerator.cpp
-    src/mill-gui/CuttingToolController.cpp
-    src/mill-gui/CuttingToolGUI.cpp
-    src/mill-gui/CuttingToolModel.cpp
-    src/mill-gui/CuttingToolParams.cpp
     src/mill-gui/DebugShapes.cpp
-    src/mill-gui/DesignModeController.cpp
     src/mill-gui/Effect.cpp
     src/mill-gui/EquidistantParametricSurface.cpp
     src/mill-gui/HeightmapGeometry.cpp
     src/mill-gui/HeightmapTextureConverter.cpp
     src/mill-gui/HeightmapVisualizationEffect.cpp
     src/mill-gui/ImGuiBinding.cpp
-    src/mill-gui/ImGuiToolboxWindow.cpp
     src/mill-gui/IntersectionCurve.cpp
-    src/mill-gui/MillPathFormatReader.cpp
-    src/mill-gui/MillerApplication.cpp
-    src/mill-gui/MillingBlock.cpp
-    src/mill-gui/MillingBlockCreationWindow.cpp
-    src/mill-gui/MillingProgramExecutor.cpp
-    src/mill-gui/MillingProgramExecutorGUI.cpp
     src/mill-gui/OpenGLApplication.cpp
     src/mill-gui/OrbitingCamera.cpp
     src/mill-gui/ParametricSurfaceClosestPointNaiveFinder.cpp
@@ -95,24 +86,41 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/ParametricSurfaceIntersectionFinder.cpp
     src/mill-gui/ParametricSurfaceMeshBuilder.cpp
     src/mill-gui/PolygonalLine.cpp
-    src/mill-gui/PreciseMillingPathGenerator.cpp
-    src/mill-gui/ProgramManagerGUI.cpp
-    src/mill-gui/RoughMillingPathGenerator.cpp
-    src/mill-gui/SamplingMillingTechnique.cpp
     src/mill-gui/Shaders.cpp
-    src/mill-gui/SienkiewiczkModelIntersectionsHandler.cpp
-    src/mill-gui/SimulationModeController.cpp
     src/mill-gui/StbImplementation.c
     src/mill-gui/SurfaceIntersectionNewtonIterable.cpp
     src/mill-gui/TextureUtils.cpp
     src/mill-gui/TexturedPhongEffect.cpp
     src/mill-gui/Vertices.cpp
+)
+
+add_library(${PROJECT_NAME_LIB}
+    src/mill-gui/BaseFlatteningPathGenerator.cpp
+    src/mill-gui/BoundariesMillingTechnique.cpp
+    src/mill-gui/CadioModelLoader.cpp
+    src/mill-gui/ContourMerger.cpp
+    src/mill-gui/CurvePathGenerator.cpp
+    src/mill-gui/CuttingToolController.cpp
+    src/mill-gui/CuttingToolGUI.cpp
+    src/mill-gui/CuttingToolModel.cpp
+    src/mill-gui/CuttingToolParams.cpp
+    src/mill-gui/DesignModeController.cpp
+    src/mill-gui/ImGuiToolboxWindow.cpp
+    src/mill-gui/MillPathFormatReader.cpp
+    src/mill-gui/MillerApplication.cpp
+    src/mill-gui/MillingBlock.cpp
+    src/mill-gui/MillingBlockCreationWindow.cpp
+    src/mill-gui/MillingProgramExecutor.cpp
+    src/mill-gui/MillingProgramExecutorGUI.cpp
+    src/mill-gui/PreciseMillingPathGenerator.cpp
+    src/mill-gui/ProgramManagerGUI.cpp
+    src/mill-gui/RoughMillingPathGenerator.cpp
+    src/mill-gui/SamplingMillingTechnique.cpp
+    src/mill-gui/SienkiewiczkModelIntersectionsHandler.cpp
+    src/mill-gui/SimulationModeController.cpp
     src/mill-gui/ZigZagPathGenerator.cpp
-    dependencies/generated/glad/src/glad.c
-    dependencies/ImGuizmo/ImGuizmo.cpp
-    dependencies/imgui/imgui.cpp
-    dependencies/imgui/imgui_demo.cpp
-    dependencies/imgui/imgui_draw.cpp
+    ${FRAMEWORK_SOURCE_FILES}
+    ${FRAMEWORK_DEPENDENCIES_SOURCE_FILES}
 )
 
 add_executable(${PROJECT_NAME_TEST}
