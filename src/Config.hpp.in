@@ -1,5 +1,5 @@
 #pragma once
 
-#define RESOURCES_PATH "@RESOURCES_PATH@"
+#define RESOURCES_PATH "@RESOURCES_PATH@/"
 
-#define RESOURCE(resourcePath) ("@RESOURCES_PATH@" resourcePath)
+#define RESOURCE(resourcePath) ("@RESOURCES_PATH@/" resourcePath)

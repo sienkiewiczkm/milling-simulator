@@ -1,21 +1,3 @@
-[submodule "dependencies/imgui"]
-	path = dependencies/imgui
-	url = https://github.com/ocornut/imgui.git
-[submodule "dependencies/glfw"]
-	path = dependencies/glfw
-	url = https://github.com/glfw/glfw.git
-[submodule "dependencies/glad"]
-	path = dependencies/glad
-	url = https://github.com/Dav1dde/glad
-[submodule "dependencies/glm"]
-	path = dependencies/glm
-	url = https://github.com/g-truc/glm
-[submodule "dependencies/stb"]
-	path = dependencies/stb
-	url = https://github.com/nothings/stb
-[submodule "dependencies/googletest"]
-	path = dependencies/googletest
-	url = https://github.com/google/googletest
-[submodule "dependencies/ImGuizmo"]
-	path = dependencies/ImGuizmo
-	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "dependencies/framework"]
+	path = dependencies/framework
+	url = git@gitlab.com:sienkiewiczkm/framework.git

@@ -2,27 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(milling-simulator)
 
 set(PROJECT_NAME_LIB ${PROJECT_NAME}-lib)
-set(PROJECT_NAME_TEST ${PROJECT_NAME}-test)
 set(DEPENDENCIES_DIR dependencies/)
-
-find_library(OpenGL REQUIRED)
-
-if (WIN32)
-    set(GLFW_ADDITIONAL_DEFINITIONS
-        "${GLFW_ADDITIONAL_DEFINITIONS} GLFW_EXPOSE_NATIVE_WIN32"
-    )
-
-    set(ADDITIONAL_DEFINITIONS
-        "${ADDITIONAL_DEFINITIONS} GLFW_EXPOSE_NATIVE_WIN32"
-    )
-endif()
-
-# glfw: do not build docs, tests and examples
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(${DEPENDENCIES_DIR}glfw)
-target_compile_definitions(glfw PRIVATE ${GLFW_ADDITIONAL_DEFINITIONS})
 
 # configure boost
 set(Boost_USE_STATIC_LIBS OFF)
@@ -31,16 +11,10 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.60.0 COMPONENTS filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_subdirectory(${DEPENDENCIES_DIR}googletest)
-enable_testing()
-include_directories(${gtest_SOURCE_DIR}/include)
-include_directories(${gmock_SOURCE_DIR}/include)
-
-include_directories(dependencies/glfw/include)
-include_directories(dependencies/glm)
-include_directories(dependencies/stb)
-
 set(RESOURCES_PATH ${PROJECT_SOURCE_DIR}/resources/)
+
+set(FRAMEWORK_RESOURCES_DIR ${RESOURCES_PATH} CACHE PATH "")
+add_subdirectory(${DEPENDENCIES_DIR}/framework)
 
 configure_file(
     ${PROJECT_SOURCE_DIR}/src/Config.hpp.in
@@ -50,48 +24,7 @@ configure_file(
 include_directories(
     ${PROJECT_SOURCE_DIR}/src/mill-gui/
     ${PROJECT_BINARY_DIR}
-    dependencies/imgui
-    dependencies/ImGuizmo
-    dependencies/generated/glad/include
-)
-
-set(FRAMEWORK_DEPENDENCIES_SOURCE_FILES
-    dependencies/ImGuizmo/ImGuizmo.cpp
-    dependencies/generated/glad/src/glad.c
-    dependencies/imgui/imgui.cpp
-    dependencies/imgui/imgui_demo.cpp
-    dependencies/imgui/imgui_draw.cpp
-)
-
-set(FRAMEWORK_SOURCE_FILES
-    src/mill-gui/BasicEffect.cpp
-    src/mill-gui/BsplineBasisEvaluator.cpp
-    src/mill-gui/BsplineEquidistantKnotGenerator.cpp
-    src/mill-gui/BsplineNonVanishingReparametrization.cpp
-    src/mill-gui/BsplineSurface.cpp
-    src/mill-gui/Common.cpp
-    src/mill-gui/CommonBsplineSurfaces.cpp
-    src/mill-gui/DebugShapes.cpp
-    src/mill-gui/Effect.cpp
-    src/mill-gui/EquidistantParametricSurface.cpp
-    src/mill-gui/HeightmapGeometry.cpp
-    src/mill-gui/HeightmapTextureConverter.cpp
-    src/mill-gui/HeightmapVisualizationEffect.cpp
-    src/mill-gui/ImGuiBinding.cpp
-    src/mill-gui/IntersectionCurve.cpp
-    src/mill-gui/OpenGLApplication.cpp
-    src/mill-gui/OrbitingCamera.cpp
-    src/mill-gui/ParametricSurfaceClosestPointNaiveFinder.cpp
-    src/mill-gui/ParametricSurfaceIntersection.cpp
-    src/mill-gui/ParametricSurfaceIntersectionFinder.cpp
-    src/mill-gui/ParametricSurfaceMeshBuilder.cpp
-    src/mill-gui/PolygonalLine.cpp
-    src/mill-gui/Shaders.cpp
-    src/mill-gui/StbImplementation.c
-    src/mill-gui/SurfaceIntersectionNewtonIterable.cpp
-    src/mill-gui/TextureUtils.cpp
-    src/mill-gui/TexturedPhongEffect.cpp
-    src/mill-gui/Vertices.cpp
+    ${FRAMEWORK_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME_LIB}
@@ -119,18 +52,6 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/SienkiewiczkModelIntersectionsHandler.cpp
     src/mill-gui/SimulationModeController.cpp
     src/mill-gui/ZigZagPathGenerator.cpp
-    ${FRAMEWORK_SOURCE_FILES}
-    ${FRAMEWORK_DEPENDENCIES_SOURCE_FILES}
-)
-
-add_executable(${PROJECT_NAME_TEST}
-    test/BsplineBasisEvaluatorTests.cpp
-    test/BsplineEquidistantKnotGeneratorTests.cpp
-    test/BsplineSurfaceTests.cpp
-    test/PointQuadtreeTests.cpp
-    test/GeometricIntersectionsTests.cpp
-    test/CommonTest.cpp
-    test/LinearCombinationEvaluatorTests.cpp
 )
 
 add_executable(${PROJECT_NAME}
@@ -141,25 +62,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${OPENGL_INCLUDE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME_TEST}
-    ${PROJECT_NAME_LIB}
-    gtest
-    gmock
-    gmock_main
-)
-
 target_link_libraries(${PROJECT_NAME}
     ${PROJECT_NAME_LIB}
-    glfw
-    ${OPENGL_gl_LIBRARY}
     ${Boost_LIBRARIES}
-)
-
-target_compile_definitions(${PROJECT_NAME_LIB} PRIVATE
-    ${ADDITIONAL_DEFINITIONS}
+    ${FRAMEWORK_LIBRARIES}
 )
 
 set(PROJECT_COMPILE_FEATURES
+    ${PROJECT_COMPILE_FEATURES}
     cxx_auto_type
     cxx_nullptr
     cxx_range_for
@@ -167,8 +77,3 @@ set(PROJECT_COMPILE_FEATURES
 
 target_compile_features(${PROJECT_NAME} PRIVATE ${PROJECT_COMPILE_FEATURES})
 target_compile_features(${PROJECT_NAME_LIB} PRIVATE ${PROJECT_COMPILE_FEATURES})
-target_compile_features(${PROJECT_NAME_TEST} PRIVATE
-    ${PROJECT_COMPILE_FEATURES}
-)
-
-add_test(NAME ${PROJECT_NAME_TEST} COMMAND ${PROJECT_NAME_TEST})
