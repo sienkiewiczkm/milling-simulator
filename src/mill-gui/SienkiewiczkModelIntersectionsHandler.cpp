@@ -189,7 +189,97 @@ void SienkiewiczkModelIntersectionsHandler::findIntersections()
     ContourMerger contourMerger;
     auto contour = contourMerger.merge2D(bodyToolControur, handleToolContour);
     _objectShiftedContour = contourMerger.merge2D(contour, drillToolContour);
+
+
+    auto handleInsideToolContour = moveContourAlongFlattenedNormal(
+        handleInner,
+        _handle,
+        ContourMoveParameter::RHS,
+        _refineToolRadius
+    );
+
+    auto bodyRefineToolControur = moveContourAlongFlattenedNormal(
+        bodyContour,
+        _body,
+        ContourMoveParameter::RHS,
+        _refineToolRadius
+    );
+
+    //handleInsideToolContour,
+    //bodyToolControur
+    auto handlePositions3d = handleInsideToolContour;
+    auto contourheight = handlePositions3d[0].z;
+    std::vector<glm::dvec2> handlePositions2d{};
+    for (const auto& pos: handlePositions3d)
+    {
+        handlePositions2d.push_back({pos.x, pos.y});
+    }
+
+    std::vector<glm::dvec2> handlePositions2dRev{};
+    std::reverse_copy(
+        std::begin(handlePositions2d),
+        std::end(handlePositions2d),
+        std::back_inserter(handlePositions2dRev)
+    );
+
+
+    auto bodyToolPos3d = bodyRefineToolControur;
+    std::vector<glm::dvec2> bodyToolPos2d{};
+    for (const auto& pos: bodyToolPos3d)
+    {
+        bodyToolPos2d.push_back({pos.x, pos.y});
+    }
+
+    std::vector<glm::dvec2> bodyToolPos2dRev{};
+    std::reverse_copy(
+        std::begin(bodyToolPos2d),
+        std::end(bodyToolPos2d),
+        std::back_inserter(bodyToolPos2dRev)
+    );
+
+    auto holeCurveCut = cutCurveUsingCurves(
+        bodyToolPos2d,
+        handlePositions2dRev,
+        handlePositions2d
+    );
+
+    // this curve has a intersection inside
+    auto holeInsideCurveCut = cutCurveUsingCurves(
+        handlePositions2d,
+        bodyToolPos2dRev,
+        bodyToolPos2d
+    );
+
+    auto autointersection = findCurveAutoIntersection(holeInsideCurveCut);
+
+    std::vector<glm::dvec2> holeInsideFixedCut{holeCurveCut};
+
+    copyContourInDirection(
+        holeInsideFixedCut,
+        holeInsideCurveCut,
+        0,
+        autointersection.first,
+        1
+    );
+
+    copyContourInDirection(
+        holeInsideFixedCut,
+        holeInsideCurveCut,
+        autointersection.second + 1,
+        holeInsideCurveCut.size() - 1,
+        1
+    );
+
+    std::vector<glm::dvec3> holeContour3d;
+    for (const auto& pt2d: holeInsideFixedCut)
+    {
+        holeContour3d.push_back({pt2d.x, pt2d.y, contourheight});
+    }
+
+    _holeShiftedContour = holeContour3d;
+
     makeRenderable(_objectShiftedContour);
+    makeRenderable(holeContour3d);
 
     makeRenderable(bodyContour);
     makeRenderable(drillLowerPart);
@@ -210,6 +300,26 @@ std::vector<glm::dvec3>
     std::transform(
         std::begin(_objectShiftedContour),
         std::end(_objectShiftedContour),
+        std::back_inserter(output),
+        [objectTransformation](const glm::dvec3 &pos)
+        {
+            return glm::dvec3{objectTransformation * glm::dvec4{pos, 1.0}};
+        }
+    );
+
+    return output;
+}
+
+std::vector<glm::dvec3>
+        SienkiewiczkModelIntersectionsHandler::getHandleHoleContour(
+    glm::dmat4 objectTransformation
+)
+{
+    std::vector<glm::dvec3> output;
+
+    std::transform(
+        std::begin(_holeShiftedContour),
+        std::end(_holeShiftedContour),
         std::back_inserter(output),
         [objectTransformation](const glm::dvec3 &pos)
         {
@@ -662,6 +772,32 @@ std::pair<int, int>
                 lhs[i+1],
                 rhs[j],
                 rhs[j+1]
+            );
+
+            if (intersection.kind == fw::GeometricIntersectionKind::Single)
+            {
+                return {i, j};
+            }
+        }
+    }
+
+    return {-1, -1};
+}
+
+std::pair<int, int>
+        SienkiewiczkModelIntersectionsHandler::findCurveAutoIntersection(
+    const std::vector<glm::dvec2>& lhs
+)
+{
+    for (auto j = 0; j+1 < lhs.size(); ++j)
+    {
+        for (auto i = 0; i + 2 < j; ++i)
+        {
+            auto intersection = fw::intersectSegments<glm::dvec2, double>(
+                lhs[i],
+                lhs[i+1],
+                lhs[j],
+                lhs[j+1]
             );
 
             if (intersection.kind == fw::GeometricIntersectionKind::Single)

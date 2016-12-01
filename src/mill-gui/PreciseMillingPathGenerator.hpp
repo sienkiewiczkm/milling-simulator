@@ -9,6 +9,12 @@
 namespace ms
 {
 
+enum class MillingDirection
+{
+    LeftToRight,
+    TopToBottom,
+};
+
 class PreciseMillingPathGenerator
 {
 public:
@@ -40,7 +46,10 @@ public:
         const std::vector<glm::dvec2>& boundaries
     );
 
-    void bake(bool inverseTrimmingSide = false);
+    void bake(
+        bool inverseTrimmingSide = false,
+        MillingDirection direction = MillingDirection::LeftToRight
+    );
     std::vector<PathMovement> buildPaths();
 
 protected:
@@ -68,6 +77,8 @@ protected:
         double maxU,
         double constV
     );
+
+    MillingDirection _currentMillingDirection;
 
 private:
     double _baseHeight;

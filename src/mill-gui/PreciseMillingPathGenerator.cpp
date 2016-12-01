@@ -101,8 +101,13 @@ void PreciseMillingPathGenerator::setParametricSurfaceBoundaries(
     _boundaries = boundaries;
 }
 
-void PreciseMillingPathGenerator::bake(bool inverseTrimmingSide)
+void PreciseMillingPathGenerator::bake(
+    bool inverseTrimmingSide,
+    MillingDirection millingDirection
+)
 {
+    _currentMillingDirection = millingDirection;
+
     bakeCheckSurfaceHeightmap();
 
     _rawPaths.clear();
@@ -354,8 +359,19 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
     std::vector<glm::dvec2> boundaries
 ) const
 {
-    glm::dvec2 scanStart{-0.1, constV};
-    glm::dvec2 scanEnd{+1.1, constV};
+    glm::dvec2 scanStart{};
+    glm::dvec2 scanEnd{};
+
+    if (_currentMillingDirection == MillingDirection::LeftToRight)
+    {
+        scanStart = {-0.1, constV};
+        scanEnd = {+1.1, constV};
+    }
+    else
+    {
+        scanStart = {constV, -0.1};
+        scanEnd = {constV, +1.1};
+    }
 
     std::vector<double> intersectionPoints{0.0, 1.0};
 
@@ -373,7 +389,11 @@ std::vector<double> PreciseMillingPathGenerator::getScanLineIntersections(
             auto intersectionPoint = scanStart
                 + intersection.t0 * (scanEnd - scanStart);
             std::cout << "int at t0=" << intersection.t0 << std::endl;
-            intersectionPoints.push_back(intersectionPoint.x);
+            intersectionPoints.push_back(
+                _currentMillingDirection == MillingDirection::LeftToRight
+                    ? intersectionPoint.x
+                    : intersectionPoint.y
+            );
         }
         else if (intersection.kind != fw::GeometricIntersectionKind::None)
         {
@@ -396,7 +416,9 @@ void PreciseMillingPathGenerator::generatePathLine(
     auto samples = 2 + _maxScanLineResolution;
 
     auto surfaceCurve = _surface->getConstParameterCurve(
-        fw::ParametrizationAxis::V,
+        _currentMillingDirection == MillingDirection::LeftToRight
+            ? fw::ParametrizationAxis::V
+            : fw::ParametrizationAxis::U,
         constV
     );
 
@@ -414,10 +436,16 @@ void PreciseMillingPathGenerator::generatePathLine(
         auto mixFactor = i / static_cast<double>(samples - 1);
         auto u = glm::mix(minU, maxU, mixFactor);
 
+        glm::vec2 coord{u, constV};
+        if (_currentMillingDirection == MillingDirection::TopToBottom)
+        {
+            std::swap(coord.x, coord.y);
+        }
+
         auto pos = glm::dvec3(_surfaceTransformation
             * glm::dvec4{surfaceCurve->evaluate(u), 1.0});
         auto normal = glm::dvec3(normalTransformation
-            * glm::dvec4{_surface->getNormal({u, constV}), 1.0});
+            * glm::dvec4{_surface->getNormal(coord), 1.0});
 
         auto centerPos = pos + _toolRadius * glm::normalize(normal);
         path.push_back(centerPos - glm::dvec3(0, _toolRadius, 0));

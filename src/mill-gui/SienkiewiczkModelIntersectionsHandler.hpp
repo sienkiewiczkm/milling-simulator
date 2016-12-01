@@ -25,6 +25,9 @@ public:
     void setScaledToolRadius(double toolRadius, double refineToolRadius);
     void findIntersections();
     std::vector<glm::dvec3> getObjectContour(glm::dmat4 objectTransformation);
+    std::vector<glm::dvec3> getHandleHoleContour(
+        glm::dmat4 objectTransformation
+    );
     void render() const;
 
     std::vector<std::vector<glm::dvec2>> getDrillParametricContours();
@@ -129,6 +132,10 @@ protected:
         const std::vector<glm::dvec2>& rhs
     );
 
+    std::pair<int, int> findCurveAutoIntersection(
+        const std::vector<glm::dvec2>& lhs
+    );
+
     void makeRenderable(
         const std::vector<fw::ParametricSurfaceIntersection>& intersection
     );
@@ -155,6 +162,7 @@ protected:
 
 private:
     std::vector<glm::dvec3> _objectShiftedContour;
+    std::vector<glm::dvec3> _holeShiftedContour;
 
     fw::ParametricSurfaceIntersectionFinder _intersectionFinder;
     std::shared_ptr<fw::IParametricSurfaceUV> _body;

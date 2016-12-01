@@ -511,7 +511,7 @@ void DesignModeController::updateMainWindow()
             );
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
-            _preciseMillingPathGenerator->setNumScanLines(64);
+            _preciseMillingPathGenerator->setNumScanLines(256);
             _preciseMillingPathGenerator->setNumLineMaximumResolution(8);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
@@ -526,7 +526,7 @@ void DesignModeController::updateMainWindow()
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
 
-        if (_intersectionsReady && ImGui::Button("Mill HANDLE HOLE K1"))
+        if (_intersectionsReady && ImGui::Button("Mill HANDLE HOLE K8 - TANG"))
         {
             _preciseMillingPathGenerator->setParametricSurface(
                 _baseBspline,
@@ -549,19 +549,53 @@ void DesignModeController::updateMainWindow()
                 _loadedModelMatrix
             );
 
-            _preciseMillingPathGenerator->setCuttingToolRadius(0.5);
+            _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(256);
-            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
-            _preciseMillingPathGenerator->bake();
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(8);
+            _preciseMillingPathGenerator->bake(
+                false,
+                MillingDirection::TopToBottom
+            );
             auto program = _preciseMillingPathGenerator->buildPaths();
 
             MillPathFormatWriter writer;
-            writer.writeToFile(RESOURCE("paths/last_handle_hole.k1"), program);
+            writer.writeToFile(
+                RESOURCE("paths/last_handle_hole_tang.k8"),
+                program
+            );
 
-            executor->setProgram("Local program (handle hole k1)", program);
+            executor->setProgram(
+                "Local program (handle hole k8 tang)",
+                program
+            );
+
             CuttingToolParams defaultParameters;
             defaultParameters.kind = CuttingToolKind::Ball;
-            defaultParameters.radius = 0.5f;
+            defaultParameters.radius = 4.0f;
+            executor->getController()->setCuttingToolParams(defaultParameters);
+        }
+
+        if (_intersectionsReady && ImGui::Button("Refine handle hole"))
+        {
+            _curveMillingPathGenerator->setTransform({});
+            _curveMillingPathGenerator->setRefinementCurves(
+                {_modelIntersections->getHandleHoleContour(_loadedModelMatrix)}
+            );
+
+            _curveMillingPathGenerator->bake();
+            auto program = _curveMillingPathGenerator->buildPaths();
+
+            MillPathFormatWriter writer;
+            writer.writeToFile(
+                RESOURCE("paths/last_hole_refinement.k8"),
+                program
+            );
+
+            executor->setProgram("Local program (hole refinement)", program);
+
+            CuttingToolParams defaultParameters;
+            defaultParameters.kind = CuttingToolKind::Ball;
+            defaultParameters.radius = 4.0f;
             executor->getController()->setCuttingToolParams(defaultParameters);
         }
 
