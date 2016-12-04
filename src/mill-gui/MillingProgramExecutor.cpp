@@ -39,12 +39,21 @@ void MillingProgramExecutor::setProgram(
 
     _programName = programName;
     _millingProgram = millingProgram;
+    _polygonalLine = nullptr;
 
     if (millingProgram.size() > 1)
     {
         _toolController->setTargetPosition(millingProgram[0].position);
         _toolController->startMovement();
         _currentProgramStep = 0;
+
+        std::vector<fw::VertexColor> vertices{};
+        for (const auto& pos: millingProgram)
+        {
+            fw::VertexColor vertex{pos.position, {1.0f, 0.0f, 1.0f}};
+            vertices.push_back(vertex);
+        }
+        _polygonalLine = std::make_shared<fw::PolygonalLine>(vertices);
     }
 
     stop();
@@ -186,6 +195,12 @@ MillingError MillingProgramExecutor::update(double dt)
     }
 
     return MillingError::None;
+}
+
+std::shared_ptr<fw::PolygonalLine>
+    MillingProgramExecutor::getProgramPolygonalLine()
+{
+    return _polygonalLine;
 }
 
 }

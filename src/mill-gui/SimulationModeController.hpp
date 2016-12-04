@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BasicEffect.hpp"
 #include "OrbitingCamera.hpp"
 #include "Config.hpp"
 #include "TextureUtils.hpp"
@@ -63,9 +64,11 @@ protected:
 
 private:
     TexturedPhongEffect _effect;
+    fw::BasicEffect _basicEffect;
     std::shared_ptr<ms::MillingBlock> _block;
     GLuint _texture;
     bool _showProgramManager;
+    bool _showMillingPath;
     unsigned int _heightmapResolutionX;
     unsigned int _heightmapResolutionY;
     bool _newBlockRequested;

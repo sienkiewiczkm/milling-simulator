@@ -4,6 +4,7 @@
 #include "CuttingToolController.hpp"
 #include "MillingBlock.hpp"
 #include "MillingErrors.hpp"
+#include "PolygonalLine.hpp"
 
 #include <memory>
 #include <string>
@@ -44,6 +45,7 @@ public:
     bool isInFastForwardMode();
 
     MillingError update(double dt);
+    std::shared_ptr<fw::PolygonalLine> getProgramPolygonalLine();
 
 private:
     bool _fastForwardMode;
@@ -53,6 +55,7 @@ private:
     std::vector<ms::PathMovement> _millingProgram;
     std::shared_ptr<CuttingToolController> _toolController;
     std::shared_ptr<MillingBlock> _block;
+    std::shared_ptr<fw::PolygonalLine> _polygonalLine;
 };
 
 }

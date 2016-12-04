@@ -11,7 +11,8 @@ SimulationModeController::SimulationModeController():
     _heightmapResolutionX(32),
     _heightmapResolutionY(32),
     _showProgramManager(false),
-    _lastErrorState(MillingError::None)
+    _lastErrorState(MillingError::None),
+    _showMillingPath{false}
 {
 }
 
@@ -27,6 +28,8 @@ void SimulationModeController::setWindow(GLFWwindow *window)
 void SimulationModeController::onCreate()
 {
     _effect.create();
+    _basicEffect.create();
+
     _texture = loadTextureFromFile(RESOURCE("textures/opengameart-metal.jpg"));
 
     _block = make_shared<MillingBlock>();
@@ -144,6 +147,17 @@ void SimulationModeController::updateMainMenuBar()
 
         ImGui::EndMenu();
     }
+
+    if (ImGui::BeginMenu("Visuals")
+    {
+        ImGui::MenuItem(
+            "Show milling paths",
+            nullptr,
+            &_showMillingPath
+        );
+
+        ImGui::EndMenu();
+    }
 }
 
 bool SimulationModeController::isGUIHidden()
@@ -239,6 +253,22 @@ void SimulationModeController::renderSceneGeometry(
     _block->setViewMatrix(view);
     _block->setProjectionMatrix(projection);
     _block->render();
+
+    if (_showMillingPath)
+    {
+        glDisable(GL_DEPTH_TEST);
+        const auto& curve = _programExecutor->getProgramPolygonalLine();
+        if (curve != nullptr)
+        {
+            _basicEffect.begin();
+            _basicEffect.setModelMatrix({});
+            _basicEffect.setViewMatrix(view);
+            _basicEffect.setProjectionMatrix(projection);
+            curve->render();
+            _basicEffect.end();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 void SimulationModeController::onKey(int key, int scancode, int action, int mods)
