@@ -41,6 +41,8 @@ public:
     void setWorkingArea(glm::dvec3 blockSize, glm::dmat4 worldMatrix);
     void setWorkingAreaResolution(glm::ivec2 areaResolution);
     void setSamplingResolution(glm::ivec2 samplingResolution);
+    void setMaximumHeightmapShift(double maxHeightmapShift);
+    void setHeightmapShiftOffset(double heightmapShiftOffset);
 
     void setParametricSurfaceBoundaries(
         const std::vector<glm::dvec2>& boundaries
@@ -56,7 +58,8 @@ protected:
     void bakeCheckSurfaceHeightmap();
     void bakePositionOnCheckHeightmap(const glm::dvec3& position);
     bool doesPositionDamageCheckSurface(
-        const glm::dvec3& toolPosition
+        const glm::dvec3& toolPosition,
+        double &outDamageMagnitude
     );
     glm::ivec2 getHeightmapCoord(glm::dvec3 position);
     glm::dvec2 getCellWorldCenter(glm::ivec2 coordinate);
@@ -84,6 +87,8 @@ private:
     double _baseHeight;
     double _safeHeight;
     double _toolRadius;
+    double _heightmapShiftOffset;
+    double _maxHeightmapShift;
     glm::dvec2 _toolHeightmapRadius;
     int _numScanLines;
     int _maxScanLineResolution;

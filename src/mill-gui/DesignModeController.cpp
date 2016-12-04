@@ -402,7 +402,10 @@ void DesignModeController::updateMainWindow()
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(128);
-            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(128);
+            _preciseMillingPathGenerator->setWorkingAreaResolution({800, 800});
+            _preciseMillingPathGenerator->setMaximumHeightmapShift(1.0);
+            _preciseMillingPathGenerator->setHeightmapShiftOffset(10e-6);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
 
@@ -435,7 +438,12 @@ void DesignModeController::updateMainWindow()
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(128);
-            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(256);
+            _preciseMillingPathGenerator->setWorkingAreaResolution(
+                {1024, 1024}
+            );
+            _preciseMillingPathGenerator->setMaximumHeightmapShift(10.0);
+            _preciseMillingPathGenerator->setHeightmapShiftOffset(0);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
 
@@ -472,8 +480,13 @@ void DesignModeController::updateMainWindow()
             );
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
-            _preciseMillingPathGenerator->setNumScanLines(300);
-            _preciseMillingPathGenerator->setNumLineMaximumResolution(64);
+            _preciseMillingPathGenerator->setNumScanLines(128);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(500);
+            _preciseMillingPathGenerator->setWorkingAreaResolution(
+                {1000, 1000}
+            );
+            _preciseMillingPathGenerator->setMaximumHeightmapShift(15.0);
+            _preciseMillingPathGenerator->setHeightmapShiftOffset(0);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
 
@@ -512,7 +525,10 @@ void DesignModeController::updateMainWindow()
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(256);
-            _preciseMillingPathGenerator->setNumLineMaximumResolution(8);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(128);
+            _preciseMillingPathGenerator->setWorkingAreaResolution({800, 800});
+            _preciseMillingPathGenerator->setMaximumHeightmapShift(1.0);
+            _preciseMillingPathGenerator->setHeightmapShiftOffset(10e-6);
             _preciseMillingPathGenerator->bake();
             auto program = _preciseMillingPathGenerator->buildPaths();
 
@@ -551,7 +567,10 @@ void DesignModeController::updateMainWindow()
 
             _preciseMillingPathGenerator->setCuttingToolRadius(4.0);
             _preciseMillingPathGenerator->setNumScanLines(256);
-            _preciseMillingPathGenerator->setNumLineMaximumResolution(8);
+            _preciseMillingPathGenerator->setNumLineMaximumResolution(128);
+            _preciseMillingPathGenerator->setWorkingAreaResolution({800, 800});
+            _preciseMillingPathGenerator->setMaximumHeightmapShift(1.0);
+            _preciseMillingPathGenerator->setHeightmapShiftOffset(10e-6);
             _preciseMillingPathGenerator->bake(
                 false,
                 MillingDirection::TopToBottom

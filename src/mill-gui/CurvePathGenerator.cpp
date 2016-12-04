@@ -13,17 +13,15 @@ CurvePathGenerator::CurvePathGenerator():
 
 void CurvePathGenerator::bake()
 {
+    _rawPaths.clear();
+
     std::vector<glm::dvec3> buffer;
     for (const auto &curve: _refinementCurves)
     {
-        std::cout << "refinement curve found! size=" << curve.size()
-            << std::endl;
-
         for (const auto& pos: curve)
         {
             auto transformed = _transform * glm::dvec4{pos, 1.0};
 
-            std::cout << "refinement position found!" << std::endl;
             if (transformed.y >= _baseHeight)
             {
                 buffer.push_back(transformed);
@@ -74,7 +72,11 @@ std::vector<PathMovement> CurvePathGenerator::buildPaths()
 
         movements.push_back({
             PathMovementType::Milling,
-            {path.back().x, _safeHeight, path.back().z}
+            {
+                movements.back().position.x,
+                _safeHeight,
+                movements.back().position.z
+            }
         });
     }
 

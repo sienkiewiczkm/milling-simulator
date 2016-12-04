@@ -16,7 +16,9 @@ PreciseMillingPathGenerator::PreciseMillingPathGenerator():
     _toolRadius{4.0},
     _blockSize{150.0, 50.0, 150.0},
     _workingAreaResolution{500, 500},
-    _samplingResolution{512, 512}
+    _samplingResolution{2*1024, 2*1024},
+    _heightmapShiftOffset{10e-6},
+    _maxHeightmapShift{0.05}
 {
 }
 
@@ -94,6 +96,20 @@ void PreciseMillingPathGenerator::setSamplingResolution(
     _samplingResolution = samplingResolution;
 }
 
+void PreciseMillingPathGenerator::setMaximumHeightmapShift(
+    double maxHeightmapShift
+)
+{
+    _maxHeightmapShift = maxHeightmapShift;
+}
+
+void PreciseMillingPathGenerator::setHeightmapShiftOffset(
+    double heightmapShiftOffset
+)
+{
+    _heightmapShiftOffset = heightmapShiftOffset;
+}
+
 void PreciseMillingPathGenerator::setParametricSurfaceBoundaries(
     const std::vector<glm::dvec2>& boundaries
 )
@@ -160,12 +176,16 @@ std::vector<PathMovement> PreciseMillingPathGenerator::buildPaths()
     {
         if (path.size() < 2) { continue; }
 
+        fw::CurveSimplifier<glm::dvec3, double> curveSimplifier;
+        curveSimplifier.setMinimumMergeCosine(0.99999);
+        auto simplifiedPath = curveSimplifier.simplify(path);
+
         movements.push_back({
             PathMovementType::Milling,
-            {path[0].x, _safeHeight, path[0].z}
+            {simplifiedPath[0].x, _safeHeight, simplifiedPath[0].z}
         });
 
-        for (const auto& position: path)
+        for (const auto& position: simplifiedPath)
         {
             auto adjustedPosition = position;
             if (adjustedPosition.y < _baseHeight)
@@ -177,7 +197,7 @@ std::vector<PathMovement> PreciseMillingPathGenerator::buildPaths()
 
         movements.push_back({
             PathMovementType::Milling,
-            {path.back().x, _safeHeight, path.back().z}
+            {simplifiedPath.back().x, _safeHeight, simplifiedPath.back().z}
         });
     }
 
@@ -250,7 +270,8 @@ void PreciseMillingPathGenerator::bakePositionOnCheckHeightmap(
 }
 
 bool PreciseMillingPathGenerator::doesPositionDamageCheckSurface(
-    const glm::dvec3& toolPosition
+    const glm::dvec3& toolPosition,
+    double &outDamageMagnitude
 )
 {
     auto hcCoord = getHeightmapCoord(toolPosition);
@@ -274,7 +295,7 @@ bool PreciseMillingPathGenerator::doesPositionDamageCheckSurface(
             );
 
             if (distance > _toolRadius) { continue; }
-            auto gainedHeight = sqrt(
+            auto gainedHeight = _toolRadius - sqrt(
                 _toolRadius * _toolRadius - distance * distance
             );
 
@@ -291,6 +312,7 @@ bool PreciseMillingPathGenerator::doesPositionDamageCheckSurface(
         }
     }
 
+    outDamageMagnitude = damageMagnitude;
     return objectDamaged;
 }
 
@@ -333,17 +355,30 @@ void PreciseMillingPathGenerator::filterOutDamages(
 
     for (const auto& position: input)
     {
-        if (doesPositionDamageCheckSurface(position))
+        auto fixedPosition = position;
+        double damageMagnitude{};
+        bool insertPosition = true;
+
+        if (doesPositionDamageCheckSurface(fixedPosition, damageMagnitude))
         {
-            if (buffer.size() > 0)
+            if (damageMagnitude < _maxHeightmapShift)
             {
-                output.push_back(buffer);
-                buffer.clear();
+                fixedPosition.y += damageMagnitude + _heightmapShiftOffset;
+            }
+            else
+            {
+                insertPosition = false;
+                if (buffer.size() > 0)
+                {
+                    output.push_back(buffer);
+                    buffer.clear();
+                }
             }
         }
-        else
+
+        if (insertPosition)
         {
-            buffer.push_back(position);
+            buffer.push_back(fixedPosition);
         }
     }
 
