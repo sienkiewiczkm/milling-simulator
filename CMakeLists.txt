@@ -37,6 +37,7 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/CuttingToolGUI.cpp
     src/mill-gui/CuttingToolModel.cpp
     src/mill-gui/CuttingToolParams.cpp
+    src/mill-gui/DecalViewer.cpp
     src/mill-gui/DesignModeController.cpp
     src/mill-gui/ImGuiToolboxWindow.cpp
     src/mill-gui/MillPathFormatReader.cpp

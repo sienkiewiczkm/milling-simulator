@@ -130,8 +130,9 @@ void DesignModeController::onCreate()
     _flatteningPathGenerator->setCuttingToolRadius(6.0f);
     _flatteningPathGenerator->setWorkingArea(_blockSize, _baseBoxModelMatrix);
 
-
     createMeshes();
+
+    _decalViewer = std::make_shared<DecalViewer>();
 }
 
 void DesignModeController::onActivate()
@@ -208,6 +209,8 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
         );
     }
 
+    _decalViewer->update(view, projection);
+
     _effect.begin();
     _effect.setViewMatrix(view);
     _effect.setProjectionMatrix(projection);
@@ -244,6 +247,8 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
     }
 
     _basicEffect->end();
+
+    _decalViewer->render();
 }
 
 void DesignModeController::updateMainMenuBar()

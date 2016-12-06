@@ -14,6 +14,7 @@
 #include "BsplineNonVanishingReparametrization.hpp"
 #include "MillingProgramExecutor.hpp"
 #include "PolygonalLine.hpp"
+#include "DecalViewer.hpp"
 #include "SienkiewiczkModelIntersectionsHandler.hpp"
 
 #include "RoughMillingPathGenerator.hpp"
@@ -91,6 +92,8 @@ private:
     std::shared_ptr<BaseFlatteningPathGenerator> _flatteningPathGenerator;
     std::shared_ptr<PreciseMillingPathGenerator> _preciseMillingPathGenerator;
     std::shared_ptr<CurvePathGenerator> _curveMillingPathGenerator;
+
+    std::shared_ptr<DecalViewer> _decalViewer;
 
     ImGuizmo::OPERATION _activeOperation;
     glm::mat4 _loadedModelMatrix;

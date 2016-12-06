@@ -148,7 +148,7 @@ void SimulationModeController::updateMainMenuBar()
         ImGui::EndMenu();
     }
 
-    if (ImGui::BeginMenu("Visuals")
+    if (ImGui::BeginMenu("Visuals"))
     {
         ImGui::MenuItem(
             "Show milling paths",
