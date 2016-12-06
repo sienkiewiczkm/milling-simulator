@@ -157,8 +157,6 @@ void DesignModeController::onUpdate(float deltaTime)
         updateMainWindow();
     }
     ImGui::End();
-
-    _programEditor->update();
 }
 
 void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
@@ -214,7 +212,9 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
         );
     }
 
+    _programEditor->update(view, projection);
     _decalViewer->update(view, projection);
+    _decalViewer->render();
 
     _effect.begin();
     _effect.setViewMatrix(view);
@@ -240,6 +240,9 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
 
     glDisable(GL_DEPTH_TEST);
     _modelIntersections->render();
+
+    _basicEffect->setModelMatrix({});
+    _programEditor->render();
     glEnable(GL_DEPTH_TEST);
 
     if (_displayLimits)
@@ -252,8 +255,6 @@ void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)
     }
 
     _basicEffect->end();
-
-    _decalViewer->render();
 }
 
 void DesignModeController::updateMainMenuBar()

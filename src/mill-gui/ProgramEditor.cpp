@@ -1,4 +1,6 @@
 #include "ProgramEditor.hpp"
+#include <array>
+#include <iostream>
 #include <sstream>
 
 #include "Config.hpp"
@@ -6,11 +8,12 @@
 #include "MillingProgramExecutor.hpp"
 #include "ImGuiExtensions.hpp"
 
-#include <imgui.h>
-#include <array>
-#include <iostream>
+#include "imgui.h"
+#include "ImGuizmo.h"
 
 #define GLM_USE_EXPERIMENTAL
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/string_cast.hpp"
 
 #include <boost/filesystem.hpp>
@@ -40,7 +43,7 @@ void ProgramEditor::setVisibility(bool isVisible)
     _isOpened = isVisible;
 }
 
-void ProgramEditor::update()
+void ProgramEditor::update(glm::mat4 view, glm::mat4 proj)
 {
     if (!_isOpened) { return; }
 
@@ -100,6 +103,7 @@ void ProgramEditor::update()
     if (ImGui::Button("Append new"))
     {
         _loadedProgram.push_back({});
+        recreatePreview();
     }
 
     ImGui::SameLine();
@@ -111,6 +115,7 @@ void ProgramEditor::update()
         auto selectedCopy = *selectedIterator;
         _loadedProgram.insert(selectedIterator, selectedCopy);
         ++_selectedProgramStep;
+        recreatePreview();
     }
 
     ImGui::SameLine();
@@ -122,6 +127,7 @@ void ProgramEditor::update()
         auto prevIterator = std::prev(selectedIterator);
         std::swap(*selectedIterator, *prevIterator);
         --_selectedProgramStep;
+        recreatePreview();
     }
 
     ImGui::SameLine();
@@ -135,6 +141,7 @@ void ProgramEditor::update()
         auto nextIterator = std::next(selectedIterator);
         std::swap(*selectedIterator, *nextIterator);
         ++_selectedProgramStep;
+        recreatePreview();
     }
 
     ImGui::SameLine();
@@ -148,11 +155,70 @@ void ProgramEditor::update()
             _selectedProgramStep,
             static_cast<int>(_loadedProgram.size()) - 1
         );
+        recreatePreview();
+    }
+
+    ImGui::Checkbox("Enable manipulation", &_stepManipulationEnabled);
+
+    if (_selectedProgramStep >= 0
+        && _selectedProgramStep < _loadedProgram.size())
+    {
+        if (!_stepManipulationEnabled)
+        {
+            if (ImGui::InputFloat3(
+                "Position",
+                glm::value_ptr(_loadedProgram[_selectedProgramStep].position)
+            ))
+            {
+                recreatePreview();
+            }
+        }
+        else
+        {
+            ImGui::Text("Step manipulation enabled - direct access disabled");
+
+            auto selectedIterator =
+                std::begin(_loadedProgram) + _selectedProgramStep;
+            glm::mat4 translation = glm::translate(
+                {},
+                selectedIterator->position
+            );
+
+            ImGuizmo::Manipulate(
+                glm::value_ptr(view),
+                glm::value_ptr(proj),
+                ImGuizmo::TRANSLATE,
+                ImGuizmo::LOCAL,
+                glm::value_ptr(translation),
+                nullptr,
+                nullptr
+            );
+
+            glm::vec3 matrixTranslation, matrixRotation, matrixScale;
+            ImGuizmo::DecomposeMatrixToComponents(
+                glm::value_ptr(translation),
+                glm::value_ptr(matrixTranslation),
+                glm::value_ptr(matrixRotation),
+                glm::value_ptr(matrixScale)
+            );
+
+            selectedIterator->position = matrixTranslation;
+            recreatePreview();
+        }
+    }
+
+    if (_stepManipulationEnabled)
+    {
     }
 
     ImGui::End();
 
     ImGui::ShowTestWindow();
+}
+
+void ProgramEditor::render()
+{
+    if (_preview != nullptr) { _preview->render(); }
 }
 
 void ProgramEditor::discoverAvailableFiles()
@@ -185,6 +251,25 @@ void ProgramEditor::loadSelectedFile()
 
     auto diameter = stoi(ext.substr(2));
     _toolRadius = 0.5f * diameter;
+
+    recreatePreview();
+}
+
+void ProgramEditor::recreatePreview()
+{
+    _preview = nullptr;
+    if (_loadedProgram.size() == 0)
+    {
+        return;
+    }
+
+    std::vector<fw::VertexColor> points{};
+    for (const auto &pos: _loadedProgram)
+    {
+        points.push_back({pos.position, {1.0f, 0.0f, 0.0f}});
+    }
+
+    _preview = std::make_shared<fw::PolygonalLine>(points);
 }
 
 }
