@@ -16,6 +16,7 @@
 #include "PolygonalLine.hpp"
 #include "DecalViewer.hpp"
 #include "SienkiewiczkModelIntersectionsHandler.hpp"
+#include "ProgramEditor.hpp"
 
 #include "RoughMillingPathGenerator.hpp"
 #include "BaseFlatteningPathGenerator.hpp"
@@ -73,6 +74,8 @@ private:
 
     std::shared_ptr<fw::IParametricSurfaceUV> _baseBspline;
     std::shared_ptr<Mesh<VertexNormalTexCoords>> _baseBsplineMesh;
+
+    std::shared_ptr<ProgramEditor> _programEditor;
 
     bool _probeEnabled;
     glm::mat4 _probeMatrix;

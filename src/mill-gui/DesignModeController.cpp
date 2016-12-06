@@ -133,6 +133,9 @@ void DesignModeController::onCreate()
     createMeshes();
 
     _decalViewer = std::make_shared<DecalViewer>();
+
+    // todo: verify if executor is okay
+    _programEditor = std::make_shared<ProgramEditor>();
 }
 
 void DesignModeController::onActivate()
@@ -154,6 +157,8 @@ void DesignModeController::onUpdate(float deltaTime)
         updateMainWindow();
     }
     ImGui::End();
+
+    _programEditor->update();
 }
 
 void DesignModeController::onRender(const OrbitingCamera &orbitingCamera)

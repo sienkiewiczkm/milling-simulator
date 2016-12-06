@@ -47,6 +47,8 @@ add_library(${PROJECT_NAME_LIB}
     src/mill-gui/MillingProgramExecutor.cpp
     src/mill-gui/MillingProgramExecutorGUI.cpp
     src/mill-gui/PreciseMillingPathGenerator.cpp
+    src/mill-gui/ProgramEditor.cpp
+    src/mill-gui/ProgramEditor.cpp
     src/mill-gui/ProgramManagerGUI.cpp
     src/mill-gui/RoughMillingPathGenerator.cpp
     src/mill-gui/SamplingMillingTechnique.cpp
