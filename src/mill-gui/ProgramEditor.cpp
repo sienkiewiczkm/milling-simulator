@@ -11,7 +11,7 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 
-#define GLM_USE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/string_cast.hpp"
@@ -24,13 +24,17 @@ using namespace std;
 namespace ms
 {
 
-ProgramEditor::ProgramEditor():
+ProgramEditor::ProgramEditor(GLFWwindow *window):
     _isOpened(true),
     _selectedIndex(-1),
-    _selectedProgramStep(-1)
+    _selectedProgramStep(-1),
+    _workLevel{21.5f},
+    _elevatedLevel{25.5f},
+    _cloneKeyBlocked{false}
 {
     _observedDirectory = RESOURCE("paths");
     discoverAvailableFiles();
+    _window = window;
 }
 
 bool *ProgramEditor::getVisibilityFlagPointer()
@@ -52,6 +56,9 @@ void ProgramEditor::update(glm::mat4 view, glm::mat4 proj)
         ImGui::End();
         return;
     }
+
+    ImGui::InputFloat("Work level", &_workLevel);
+    ImGui::InputFloat("Elevated level", &_elevatedLevel);
 
     ImGui::BeginChild(
         "Programs",
@@ -108,7 +115,13 @@ void ProgramEditor::update(glm::mat4 view, glm::mat4 proj)
 
     ImGui::SameLine();
 
-    if (_selectedIndex >= 0 && ImGui::Button("Clone"))
+    auto cloneButton = glfwGetKey(_window, GLFW_KEY_C);
+    bool pleaseClone = cloneButton == GLFW_PRESS && !_cloneKeyBlocked;
+    if (cloneButton != GLFW_PRESS) { _cloneKeyBlocked = false; }
+    else { _cloneKeyBlocked = true; }
+
+    if (_selectedIndex >= 0
+        && (pleaseClone || ImGui::Button("Clone")))
     {
         auto selectedIterator =
             std::begin(_loadedProgram) + _selectedProgramStep;
@@ -158,6 +171,30 @@ void ProgramEditor::update(glm::mat4 view, glm::mat4 proj)
         recreatePreview();
     }
 
+    ImGui::Separator();
+
+    if (_selectedIndex >= 0 && ImGui::Button("Clone & pre-elevate"))
+    {
+        auto selectedIterator =
+            std::begin(_loadedProgram) + _selectedProgramStep;
+        auto selectedCopy = *selectedIterator;
+        _loadedProgram.insert(selectedIterator, selectedCopy);
+        selectedIterator->position.y = _elevatedLevel;
+        ++_selectedProgramStep;
+        recreatePreview();
+    }
+
+    if (_selectedIndex >= 0 && ImGui::Button("Clone & post-elevate"))
+    {
+        auto selectedIterator =
+            std::begin(_loadedProgram) + _selectedProgramStep;
+        auto selectedCopy = *selectedIterator;
+        selectedCopy.position.y = _elevatedLevel;
+        _loadedProgram.insert(selectedIterator, selectedCopy);
+        ++_selectedProgramStep;
+        recreatePreview();
+    }
+
     ImGui::Checkbox("Enable manipulation", &_stepManipulationEnabled);
 
     if (_selectedProgramStep >= 0
@@ -165,9 +202,10 @@ void ProgramEditor::update(glm::mat4 view, glm::mat4 proj)
     {
         if (!_stepManipulationEnabled)
         {
-            if (ImGui::InputFloat3(
+            if (ImGui::DragFloat3(
                 "Position",
-                glm::value_ptr(_loadedProgram[_selectedProgramStep].position)
+                glm::value_ptr(_loadedProgram[_selectedProgramStep].position),
+                0.1f
             ))
             {
                 recreatePreview();

@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 #include <ImGuizmo.h>
 
@@ -135,7 +136,7 @@ void DesignModeController::onCreate()
     _decalViewer = std::make_shared<DecalViewer>();
 
     // todo: verify if executor is okay
-    _programEditor = std::make_shared<ProgramEditor>();
+    _programEditor = std::make_shared<ProgramEditor>(_window);
 }
 
 void DesignModeController::onActivate()
@@ -687,7 +688,7 @@ void DesignModeController::renderParametricPreviewCanvas(
 {
     std::string title = "Parametric preview of \"" + name + "\"";
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImGui::Text(title.c_str());
+    ImGui::Text("%s", title.c_str());
 
     ImVec4 bg = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
     ImVec4 fg = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);

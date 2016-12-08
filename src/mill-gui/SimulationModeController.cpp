@@ -192,6 +192,7 @@ void SimulationModeController::updateMillingErrorPopup()
 
         ImGui::TextColored(
             ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+            "%s",
             errorText.c_str()
         );
 

@@ -92,7 +92,7 @@ void DecalViewer::update(glm::mat4 view, glm::mat4 projection)
 
     if (ImGui::Button("Load decal image"))
     {
-        ImGui::Text(_textureName.c_str());
+        ImGui::Text("%s", _textureName.c_str());
         _texture = loadTextureFromFile(
             std::string(RESOURCES_PATH) + "textures/" + _textureName
         );

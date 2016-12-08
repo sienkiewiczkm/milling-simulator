@@ -45,7 +45,7 @@ void MillingProgramExecutorGUI::showExecutionControls()
     auto programName = _programExecutor->isProgramLoaded()
         ? _programExecutor->getProgramName()
         : "None";
-    ImGui::Text(programName.c_str());
+    ImGui::Text("%s", programName.c_str());
 
     if (ImGui::Button("Start")) { _programExecutor->start(); }
     ImGui::SameLine();
