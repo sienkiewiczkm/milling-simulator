@@ -102,8 +102,7 @@ void MillPathFormatReader::readFromFile(const std::string &filename)
                     ? PathMovementType::FastMovement
                     : PathMovementType::Milling;
 
-                // todo: verify YZ swap
-                glm::vec3 position = glm::vec3(f[0], f[2], f[1]);
+                glm::vec3 position = glm::vec3(f[0], f[2], -f[1]);
 
                 _movements.push_back(PathMovement(movementType, position));
             }
@@ -131,7 +130,7 @@ void MillPathFormatWriter::writeToFile(
         file << "N" << commandId++ << "G01"
             << std::setprecision(3) << std::fixed
             << "X" << movement.position.x
-            << "Y" << movement.position.z
+            << "Y" << -movement.position.z
             << "Z" << movement.position.y
             << std::endl;
     }
